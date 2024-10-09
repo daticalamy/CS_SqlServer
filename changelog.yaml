@@ -1,0 +1,16 @@
+databaseChangeLog:
+      
+  - includeAll:
+      path: scripts/Tables
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: scripts/Procedures
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: scripts/Views
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false

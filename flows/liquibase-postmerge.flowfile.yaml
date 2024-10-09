@@ -1,0 +1,42 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+## Note: Any command which fails in any stage below result in the command stopping, and endStage being run.
+## A flow file can have one or more stages, each with multiple "actions", 
+## or your flow file can have multiple stages with fewer actions in each stage.
+
+## Call this flow using: liquibase flow --flow-file=flowfiles/liquibase-postmerge.flowfile.yaml
+
+stages:
+         
+  Status:
+    actions:
+      - type: liquibase
+        command: status
+        cmdArgs: {verbose: true}
+
+  Update-SQL:
+    actions:
+      - type: liquibase
+        command: update-sql
+        
+  Update:  
+    actions:
+      - type: liquibase
+        command: update
+
+#  PostDeploy-Checks:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: database, checks-settings-file: "policychecks/liquibase.checks-settings.conf", auto-update: "ON" }
+        globalArgs: { reports-name: "checks-report-database.html" }
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: history
