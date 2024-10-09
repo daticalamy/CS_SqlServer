@@ -118,10 +118,10 @@ jobs:
           echo "environment=DEV" >> $GITHUB_OUTPUT          
           $BRANCH="${{ github.ref }}"
           $BRANCH=$BRANCH -replace '.*/'
-          if "%branch%"=="qa" ( 
+          if "%BRANCH%"=="qa" ( 
             echo "environment=QA" >> $GITHUB_OUTPUT
           fi
-          if "%branch%"=="release*" ( 
+          if "%BRANCH%"=="release*" ( 
             echo "environment=PROD" >> $GITHUB_OUTPUT
           fi
 
