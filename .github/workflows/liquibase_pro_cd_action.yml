@@ -64,37 +64,7 @@ jobs:
   # Initialization runs first because it has no 'needs' value.
   ####################################################################
   init:
-    name: Initialization
-    # This runs on a self-hosted runner with Liquibase preinstalled.
-    runs-on: [self-hosted, linux]
-
-    # From init, we output the environment determined during the set-environment step below
-    outputs:
-      environment: ${{ steps.set-environment.outputs.environment }}
-
-    steps:
-      # Cancel any previous runs that are not completed for this workflow
-      #- name: Cancel previous workflow
-      #  uses: styfle/cancel-workflow-action@0.12.1
-      #  with:
-      #    access_token: ${{ github.token }}
-
-      # Determine the environment based on the branch(es) that triggered this workflow.
-      # Output "DEV", "QA", or "PROD" to $GITHUB_OUTPUT where job output parameters are
-      # shared between jobs.
-      - name: Set Environment
-        id: set-environment
-        run: |
-          echo "environment=DEV" >> $GITHUB_OUTPUT
-          if [[ "${{github.base_ref}}" == qa || "${{github.ref}}" == refs/heads/qa ]]; then
-            echo "environment=QA" >> $GITHUB_OUTPUT
-          fi
-          if [[ "${{github.base_ref}}" == release* || "${{github.ref}}" == refs/heads/release* ]]; then
-            echo "environment=PROD" >> $GITHUB_OUTPUT
-          fi
-          
-  init-windows:
-    name: Initialization Windows
+    name: Initialization (Windows)
     # This runs on a self-hosted runner with Liquibase preinstalled.
     runs-on: [self-hosted, windows]
 
@@ -103,12 +73,6 @@ jobs:
       environment: ${{ steps.set-environment.outputs.environment }}
 
     steps:
-      # Cancel any previous runs that are not completed for this workflow
-      #- name: Cancel previous workflow
-      #  uses: styfle/cancel-workflow-action@0.12.1
-      #  with:
-      #    access_token: ${{ github.token }}
-
       # Determine the environment based on the branch(es) that triggered this workflow.
       # Output "DEV", "QA", or "PROD" to $GITHUB_OUTPUT where job output parameters are
       # shared between jobs.
@@ -120,10 +84,10 @@ jobs:
           $BRANCH=$BRANCH -replace '.*/'
           if "%BRANCH%"=="qa" ( 
             echo "environment=QA" >> $GITHUB_OUTPUT
-          fi
+          )
           if "%BRANCH%"=="release*" ( 
             echo "environment=PROD" >> $GITHUB_OUTPUT
-          fi
+          )
 
   ####################################################################
   # Print out the selected environment to the log for troubleshooting.
