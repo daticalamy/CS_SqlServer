@@ -66,7 +66,7 @@ jobs:
   init:
     name: Initialization
     # This runs on a self-hosted runner with Liquibase preinstalled.
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, linux]
 
     # From init, we output the environment determined during the set-environment step below
     outputs:
@@ -90,6 +90,38 @@ jobs:
             echo "environment=QA" >> $GITHUB_OUTPUT
           fi
           if [[ "${{github.base_ref}}" == release* || "${{github.ref}}" == refs/heads/release* ]]; then
+            echo "environment=PROD" >> $GITHUB_OUTPUT
+          fi
+          
+  init-windows:
+    name: Initialization Windows
+    # This runs on a self-hosted runner with Liquibase preinstalled.
+    runs-on: [self-hosted, windows]
+
+    # From init, we output the environment determined during the set-environment step below
+    outputs:
+      environment: ${{ steps.set-environment.outputs.environment }}
+
+    steps:
+      # Cancel any previous runs that are not completed for this workflow
+      #- name: Cancel previous workflow
+      #  uses: styfle/cancel-workflow-action@0.12.1
+      #  with:
+      #    access_token: ${{ github.token }}
+
+      # Determine the environment based on the branch(es) that triggered this workflow.
+      # Output "DEV", "QA", or "PROD" to $GITHUB_OUTPUT where job output parameters are
+      # shared between jobs.
+      - name: Set Environment
+        id: set-environment
+        run: |
+          echo "environment=DEV" >> $GITHUB_OUTPUT          
+          $BRANCH="${{ github.ref }}"
+          $BRANCH=$BRANCH -replace '.*/'
+          if "%branch%"=="qa" ( 
+            echo "environment=QA" >> $GITHUB_OUTPUT
+          fi
+          if "%branch%"=="release*" ( 
             echo "environment=PROD" >> $GITHUB_OUTPUT
           fi
 
