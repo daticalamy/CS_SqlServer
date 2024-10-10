@@ -83,7 +83,6 @@ jobs:
           $BRANCH="${{ github.ref }}"
           $BRANCH=$BRANCH -replace '.*/'
           echo $BRANCH
-        shell: bash
 
   ####################################################################
   # Print out the selected environment to the log for troubleshooting.
@@ -96,7 +95,9 @@ jobs:
     steps:
       - env:
           ENVIRONMENT: ${{needs.init.outputs.environment}}
-        run: echo "The $ENVIRONMENT environment was selected."
+        run: | 
+          echo ${{ env.OUTPUT1 }}
+          echo "The $ENVIRONMENT environment was selected."
 
   ####################################################################
   #  Check out the source code and configuration
