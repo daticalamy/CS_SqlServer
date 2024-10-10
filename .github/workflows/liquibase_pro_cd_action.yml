@@ -78,12 +78,12 @@ jobs:
       # shared between jobs.
       - name: Set Environment
         id: set-environment
+        shell: pwsh
         run: |
           echo "environment=DEV" >> $env:GITHUB_OUTPUT          
           $BRANCH="${{ github.ref }}"
           $BRANCH=$BRANCH -replace '.*/'
           echo $BRANCH
-        shell: pwsh
 
   ####################################################################
   # Print out the selected environment to the log for troubleshooting.
