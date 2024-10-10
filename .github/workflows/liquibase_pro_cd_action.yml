@@ -79,7 +79,8 @@ jobs:
       - name: Set Environment
         id: set-environment
         run: |
-          echo "environment=DEV" | Out-File -FilePath $env:GITHUB_ENV -Append          
+          echo "environment=DEV" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "environment=DEV" | Out-File -FilePath $env:GITHUB_OUTPUT -Append          
           $BRANCH="${{ github.ref }}"
           $BRANCH=$BRANCH -replace '.*/'
           echo $BRANCH
