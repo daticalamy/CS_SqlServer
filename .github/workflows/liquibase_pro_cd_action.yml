@@ -64,7 +64,7 @@ env:
   LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
   
   # Override Properties File
-  LIQUIBASE_DEFAULTS_FILE: liquibase.windows 
+  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties 
 
 jobs:
   ####################################################################
