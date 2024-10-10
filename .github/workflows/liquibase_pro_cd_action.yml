@@ -79,10 +79,11 @@ jobs:
       - name: Set Environment
         id: set-environment
         run: |
-          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf8 -Append          
+          echo "environment=DEV" >> $env:GITHUB_OUTPUT          
           $BRANCH="${{ github.ref }}"
           $BRANCH=$BRANCH -replace '.*/'
           echo $BRANCH
+        shell: pwsh
 
   ####################################################################
   # Print out the selected environment to the log for troubleshooting.
