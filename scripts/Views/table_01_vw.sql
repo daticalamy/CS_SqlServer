@@ -1,13 +1,9 @@
 --liquibase formatted sql
 --changeset asmith:01 labels:POCEnv
 
-CREATE OR REPLACE VIEW table_01_vw(id, name) AS (
-  SELECT
-    id, name
-  FROM
-    table_01
-  ORDER BY
-    id, name DESC
-);
+CREATE VIEW [dbo].[table_01_vw]
+AS 
+SELECT ID, NAME
+from [dbo].[table_01];
 
---rollback DROP VIEW table_01_vw
+--rollback DROP VIEW dbo.table_01_vw

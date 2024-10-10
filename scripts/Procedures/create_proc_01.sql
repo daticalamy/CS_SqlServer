@@ -1,12 +1,7 @@
 --liquibase formatted sql
 --changeset asmith:01 labels:POCEnv
 
-CREATE OR REPLACE PROCEDURE test_proc_01()
-BEGIN
-  DECLARE id STRING;
-  SET id = GENERATE_UUID();
-  INSERT INTO table_01 (id,name,location)
-    VALUES(id, 'Amy','Test');
-  SELECT FORMAT("Created row %s", id);
-END
---rollback DROP PROCEDURE test_proc_01;
+CREATE OR ALTER PROCEDURE dbo.test_proc_01
+AS
+SELECT '1' from dbo.table_01;
+--rollback DROP PROCEDURE dbo.test_proc_01;
