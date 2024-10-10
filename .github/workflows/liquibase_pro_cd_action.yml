@@ -94,9 +94,10 @@ jobs:
     needs: [init]
     steps:
       - env:
-          ENVIRONMENT: ${{needs.init.outputs.environment}}
+          ENVIRONMENT: ${{steps.init.outputs.environment}}
         run: | 
           echo ${{ env.ENVIRONMENT }}
+          $ENVIRONMENT="${{ env.ENVIRONMENT }}"
           echo "The $ENVIRONMENT environment was selected."
 
   ####################################################################
