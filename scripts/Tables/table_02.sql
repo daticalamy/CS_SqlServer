@@ -1,7 +1,7 @@
 --liquibase formatted sql
 --changeset amy_smith:01 labels:POCEnv
 
-create or replace table table_01
+create table table_01
 (
 id string(32),
 name  STRING(40),
