@@ -58,6 +58,12 @@ env:
   # See https://docs.liquibase.com/parameters/log-format.html
   LIQUIBASE_LOG_FORMAT: JSON
   LIQUIBASE_LOG_LEVEL: INFO
+  
+  # Override Liquibase Schema Names 
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
+  
+  # Override Properties File
+  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties 
 
 jobs:
   ####################################################################
