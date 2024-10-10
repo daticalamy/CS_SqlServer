@@ -89,7 +89,7 @@ jobs:
   # This informational job runs in parallel with the checkout-repo job.
   ####################################################################
   print-environment:
-    name: Environment information
+    name: Environment information (Windows)
     runs-on: [self-hosted]
     needs: [init]
     steps:
