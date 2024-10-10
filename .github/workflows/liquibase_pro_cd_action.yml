@@ -78,9 +78,8 @@ jobs:
       # shared between jobs.
       - name: Set Environment
         id: set-environment
-        shell: pwsh
         run: |
-          echo "environment=DEV" >> $env:GITHUB_OUTPUT          
+          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8       
           $BRANCH="${{ github.ref }}"
           $BRANCH=$BRANCH -replace '.*/'
           echo $BRANCH
