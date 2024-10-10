@@ -96,7 +96,7 @@ jobs:
       - env:
           ENVIRONMENT: ${{needs.init.outputs.environment}}
         run: | 
-          echo ${{ env.OUTPUT1 }}
+          echo ${{ env.ENVIRONMENT }}
           echo "The $ENVIRONMENT environment was selected."
 
   ####################################################################
