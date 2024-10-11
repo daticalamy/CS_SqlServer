@@ -80,25 +80,19 @@ jobs:
       environment: ${{ steps.set-environment.outputs.environment }}
 
     steps:
-      # Cancel any previous runs that are not completed for this workflow
-      - name: Cancel previous workflow
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
-
       # Determine the environment based on the branch(es) that triggered this workflow.
       # Output "DEV", "QA", or "PROD" to $GITHUB_OUTPUT where job output parameters are
       # shared between jobs.
       - name: Set Environment
         id: set-environment
         run: |
-          echo "environment=DEV" >> $GITHUB_OUTPUT
-          if [[ "${{ inputs.environment }}" == QA ]]; then
-            echo "environment=QA" >> $GITHUB_OUTPUT
-          fi
-          if [[ "${{ inputs.environment }}" == PROD ]]; then
-            echo "environment=PROD" >> $GITHUB_OUTPUT
-          fi
+          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          if("${{ inputs.environment }}" -eq "QA" ) {
+            echo "environment=QA" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+          if("${{ inputs.environment }}" -eq "PROD" ) {
+            echo "environment=PROD" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
 
   ###################################################################
   #  Check out the source code

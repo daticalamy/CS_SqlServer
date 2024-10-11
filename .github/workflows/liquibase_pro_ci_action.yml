@@ -84,12 +84,12 @@ jobs:
         id: set-environment
         run: |
           echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
-          if [[ "${{github.base_ref}}" == qa || "${{github.ref}}" == refs/heads/qa ]]; then
+          if("${{ github.base_ref }}" -eq "QA" ) {
             echo "environment=QA" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
-          fi
-          if [[ "${{github.base_ref}}" == release* || "${{github.ref}}" == refs/heads/release* ]]; then
+          }
+          if("${{ github.base_ref }}" -eq "PROD" ) {
             echo "environment=PROD" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
-          fi
+          }
 
   ####################################################################
   # Print out the selected environment to the log for troubleshooting.
