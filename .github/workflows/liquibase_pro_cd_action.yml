@@ -85,10 +85,13 @@ jobs:
       - name: Set Environment
         id: set-environment
         run: |
-          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8       
-          $BRANCH="${{ github.ref }}"
-          $BRANCH=$BRANCH -replace '.*/'
-          echo $BRANCH
+          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8          
+          if("${{ github.base_ref }}" -eq "QA" ) {
+            echo "environment=QA" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+          if("${{ github.base_ref }}" -eq "PROD" ) {
+            echo "environment=PROD" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
 
   ####################################################################
   # Print out the selected environment to the log for troubleshooting.

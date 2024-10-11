@@ -71,6 +71,12 @@ env:
   # See https://docs.liquibase.com/parameters/log-format.html
   LIQUIBASE_LOG_FORMAT: JSON
   LIQUIBASE_LOG_LEVEL: INFO
+  
+  # Override Liquibase Schema Names 
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
+  
+  # Override Properties File
+  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties 
 
 jobs:
   ####################################################################
@@ -83,25 +89,19 @@ jobs:
       environment: ${{ steps.set-environment.outputs.environment }}
 
     steps:
-      # Cancel any previous runs that are not completed for this workflow
-      - name: Cancel previous workflow
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
-
       # Determine the environment based on the branch(es) that triggered this workflow.
       # Output "DEV", "QA", or "PROD" to $GITHUB_OUTPUT where job output parameters are
       # shared between jobs.
       - name: Set Environment
         id: set-environment
         run: |
-          echo "environment=DEV" >> $GITHUB_OUTPUT
-          if [[ "${{ inputs.environment }}" == QA ]]; then
-            echo "environment=QA" >> $GITHUB_OUTPUT
-          fi
-          if [[ "${{ inputs.environment }}" == PROD ]]; then
-            echo "environment=PROD" >> $GITHUB_OUTPUT
-          fi
+          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          if("${{ inputs.environment }}" -eq "QA" ) {
+            echo "environment=QA" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+          if("${{ inputs.environment }}" -eq "PROD" ) {
+            echo "environment=PROD" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
 
   ###################################################################
   #  Check out the source code and configuration
@@ -138,6 +138,4 @@ jobs:
       # Execute the Flow file
       - name: Run flow
         run: |
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow \
-             --flow-file=${{ env.FLOW_FILE }} \
-             --logfile=logs/liquibase.log
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
