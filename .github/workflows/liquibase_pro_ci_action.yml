@@ -141,6 +141,4 @@ jobs:
       # Execute the Flow file
       - name: Perform policy checks
         run: |
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow \
-             --flow-file=${{ env.FLOW_FILE }} \
-             --logfile=logs/liquibase.log
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
