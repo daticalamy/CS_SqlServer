@@ -102,7 +102,10 @@ jobs:
     steps:
       - env:
           ENVIRONMENT: ${{needs.init.outputs.environment}}
-        run: echo "The $ENVIRONMENT environment was selected."
+        run: |
+          echo ${{ env.ENVIRONMENT }}
+          $ENVIRONMENT="${{ env.ENVIRONMENT }}"
+          echo "The $ENVIRONMENT environment was selected."
 
   ###################################################################
   #  Check out the source code
