@@ -2,7 +2,7 @@
 ### This flowfile is intended to highlight capabilities of Liquibase Pro
 ### Review and update prior to use
 ###
-### Liquibase version: 4.26.0+
+### Liquibase version: 4.29.2+
 ###
 ### Liquibase sales: https://www.liquibase.com/contact-us
 ### Liquibase support: https://support.liquibase.com/knowledge
@@ -76,7 +76,7 @@ globalVariables:
   ### Files
   ###
   DIFF_FILE: "Diff_${LB_ENVIRONMENT}.json"
-  SNAPSHOT_FILE: "Snapshot_${LB_ENVIRONMENT}.json"
+  SNAPSHOT_FILE: "snapshots/Snapshot_${LB_ENVIRONMENT}.json"
   ###
   ### Operational Reports
   ### Liquibase Pro creates operational reports for certain commands
@@ -92,6 +92,10 @@ globalVariables:
   ### These flags can also be set dynamically by an automation tool based on user input, environment, team, etc.
   ###
   LB_SHOW_UPDATE_SQL: "F"
+  LB_TEST_DRIFT: "T"
+  LB_TEST_ROLLBACKS: "T"
+  LB_BASE_DIR: "liquibase"
+  LIQUIBASE_COMMAND_TAG: "1.0"
 
 ###
 ### Stages to execute
@@ -122,15 +126,15 @@ stages:
       # Show quality checks
       # https://docs.liquibase.com/commands/quality-checks/home.html
       #
-      - type: liquibase
-        if: "${LB_TEST_CHECKS} == T"
-        command: checks show
+      #- type: liquibase
+      #  if: "${LB_TEST_CHECKS} == T"
+      #  command: checks show
       #
       # Run quality checks
       # https://docs.liquibase.com/commands/quality-checks/home.html
       #
       - type: liquibase
-        if: "${LB_TEST_CHECKS} == T"
+      #  if: "${LB_TEST_CHECKS} == T"
         command: checks run
         cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}", report-name: "${CHECKS_REPORT}", checks-scope: "changelog, database", changeset-filter: "pending", auto-update: "on" }
       #
