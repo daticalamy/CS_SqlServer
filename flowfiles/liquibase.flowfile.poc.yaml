@@ -208,7 +208,7 @@ stages:
       - type: shell
         command: | 
           pwd
-          git add -A && git commit -m"Adding snapshot" && git push
+          git status
 
 ###
 ### Always execute
