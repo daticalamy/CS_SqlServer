@@ -129,4 +129,5 @@ jobs:
       # Execute the Flow file
       - name: Run flow
         run: |
+          env
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
