@@ -204,13 +204,6 @@ stages:
         command: snapshot
         globalArgs: { include-relations-for-computed-columns: "true", outputfile: "${LB_BASE_DIR}/${SNAPSHOT_FILE}" }
         cmdArgs: { snapshotFormat: "json" }
-        
-      - type: shell
-        command: | 
-          pwd
-          git status
-          git add liquibase/snapshots/*
-          git commit -m"Adding snapshot"
 
 ###
 ### Always execute
