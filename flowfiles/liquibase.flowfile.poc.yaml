@@ -122,15 +122,15 @@ stages:
       # Show quality checks
       # https://docs.liquibase.com/commands/quality-checks/home.html
       #
-      - type: liquibase
-        if: "${LB_TEST_CHECKS} == T"
-        command: checks show
+      #- type: liquibase
+      #  if: "${LB_TEST_CHECKS} == T"
+      #  command: checks show
       #
       # Run quality checks
       # https://docs.liquibase.com/commands/quality-checks/home.html
       #
       - type: liquibase
-        if: "${LB_TEST_CHECKS} == T"
+      #  if: "${LB_TEST_CHECKS} == T"
         command: checks run
         cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}", report-name: "${CHECKS_REPORT}", checks-scope: "changelog, database", changeset-filter: "pending", auto-update: "on" }
       #
