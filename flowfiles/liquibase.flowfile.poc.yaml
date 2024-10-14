@@ -209,6 +209,9 @@ stages:
         command: | 
           pwd
           git status
+          git add liquibase/snapshots/*
+          git commit -m"Adding snapshot"
+          git push
 
 ###
 ### Always execute
