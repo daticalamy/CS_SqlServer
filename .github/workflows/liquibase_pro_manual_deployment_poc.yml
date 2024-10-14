@@ -6,6 +6,8 @@
 name: 'Liquibase Pro Deployment Workflow (POC Flow)'
 run-name: Deployment of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
+permissions:
+  contents: write
 on:
   workflow_dispatch:
     # Following are the inputs received via the GitHub Actions Run workflow dialog
