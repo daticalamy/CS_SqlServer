@@ -206,7 +206,9 @@ stages:
         cmdArgs: { snapshotFormat: "json" }
         
       - type: shell
-        command: git add -A && git commit -m'Adding snapshot' && git push
+        command: | 
+          pwd
+          git add -A && git commit -m"Adding snapshot" && git push
 
 ###
 ### Always execute
