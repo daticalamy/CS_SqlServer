@@ -31,6 +31,9 @@ env:
   # the Liquibase Configuration Repo which orchestrates the database changes.
   # See https://docs.liquibase.com/commands/flow/flow.html
   FLOW_FILE: "flowfiles/liquibase.flowfile.poc.yaml"
+  
+  # Used by POC Flow File
+  LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
 
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
@@ -128,6 +131,5 @@ jobs:
     steps:
       # Execute the Flow file
       - name: Run flow
-        run: |
-          env
+        run: | 
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
