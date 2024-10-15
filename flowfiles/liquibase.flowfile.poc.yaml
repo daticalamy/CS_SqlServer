@@ -214,7 +214,6 @@ stages:
           git add snapshots/*
           git commit -m"Adding snapshot"
           git push        
-       
 
 ###
 ### Always execute
