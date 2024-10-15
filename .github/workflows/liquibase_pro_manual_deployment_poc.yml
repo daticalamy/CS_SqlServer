@@ -135,7 +135,6 @@ jobs:
     steps:
       # Execute the Flow file
       - name: Run flow
-        uses: actions/checkout@v3
         run: | 
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
           pwd
