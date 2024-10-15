@@ -125,6 +125,8 @@ jobs:
   #####################################################################
   liquibase-deployment:
     name: Database Deployment
+    permissions:
+      contents: write
     needs: [init, checkout-repo]
     runs-on: [self-hosted]
 
@@ -133,6 +135,7 @@ jobs:
     steps:
       # Execute the Flow file
       - name: Run flow
+        uses: actions/checkout@v3
         run: | 
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
           pwd
