@@ -133,6 +133,10 @@ jobs:
     environment: ${{needs.init.outputs.environment}}
 
     steps:
+      # Check out the source code
+      - name: Checkout Database Source repo
+        uses: actions/checkout@v3
+   
       # Execute the Flow file
       - name: Run flow
         run: | 
