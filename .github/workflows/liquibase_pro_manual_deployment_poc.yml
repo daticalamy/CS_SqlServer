@@ -130,6 +130,10 @@ jobs:
       - name: Run flow
         run: | 
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log  
+          git status
+          git add snapshots/*
+          git commit -m"Adding snapshot"
+          git push
           
       - name: Create Artifact
         if: always()

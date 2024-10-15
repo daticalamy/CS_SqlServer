@@ -208,12 +208,12 @@ stages:
       # Store updated snapshot
       # https://docs.liquibase.com/commands/inspection/snapshot.html
       #
-      - type: shell
-        command: |
-          git status
-          git add snapshots/*
-          git commit -m"Adding snapshot"
-          git push        
+      #- type: shell
+      #  command: |
+      #    git status
+      #    git add snapshots/*
+      #    git commit -m"Adding snapshot"
+      #    git push        
 
 ###
 ### Always execute
