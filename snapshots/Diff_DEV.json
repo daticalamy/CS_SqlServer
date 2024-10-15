@@ -1,7 +1,7 @@
 {
   "diff": {
     "diffFormat": 1,
-    "created": "Tue Oct 15 17:43:37 UTC 2024",
+    "created": "Tue Oct 15 17:47:39 UTC 2024",
     "databases": {
       "reference": {
         "majorVersion": "15",
@@ -48,6 +48,41 @@
           "name": "name",
           "type": "column",
           "relationName": "table_06",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_DEV"
+        }
+      },
+      {
+        "unexpectedObject": {
+          "name": "id",
+          "type": "column",
+          "relationName": "table_07",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_DEV"
+        }
+      },
+      {
+        "unexpectedObject": {
+          "name": "sku",
+          "type": "column",
+          "relationName": "table_07",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_DEV"
+        }
+      },
+      {
+        "unexpectedObject": {
+          "name": "name",
+          "type": "column",
+          "relationName": "table_07",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_DEV"
+        }
+      },
+      {
+        "unexpectedObject": {
+          "name": "table_07",
+          "type": "table",
           "schemaName": "dbo",
           "catalogName": "LPL_BTR_DEV"
         }
