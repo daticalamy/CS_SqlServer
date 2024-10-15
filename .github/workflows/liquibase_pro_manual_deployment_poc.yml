@@ -130,6 +130,9 @@ jobs:
       - name: Run flow
         run: | 
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log  
+
+      - name: Check-in New Snapshot
+        run: |   
           git status
           git add snapshots/*
           git commit -m"Adding snapshot"
