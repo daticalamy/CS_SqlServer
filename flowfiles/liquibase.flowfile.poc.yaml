@@ -76,7 +76,7 @@ globalVariables:
   ### Files
   ###
   DIFF_FILE: "Diff_${LB_ENVIRONMENT}.json"
-  SNAPSHOT_FILE: "${LB_BASE_DIR}/snapshots/Snapshot_${LB_ENVIRONMENT}.json"
+  SNAPSHOT_FILE: "snapshots/Snapshot_${LB_ENVIRONMENT}.json"
   ###
   ### Operational Reports
   ### Liquibase Pro creates operational reports for certain commands
