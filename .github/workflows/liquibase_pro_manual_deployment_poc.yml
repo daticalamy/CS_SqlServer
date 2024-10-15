@@ -99,35 +99,17 @@ jobs:
             echo "environment=PROD" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
           }
 
-  ###################################################################
-  #  Check out the source code
   ####################################################################
-  checkout-repo:
-    name: Check out repositories
-    needs: [init]
-    runs-on: [self-hosted]
-
-    steps:
-      # Check out the source code
-      - name: Checkout Database Source repo
-        uses: actions/checkout@v3
-
-      # Check out the Liquibase Configuration Repo to a folder, "liquibase-process"
-      - name: Checkout Liquibase Configuration repo
-        uses: actions/checkout@v4
-        with:
-          repository: adeelmalik78/Automations
-          path: liquibase-process
-
-  ####################################################################
+  #  Check out repositories. Because we push back snapshots to the 
+  #  repository we need deployment in same stage.
   #  Perform the Database change control operations specified
   #  in the flowfile. In this case, deploy the database changes.
   #####################################################################
   liquibase-deployment:
-    name: Database Deployment
+    name: Check out repositories and Database Deployment
     permissions:
       contents: write
-    needs: [init, checkout-repo]
+    needs: [init]
     runs-on: [self-hosted]
 
     environment: ${{needs.init.outputs.environment}}
@@ -136,6 +118,13 @@ jobs:
       # Check out the source code
       - name: Checkout Database Source repo
         uses: actions/checkout@v3
+        
+      # Check out the Liquibase Configuration Repo to a folder, "liquibase-process"
+      - name: Checkout Liquibase Configuration repo
+        uses: actions/checkout@v4
+        with:
+          repository: adeelmalik78/Automations
+          path: liquibase-process
    
       # Execute the Flow file
       - name: Run flow
