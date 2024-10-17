@@ -94,7 +94,7 @@ globalVariables:
   LB_SHOW_UPDATE_SQL: "F"
   LB_TEST_DRIFT: "T"
   LB_TEST_ROLLBACKS: "T"
-  LB_BASE_DIR: "liquibase"
+  LB_BASE_DIR: "."
   LIQUIBASE_COMMAND_TAG: "1.0"
 
 ###
@@ -136,7 +136,7 @@ stages:
       - type: liquibase
       #  if: "${LB_TEST_CHECKS} == T"
         command: checks run
-        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}", report-name: "${CHECKS_REPORT}", checks-scope: "changelog, database", changeset-filter: "pending", auto-update: "on" }
+        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${CHECKS_REPORT}", checks-scope: "changelog, database", changeset-filter: "pending", auto-update: "on" }
       #
       # Run diff and check for drift
       # Update referenceURL database type in cmdArgs (e.g., oracle, mssql, snowflake, etc.)
@@ -145,8 +145,8 @@ stages:
       - type: liquibase
         if: "exists('${SNAPSHOT_FILE}', false) && ${LB_TEST_DRIFT} == 'T'"
         command: diff
-        globalArgs: { include-relations-for-computed-columns: "true", outputfile: "${LB_BASE_DIR}/${DIFF_FILE}" }
-        cmdArgs: { drift-severity: "1", report-enabled: "true", report-path: "${LB_BASE_DIR}", report-name: "${DRIFT_REPORT}", referenceURL: "offline:mssql?snapshot=${SNAPSHOT_FILE}", format: json }
+        globalArgs: { include-relations-for-computed-columns: "true", outputfile: "${LB_BASE_DIR}/snapshots/${DIFF_FILE}" }
+        cmdArgs: { drift-severity: "1", report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${DRIFT_REPORT}", referenceURL: "offline:mssql?snapshot=${SNAPSHOT_FILE}", format: json }
       #
       # Tag database
       # https://docs.liquibase.com/commands/utility/tag.html
@@ -168,7 +168,7 @@ stages:
       #
       - type: liquibase
         command: update
-        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}", report-name: "${UPDATE_REPORT}" }
+        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
       #
       # Test rollbacks
       # Typically non-production only
@@ -195,7 +195,7 @@ stages:
       - type: liquibase
         if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'PROD')"
         command: update
-        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}", report-name: "${UPDATE_REPORT}" }
+        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
       #
       # Create updated snapshot
       # https://docs.liquibase.com/commands/inspection/snapshot.html
@@ -204,6 +204,16 @@ stages:
         command: snapshot
         globalArgs: { include-relations-for-computed-columns: "true", outputfile: "${LB_BASE_DIR}/${SNAPSHOT_FILE}" }
         cmdArgs: { snapshotFormat: "json" }
+      #
+      # Store updated snapshot
+      # https://docs.liquibase.com/commands/inspection/snapshot.html
+      #
+      #- type: shell
+      #  command: |
+      #    git status
+      #    git add snapshots/*
+      #    git commit -m"Adding snapshot"
+      #    git push        
 
 ###
 ### Always execute
