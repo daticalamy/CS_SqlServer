@@ -116,6 +116,11 @@ jobs:
     name: Check out repositories
     needs: [init]
     runs-on: [self-hosted]
+    permissions: 
+      actions: read 
+      contents: read 
+      pages: write 
+      id-token: write
 
     steps:
       # Check out the source code
