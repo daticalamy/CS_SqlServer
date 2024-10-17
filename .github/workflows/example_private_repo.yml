@@ -138,7 +138,7 @@ jobs:
       - name: Checkout Sample Private Repo
         uses: actions/checkout@v4
         with:
-          repository: liquibase/lpl_ddb
+          repository: daticalamy/EPHEM_UAT
           path: test-repo
 
 
