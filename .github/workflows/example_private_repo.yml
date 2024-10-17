@@ -140,7 +140,7 @@ jobs:
         with:
           repository: daticalamy/EPHEM_UAT
           path: test-repo
-
+          token: ${{secrets.MY_GITHUB_TOKEN}}
 
   #####################################################################
   #  Perform the Database change control operations specified
