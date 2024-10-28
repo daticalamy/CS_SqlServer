@@ -387,7 +387,7 @@
             Liquibase Update Report
         </div>
         <div style="color: #414141; font-weight: lighter">
-            Update Initiated 2024-10-28T16:49:19.371Z
+            Update Initiated 2024-10-28T16:55:40.322Z
         </div>
         <hr/>
         <div class="main__alert" style="background: #9DD96AFF;">
@@ -396,8 +396,8 @@
                         Update Succeeded!
                     </div>
                     <!--Whitespace matters here! Sorry formatters!-->
-                    <pre class="content__box" style="color: #000; font-family: monospace; white-space: pre-wrap">Database is up to date, no changesets to execute
-Liquibase: Update has been successful. Rows affected: 0</pre>
+                    <pre class="content__box" style="color: #000; font-family: monospace; white-space: pre-wrap">&#13;&#10;UPDATE SUMMARY&#13;&#10;Run:                          4&#13;&#10;Previously run:               0&#13;&#10;Filtered out:                 0&#13;&#10;Failed deployment:            0&#13;&#10;-------------------------------&#13;&#10;Total change sets:            4&#13;&#10;&#13;&#10;
+Liquibase: Update has been successful. Rows affected: 4</pre>
                 </div>
                 <div class="main__alert__icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -484,7 +484,7 @@ Liquibase: Update has been successful. Rows affected: 0</pre>
                                     <td>
                                         <div class="runtime__metadata__item">
                                             <div class="runtime__metadata__item__key">Start Time</div>
-                                            <div class="runtime__metadata__item__value">2024-10-28T16:49:19.371Z</div>
+                                            <div class="runtime__metadata__item__value">2024-10-28T16:55:40.322Z</div>
                                         </div>
                                     </td>
                                     <td>
@@ -498,7 +498,7 @@ Liquibase: Update has been successful. Rows affected: 0</pre>
                                     <td>
                                         <div class="runtime__metadata__item">
                                             <div class="runtime__metadata__item__key">Update Duration</div>
-                                            <div class="runtime__metadata__item__value">0 hours 0 mins 0 secs 167 ms</div>
+                                            <div class="runtime__metadata__item__value">0 hours 0 mins 0 secs 344 ms</div>
                                         </div>
                                     </td>
                                     <td>
@@ -546,7 +546,219 @@ Liquibase: Update has been successful. Rows affected: 0</pre>
         <div class="main__summary main__section">
             <div class="summary__accordion">
                 <div class="section__title" style="padding: 16px">
-                    Changeset Execution Details - 0 Executed, 0 Failed
+                    Changeset Execution Details - 4 Executed, 0 Failed
+                </div>
+                <div class="summary__accordion__item">
+                    <div class="summary__accordion__header">
+                        <div class="summary__accordion__title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-1.25 16.518l-4.5-4.319 1.396-1.435 3.078 2.937 6.105-6.218 1.421 1.409-7.5 7.626z"
+                                      fill="green"/>
+                            </svg>
+                            <div style="padding: 5px 10px">01</div>
+                        </div>
+                        <div class="summary__accordion__url">amy_smith</div>
+                        <i class="summary__accordion__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16.5901 8.295L12.0001 12.875L7.41006 8.295L6.00006 9.705L12.0001 15.705L18.0001 9.705L16.5901 8.295Z"
+                                      fill="black" fill-opacity="0.54"/>
+                            </svg>
+                        </i>
+                    </div>
+                    <div class="summary__accordion__content">
+                        <table>
+                            <tbody>
+                            <tr class="summary__accordion__changeset_labels">
+                                <td style="color: #000">
+                                    <div class="property__key">Labels:</div>
+                                    <div class="property__value">pocenv</div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Contexts:</div>
+                                    <div class="property__value"></div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Changelog:</div>
+                                    <div class="property__value">changesets/release/changelog.sql</div>
+                                </td>
+                            </tr>
+                            <tr style="justify-content: normal">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Changeset Comment:
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000"></td>
+                            </tr>
+                            <tr class="summary__accordion__changeset_metadata">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Generated SQL
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000">
+                                    <div class="content__box" style="font-family: monospace; white-space: pre-wrap; word-wrap: anywhere">create table dbo.table_01 (&#13;&#10;  id int, &#13;&#10;  name varchar(50),&#13;&#10;  sku varchar(30) &#13;&#10;);</div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="summary__accordion__item">
+                    <div class="summary__accordion__header">
+                        <div class="summary__accordion__title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-1.25 16.518l-4.5-4.319 1.396-1.435 3.078 2.937 6.105-6.218 1.421 1.409-7.5 7.626z"
+                                      fill="green"/>
+                            </svg>
+                            <div style="padding: 5px 10px">02</div>
+                        </div>
+                        <div class="summary__accordion__url">amy_smith</div>
+                        <i class="summary__accordion__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16.5901 8.295L12.0001 12.875L7.41006 8.295L6.00006 9.705L12.0001 15.705L18.0001 9.705L16.5901 8.295Z"
+                                      fill="black" fill-opacity="0.54"/>
+                            </svg>
+                        </i>
+                    </div>
+                    <div class="summary__accordion__content">
+                        <table>
+                            <tbody>
+                            <tr class="summary__accordion__changeset_labels">
+                                <td style="color: #000">
+                                    <div class="property__key">Labels:</div>
+                                    <div class="property__value">pocenv</div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Contexts:</div>
+                                    <div class="property__value"></div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Changelog:</div>
+                                    <div class="property__value">changesets/release/changelog.sql</div>
+                                </td>
+                            </tr>
+                            <tr style="justify-content: normal">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Changeset Comment:
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000"></td>
+                            </tr>
+                            <tr class="summary__accordion__changeset_metadata">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Generated SQL
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000">
+                                    <div class="content__box" style="font-family: monospace; white-space: pre-wrap; word-wrap: anywhere">create table dbo.table_02 (&#13;&#10;  id int, &#13;&#10;  name varchar(50),&#13;&#10;  sku varchar(30) &#13;&#10;);</div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="summary__accordion__item">
+                    <div class="summary__accordion__header">
+                        <div class="summary__accordion__title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-1.25 16.518l-4.5-4.319 1.396-1.435 3.078 2.937 6.105-6.218 1.421 1.409-7.5 7.626z"
+                                      fill="green"/>
+                            </svg>
+                            <div style="padding: 5px 10px">03</div>
+                        </div>
+                        <div class="summary__accordion__url">amy_smith</div>
+                        <i class="summary__accordion__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16.5901 8.295L12.0001 12.875L7.41006 8.295L6.00006 9.705L12.0001 15.705L18.0001 9.705L16.5901 8.295Z"
+                                      fill="black" fill-opacity="0.54"/>
+                            </svg>
+                        </i>
+                    </div>
+                    <div class="summary__accordion__content">
+                        <table>
+                            <tbody>
+                            <tr class="summary__accordion__changeset_labels">
+                                <td style="color: #000">
+                                    <div class="property__key">Labels:</div>
+                                    <div class="property__value"></div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Contexts:</div>
+                                    <div class="property__value"></div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Changelog:</div>
+                                    <div class="property__value">changesets/release/changelog.sql</div>
+                                </td>
+                            </tr>
+                            <tr style="justify-content: normal">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Changeset Comment:
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000"></td>
+                            </tr>
+                            <tr class="summary__accordion__changeset_metadata">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Generated SQL
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000">
+                                    <div class="content__box" style="font-family: monospace; white-space: pre-wrap; word-wrap: anywhere">create table dbo.table_03 (&#13;&#10;  id int, &#13;&#10;  name varchar(50),&#13;&#10;  sku varchar(30) &#13;&#10;);</div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="summary__accordion__item">
+                    <div class="summary__accordion__header">
+                        <div class="summary__accordion__title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-1.25 16.518l-4.5-4.319 1.396-1.435 3.078 2.937 6.105-6.218 1.421 1.409-7.5 7.626z"
+                                      fill="green"/>
+                            </svg>
+                            <div style="padding: 5px 10px">04</div>
+                        </div>
+                        <div class="summary__accordion__url">amy_smith</div>
+                        <i class="summary__accordion__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16.5901 8.295L12.0001 12.875L7.41006 8.295L6.00006 9.705L12.0001 15.705L18.0001 9.705L16.5901 8.295Z"
+                                      fill="black" fill-opacity="0.54"/>
+                            </svg>
+                        </i>
+                    </div>
+                    <div class="summary__accordion__content">
+                        <table>
+                            <tbody>
+                            <tr class="summary__accordion__changeset_labels">
+                                <td style="color: #000">
+                                    <div class="property__key">Labels:</div>
+                                    <div class="property__value"></div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Contexts:</div>
+                                    <div class="property__value"></div>
+                                </td>
+                                <td style="color: #000">
+                                    <div class="property__key">Changelog:</div>
+                                    <div class="property__value">changesets/release/changelog.sql</div>
+                                </td>
+                            </tr>
+                            <tr style="justify-content: normal">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Changeset Comment:
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000"></td>
+                            </tr>
+                            <tr class="summary__accordion__changeset_metadata">
+                                <td class="summary__accordion__changeset__key property__key" style="color: #000">
+                                    Generated SQL
+                                </td>
+                                <td class="summary__accordion__changeset__value" style="color: #000">
+                                    <div class="content__box" style="font-family: monospace; white-space: pre-wrap; word-wrap: anywhere">create table dbo.table_04 (&#13;&#10;  id int, &#13;&#10;  name varchar(50),&#13;&#10;  sku varchar(30) &#13;&#10;);</div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
