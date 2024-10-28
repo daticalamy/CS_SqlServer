@@ -1,7 +1,7 @@
 {
   "diff": {
     "diffFormat": 1,
-    "created": "Tue Oct 15 18:07:45 UTC 2024",
+    "created": "Mon Oct 28 17:45:51 UTC 2024",
     "databases": {
       "reference": {
         "majorVersion": "15",
@@ -15,6 +15,79 @@
         "name": "Microsoft SQL Server",
         "url": "jdbc:sqlserver://demo-db1-win.liquibase.net:1433;connectRetryInterval=10;connectRetryCount=1;maxResultBuffer=-1;sendTemporalDataTypesAsStringForBulkCopy=true;delayLoadingLobs=true;useFmtOnly=false;useBulkCopyForBatchInsert=false;cancelQueryTimeout=-1;sslProtocol=TLS;calcBigDecimalPrecision=false;useDefaultJaasConfig=false;jaasConfigurationName=SQLJDBCDriver;statementPoolingCacheSize=0;serverPreparedStatementDiscardThreshold=10;enablePrepareOnFirstPreparedStatementCall=false;fips=false;socketTimeout=0;authentication=NotSpecified;authenticationScheme=nativeAuthentication;xopenStates=false;datetimeParameterType=datetime2;sendTimeAsDatetime=true;replication=false;trustStoreType=JKS;trustServerCertificate=true;TransparentNetworkIPResolution=true;iPAddressPreference=IPv4First;serverNameAsACE=false;sendStringParametersAsUnicode=true;selectMethod=direct;responseBuffering=adaptive;queryTimeout=-1;packetSize=8000;multiSubnetFailover=false;loginTimeout=30;lockTimeout=-1;lastUpdateCount=true;useFlexibleCallableStatements=true;useDefaultGSSCredential=false;prepareMethod=prepexec;encrypt=True;disableStatementPooling=true;databaseName=LPL_BTR_QA;columnEncryptionSetting=Disabled;applicationName=Microsoft JDBC Driver for SQL Server;applicationIntent=readwrite;"
       }
-    }
+    },
+    "missingObjects": [
+      {
+        "missingObject": {
+          "name": "sku",
+          "type": "column",
+          "relationName": "table_01",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      },
+      {
+        "missingObject": {
+          "name": "table_02",
+          "type": "table",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      },
+      {
+        "missingObject": {
+          "name": "table_01",
+          "type": "table",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      },
+      {
+        "missingObject": {
+          "name": "sku",
+          "type": "column",
+          "relationName": "table_02",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      },
+      {
+        "missingObject": {
+          "name": "name",
+          "type": "column",
+          "relationName": "table_01",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      },
+      {
+        "missingObject": {
+          "name": "name",
+          "type": "column",
+          "relationName": "table_02",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      },
+      {
+        "missingObject": {
+          "name": "id",
+          "type": "column",
+          "relationName": "table_02",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      },
+      {
+        "missingObject": {
+          "name": "id",
+          "type": "column",
+          "relationName": "table_01",
+          "schemaName": "dbo",
+          "catalogName": "LPL_BTR_QA"
+        }
+      }
+    ]
+    
   }
 }
