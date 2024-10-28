@@ -134,8 +134,9 @@ jobs:
       - name: Check-in New Snapshot
         run: |   
           git status
+          git add reports/*
           git add snapshots/*
-          git commit -m"Adding snapshot"
+          git commit -m"Adding reports and snapshots"
           git push
           
       - name: Create Artifact

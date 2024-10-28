@@ -23,3 +23,11 @@ create table dbo.table_03 (
   sku varchar(30) 
 );
 --rollback drop table dbo.table_03
+
+--changeset amy_smith:04
+create table dbo.table_04 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table dbo.table_04
