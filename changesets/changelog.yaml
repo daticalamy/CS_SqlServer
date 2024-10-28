@@ -1,16 +1,5 @@
 databaseChangeLog:
       
   - includeAll:
-      path: scripts/Tables
+      path: release
       relativeToChangelogFile: true
-      errorIfMissingOrEmpty: false
-
-  - includeAll:
-      path: scripts/Procedures
-      relativeToChangelogFile: true
-      errorIfMissingOrEmpty: false
-
-  - includeAll:
-      path: scripts/Views
-      relativeToChangelogFile: true
-      errorIfMissingOrEmpty: false

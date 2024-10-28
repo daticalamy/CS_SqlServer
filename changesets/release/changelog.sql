@@ -1,16 +1,17 @@
-databaseChangeLog:
-      
-  - includeAll:
-      path: scripts/Tables
-      relativeToChangelogFile: true
-      errorIfMissingOrEmpty: false
+--liquibase formatted sql
 
-  - includeAll:
-      path: scripts/Procedures
-      relativeToChangelogFile: true
-      errorIfMissingOrEmpty: false
+--changeset amy_smith:01 labels:POCEnv
+create table dbo.table_01 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table dbo.table_01
 
-  - includeAll:
-      path: scripts/Views
-      relativeToChangelogFile: true
-      errorIfMissingOrEmpty: false
+--changeset amy_smith:02 labels:POCEnv
+create table dbo.table_02 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table dbo.table_02
