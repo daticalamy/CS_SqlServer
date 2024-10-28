@@ -1,41 +1,33 @@
 #####################################################################
-#  GitHub Action to perform manual deployment of database
+#  GitHub Action to perform continuous deployment (CD) of database
 #  changes using Liquibase Pro, Liquibase Pro Flows, and Custom
 #  Policy checks.
 #####################################################################
-name: 'Liquibase Pro Deployment Workflow (POC Flow)'
-run-name: Deployment of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
+name: 'Example Private Repo'
+run-name: Continuous Deployment of ${{github.ref}} by ${{ github.actor }}
 
-permissions:
-  contents: write
+# This workflow will execute whenever a 'push' event occurs on the
+# 'develop' branch. A push event can occur due to several events,
+# including merging a PR or bypassing rules and pushing directly to
+# the branch as a repository administrator. When this workflow
+# executes, it will deploy all pending changes, including any which
+# have been previously rolled back.
+#
+# To extend CD to other environments, add their corresponding
+# branches here.
 on:
-  workflow_dispatch:
-    # Following are the inputs received via the GitHub Actions Run workflow dialog
-    inputs:
-      # The type 'environment' will automatically pull in the environments created in Settings->Environments
-      environment:
-        description: 'Environment to deploy to'
-        type: environment
-        required: true
-      # For more info on log level, see: https://docs.liquibase.com/parameters/log-level.html
-      log-level:
-        description: 'Liquibase log level'
-        required: false
-        default: 'INFO'
-        type: choice
-        options: [ 'SEVERE','WARNING','INFO','FINE','OFF' ]
+  push:
+    branches:
+      - 'develop'
 
-####################################################################
+#####################################################################
 #  Set up the environment
 #####################################################################
 env:
   # The top level Flow File that gets cloned into the workspace from
   # the Liquibase Configuration Repo which orchestrates the database changes.
   # See https://docs.liquibase.com/commands/flow/flow.html
-  FLOW_FILE: "flowfiles/liquibase.flowfile.poc.yaml"
-  
-  # Used by POC Flow File
-  LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
+  FLOW_FILE: "flowfiles/liquibase-postmerge.flowfile.yaml"
 
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
@@ -50,7 +42,7 @@ env:
   # same license key is used for all executions, so it is tracked at the repository level
   # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
   LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_PRO_LICENSE_KEY }}
-  
+
   # JDBC URL of the database per environment. Based on the incoming branch (one of DEV, QA, or PROD),
   # the corresponding secret will be taken from the Environment secrets.
   # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
@@ -78,9 +70,11 @@ jobs:
   # Initialization runs first because it has no 'needs' value.
   ####################################################################
   init:
-    name: Initialization
+    name: Initialization (Windows)
     # This runs on a self-hosted runner with Liquibase preinstalled.
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, windows]
+
+    # From init, we output the environment determined during the set-environment step below
     outputs:
       environment: ${{ steps.set-environment.outputs.environment }}
 
@@ -91,58 +85,72 @@ jobs:
       - name: Set Environment
         id: set-environment
         run: |
-          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
-          if("${{ inputs.environment }}" -eq "QA" ) {
+          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8          
+          if("${{ github.base_ref }}" -eq "QA" ) {
             echo "environment=QA" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
           }
-          if("${{ inputs.environment }}" -eq "PROD" ) {
+          if("${{ github.base_ref }}" -eq "PROD" ) {
             echo "environment=PROD" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
           }
 
   ####################################################################
-  #  Check out repositories. Because we push back snapshots to the 
-  #  repository we need deployment in same stage.
-  #  Perform the Database change control operations specified
-  #  in the flowfile. In this case, deploy the database changes.
-  #####################################################################
-  liquibase-deployment:
-    name: Check out repositories and Database Deployment
-    permissions:
-      contents: write
+  # Print out the selected environment to the log for troubleshooting.
+  # This informational job runs in parallel with the checkout-repo job.
+  ####################################################################
+  print-environment:
+    name: Environment information (Windows)
+    runs-on: [self-hosted]
+    needs: [init]
+    steps:
+      - env:
+          ENVIRONMENT: ${{needs.init.outputs.environment}}
+        run: | 
+          echo ${{ env.ENVIRONMENT }}
+          $ENVIRONMENT="${{ env.ENVIRONMENT }}"
+          echo "The $ENVIRONMENT environment was selected."
+
+  ####################################################################
+  #  Check out the source code and configuration
+  ####################################################################
+  checkout-repo:
+    name: Check out repositories
     needs: [init]
     runs-on: [self-hosted]
-
-    environment: ${{needs.init.outputs.environment}}
 
     steps:
       # Check out the source code
       - name: Checkout Database Source repo
         uses: actions/checkout@v3
-        
+
       # Check out the Liquibase Configuration Repo to a folder, "liquibase-process"
       - name: Checkout Liquibase Configuration repo
         uses: actions/checkout@v4
         with:
           repository: adeelmalik78/Automations
           path: liquibase-process
-   
-      # Execute the Flow file
-      - name: Run flow
-        run: | 
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log  
 
-      - name: Check-in New Snapshot
-        run: |   
-          git status
-          git add reports/*
-          git add snapshots/*
-          git commit -m"Adding reports and snapshots"
-          git push
-          
-      - name: Create Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+      # Check out the Liquibase Configuration Repo to a folder, "liquibase-process"
+      - name: Checkout Sample Private Repo
+        uses: actions/checkout@v4
         with:
-          name: reports
-          path: |
-            reports/*
+          repository: daticalamy/EPHEM_UAT
+          path: test-repo
+          token: ${{secrets.MY_GITHUB_TOKEN}}
+
+  #####################################################################
+  #  Perform the Database change control operations specified
+  #  in the flowfile.
+  #####################################################################
+  liquibase-deployment:
+    name: Database Deployment
+    needs: [checkout-repo, init]
+    runs-on: [self-hosted]
+
+    environment: ${{needs.init.outputs.environment}}
+
+    steps:
+      # Execute the Flow file.
+      - name: Run flow
+        run: |
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
+
