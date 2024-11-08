@@ -156,7 +156,7 @@ jobs:
           $commandurl=$env:LIQUIBASE_COMMAND_URL
           [securestring]$secStringPassword = ConvertTo-SecureString "${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}" -AsPlainText -Force
           $cred = new-object -typename System.Management.Automation.PSCredential ("SVCDEVDBINV", $secStringPassword)
-          $session= New-PSSession -ComputerName "G67PAW-GIT03" -Credential $cred -Authentication credSSP
+          $session= New-PSSession -ComputerName "DEMO-AD" -Credential $cred -Authentication credSSP
           Invoke-Command -Session $session -ScriptBlock {
           param ($licenseKey, $flowFile, $workdir, $commandurl)
           $ErrorActionPreference= 'silentlycontinue'
