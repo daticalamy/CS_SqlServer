@@ -18,7 +18,7 @@ run-name: Continuous Deployment of ${{github.ref}} by ${{ github.actor }}
 on:
   push:
     branches:
-      - 'develop'
+      - 'developRunAs'
 
 #####################################################################
 #  Set up the environment
@@ -142,6 +142,41 @@ jobs:
 
     steps:
       # Execute the Flow file.
-      - name: Run flow
+      #- name: Run flow
+      #  run: |
+      #    liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
+
+      # Execute the Flow file.
+      - name: Check version
+        shell: pwsh
         run: |
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
+          $licenseKey = $env:LIQUIBASE_LICENSE_KEY
+          $flowFile = $env:FLOW_FILE
+          $workdir="${{ github.workspace }}"
+          $commandurl=$env:LIQUIBASE_COMMAND_URL
+          [securestring]$secStringPassword = ConvertTo-SecureString "${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}" -AsPlainText -Force
+          $cred = new-object -typename System.Management.Automation.PSCredential ("SVCDEVDBINV", $secStringPassword)
+          $session= New-PSSession -ComputerName "DEMO-AD" -Credential $cred -Authentication credSSP
+          Invoke-Command -Session $session -ScriptBlock {
+          param ($licenseKey, $flowFile, $workdir, $commandurl)
+          $ErrorActionPreference= 'silentlycontinue'
+          Set-Location $Workdir
+          liquibase -v | %{ "$_" }
+          } -ArgumentList $licenseKey, $flowFile, $workdir, $commandurl
+          
+      - name: Run flow
+        shell: pwsh
+        run: |
+          $licenseKey = $env:LIQUIBASE_LICENSE_KEY
+          $flowFile = $env:FLOW_FILE
+          $workdir="${{ github.workspace }}"
+          $commandurl=$env:LIQUIBASE_COMMAND_URL
+          [securestring]$secStringPassword = ConvertTo-SecureString "${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}" -AsPlainText -Force
+          $cred = new-object -typename System.Management.Automation.PSCredential ("SVCDEVDBINV", $secStringPassword)
+          $session= New-PSSession -ComputerName "DEMO-AD" -Credential $cred -Authentication credSSP
+          Invoke-Command -Session $session -ScriptBlock {
+          param ($licenseKey, $flowFile, $workdir, $commandurl)
+          $ErrorActionPreference= 'silentlycontinue'
+          Set-Location $Workdir
+          liquibase --license-key=$licenseKey flow --flow-file=$flowFile --logfile=logs/liquibase.log | %{ "$_" }
+          } -ArgumentList $licenseKey, $flowFile, $workdir, $commandurl
