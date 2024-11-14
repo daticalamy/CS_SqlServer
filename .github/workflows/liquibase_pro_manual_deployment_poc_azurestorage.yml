@@ -3,7 +3,7 @@
 #  changes using Liquibase Pro, Liquibase Pro Flows, and Custom
 #  Policy checks.
 #####################################################################
-name: 'Liquibase Pro Deployment Workflow (POC Flow)'
+name: 'Liquibase Pro Deployment Workflow (POC AzureStorage Flow)'
 run-name: Deployment of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
 permissions:
@@ -71,7 +71,11 @@ env:
   LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
   
   # Override Properties File
-  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties 
+  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
+
+  #Azure storage
+  AZURE_STORAGE_ACCOUNT: 
+  AZURE_CONTAINER_NAME:  
 
 jobs:
   ####################################################################
@@ -126,10 +130,16 @@ jobs:
           repository: adeelmalik78/Automations
           path: liquibase-process
 
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       # Take snapshot outside Flow File
       - name: Upload snapshot
         run: | 
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} snapshot --logfile=logs/liquibase.log --output-file=snapshots/Snapshot_development.json --snapshot-format=json     
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} snapshot --logfile=logs/liquibase.log --output-file=snapshots/Snapshot_development.json --snapshot-format=json
+          az storage blob upload-batch --account-name ${{ env.BLOB_STORAGE_ACCOUNT_NAME }} -d '<storagename>' -s './<folder name>' --pattern "*.txt"          
    
       # Execute the Flow file
       #- name: Run flow
