@@ -1,7 +1,10 @@
 # File: .github/workflows/workflow.yml
 
 name: Run Azure Login with OIDC
-on: [push]
+on:
+  push:
+    branches:
+      - 'developX'
 
 permissions:
   id-token: write
