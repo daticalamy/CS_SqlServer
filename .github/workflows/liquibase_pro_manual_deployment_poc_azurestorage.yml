@@ -138,12 +138,12 @@ jobs:
       # Take snapshot outside Flow File
       - name: Take snapshot
         run: | 
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} snapshot --logfile=logs/liquibase.log --output-file=snapshots/Snapshot_development.json --snapshot-format=json 
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} snapshot --logfile=logs/liquibase.log --output-file=test.json --snapshot-format=json 
 
       # Take snapshot outside Flow File
       - name: Upload snapshot
         run: | 
-          az storage blob upload --container-name snapshots --name Snapshot_development --overwrite --file "snapshots/Snapshot_development.json"
+          az storage blob upload --container-name snapshots --name test --overwrite --file test.json
           
       - name: Create Reports Artifact
         if: always()
