@@ -142,9 +142,10 @@ jobs:
 
       # Take snapshot outside Flow File
       - name: Upload snapshot
-        run: | 
-          az storage blob upload --container-name snapshots --name test --overwrite --file test.json
-        shell: cmd
+        uses: azure/CLI@v1
+        with:
+        inlineScript: |
+            az storage blob upload --container-name snapshots --name test --overwrite --file test.json
           
       - name: Create Reports Artifact
         if: always()
