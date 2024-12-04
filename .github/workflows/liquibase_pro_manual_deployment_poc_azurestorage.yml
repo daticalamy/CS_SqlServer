@@ -3,7 +3,7 @@
 #  changes using Liquibase Pro, Liquibase Pro Flows, and Custom
 #  Policy checks.
 #####################################################################
-name: 'Liquibase Pro Deployment Workflow (POC AzureStorage Flow)'
+name: 'POC AzureStorage Flow'
 run-name: Deployment of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
 permissions:
@@ -136,18 +136,16 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Take snapshot outside Flow File
+      - name: Take snapshot
+        run: | 
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} snapshot --logfile=logs/liquibase.log --output-file=snapshots/Snapshot_development.json --snapshot-format=json 
+
+      # Take snapshot outside Flow File
       - name: Upload snapshot
         run: | 
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} snapshot --logfile=logs/liquibase.log --output-file=snapshots/Snapshot_development.json --snapshot-format=json
           az storage blob upload --container-name snapshots --name Snapshot_development --file snapshots/Snapshot_development.json
-      #    az storage blob upload-batch --account-name ${{ env.BLOB_STORAGE_ACCOUNT_NAME }} -d '<storagename>' -s './<folder name>' --pattern "*.txt"          
-   
-      # Execute the Flow file
-      #- name: Run flow
-      #  run: | 
-      #    liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log  
           
-      - name: Create Artifact
+      - name: Create Reports Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
