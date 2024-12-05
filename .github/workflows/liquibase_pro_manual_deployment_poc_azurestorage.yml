@@ -150,7 +150,12 @@ jobs:
       # Take snapshot outside Flow File
       - name: Upload snapshot
         run: |
-          az storage blob upload --container-name snapshots --name test --overwrite --file test.json
+          az storage blob upload \
+            --account-name "Visual Studio Professional Subscription" \
+            --container-name snapshots \
+            --file test.json \
+            --name test \
+            --overwrite
           
       - name: Create Reports Artifact
         if: always()
