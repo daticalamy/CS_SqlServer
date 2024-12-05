@@ -149,8 +149,6 @@ jobs:
 
       # Take snapshot outside Flow File
       - name: Upload snapshot
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
         run: |
           az storage blob upload --container-name snapshots --name test --overwrite --file test.json
           
