@@ -71,11 +71,7 @@ env:
   LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
   
   # Override Properties File
-  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
-
-  #Azure storage
-  AZURE_STORAGE_ACCOUNT: 
-  AZURE_CONTAINER_NAME:  
+  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties 
 
 jobs:
   ####################################################################
