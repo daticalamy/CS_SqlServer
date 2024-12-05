@@ -144,7 +144,7 @@ jobs:
       - name: Upload snapshot
         uses: azure/CLI@v1
         with:
-        inlineScript: |
+          inlineScript: |
             az storage blob upload --container-name snapshots --name test --overwrite --file test.json
           
       - name: Create Reports Artifact
