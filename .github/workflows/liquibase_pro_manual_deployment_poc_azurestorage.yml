@@ -147,8 +147,13 @@ jobs:
           az account show
           az storage -h
 
-      # Take snapshot outside Flow File
+      # Upload snapshot 
       - name: Upload snapshot
+        run: |
+          az storage blob upload --container-name snapshots --file snapshots/Snapshot_${{ inputs.environment }}.json --name Snapshot_${{ inputs.environment }}.json --overwrite
+
+      # Take snapshot outside Flow File
+      - name: Download snapshot
         run: |
           az storage blob upload --container-name snapshots --file snapshots/Snapshot_${{ inputs.environment }}.json --name Snapshot_${{ inputs.environment }}.json --overwrite
           
