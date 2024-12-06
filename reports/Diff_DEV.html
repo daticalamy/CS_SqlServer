@@ -398,11 +398,11 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
             </div>
             <div class="main__alert__text">
                 <div class="main__alert__title">
-                    Diff operation did not detect
+                    Diff operation detected
                     differences
                 </div>
                 <div class="main__alert__info">
-                    Report created Fri Dec 06 20:43:24 UTC 2024 by Administrator at AD-DEMO
+                    Report created Fri Dec 06 20:52:03 UTC 2024 by Administrator at AD-DEMO
                 </div>
                 <div class="main__alert__command">
                     Command Syntax: liquibase --license-key ***** flow --flow-file&#61;flowfiles/liquibase.flowfile.poc.yaml --logfile&#61;logs/liquibase.log
@@ -438,7 +438,7 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
             </div>
             <div class="summary__accordion__item">
                 <div class="summary__accordion__header">
-                    <div class="summary__accordion__title">0 Objects Missing on Source</div>
+                    <div class="summary__accordion__title">1 Objects Missing on Source</div>
                     <div class="summary__accordion__url">offline:mssql?snapshot&#61;snapshots/Snapshot_DEV.json</div>
                     <i class="summary__accordion__icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -451,7 +451,15 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
                     <table>
                         <tbody>
                         <tr>
-                            <td style="color: #000">No unexpected objects! 🎉</td>
+                            <td style="color: #000">Object Type</td>
+                            <td style="color: #000">Object Identifier</td>
+                        </tr>
+                        <tr>
+                            <td style="color: #000"> Index(s)</td>
+                            <td style="color: #000">
+                                <div>Schema: PROPERTY_TAX</div>
+                                <div>ClusteredIndex-20241206-205038 UNIQUE  ON PROPERTY_TAX.table_01(name)</div>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -477,6 +485,14 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
                     </table>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="main__details main__section">
+        <div class="section__title">
+            Detailed Object Differences
+        </div>
+        <div class="card">
+            <div id="sql-diff"></div>
         </div>
     </div>
     <div class="main__metadata main__section">
@@ -535,12 +551,12 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
         </div>
     </div>
     <div style="display: none">
-        <pre id="jsonMissing">{&#10;  &quot;diff&quot;: {&#10;    &quot;diffFormat&quot;: 1,&#10;    &quot;created&quot;: &quot;Fri Dec 06 20:43:24 UTC 2024&quot;&#10;  }&#10;}&#10;</pre>
-        <pre id="jsonUnexpected">{&#10;  &quot;diff&quot;: {&#10;    &quot;diffFormat&quot;: 1,&#10;    &quot;created&quot;: &quot;Fri Dec 06 20:43:24 UTC 2024&quot;&#10;  }&#10;}&#10;</pre>
-        <pre id="jsonChanged">{&#10;  &quot;diff&quot;: {&#10;    &quot;diffFormat&quot;: 1,&#10;    &quot;created&quot;: &quot;Fri Dec 06 20:43:24 UTC 2024&quot;&#10;  }&#10;}&#10;</pre>
+        <pre id="jsonMissing">{&#10;  &quot;diff&quot;: {&#10;    &quot;diffFormat&quot;: 1,&#10;    &quot;created&quot;: &quot;Fri Dec 06 20:52:02 UTC 2024&quot;&#10;  }&#10;}&#10;</pre>
+        <pre id="jsonUnexpected">{&#10;  &quot;diff&quot;: {&#10;    &quot;diffFormat&quot;: 1,&#10;    &quot;created&quot;: &quot;Fri Dec 06 20:52:02 UTC 2024&quot;,&#10;    &quot;unexpectedObjects&quot;: [&#10;      {&#10;        &quot;unexpectedObject&quot;: {&#10;          &quot;name&quot;: &quot;ClusteredIndex-20241206-205038&quot;,&#10;          &quot;type&quot;: &quot;index&quot;,&#10;          &quot;schemaName&quot;: &quot;PROPERTY_TAX&quot;,&#10;          &quot;catalogName&quot;: &quot;LPL_BTR_DEV&quot;&#10;        }&#10;      }&#10;    ]&#10;    &#10;  }&#10;}&#10;</pre>
+        <pre id="jsonChanged">{&#10;  &quot;diff&quot;: {&#10;    &quot;diffFormat&quot;: 1,&#10;    &quot;created&quot;: &quot;Fri Dec 06 20:52:02 UTC 2024&quot;&#10;  }&#10;}&#10;</pre>
         <pre id="target-url">jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName&#61;LPL_BTR_DEV;trustServerCertificate&#61;true</pre>
         <pre id="reference-url">offline:mssql?snapshot&#61;snapshots/Snapshot_DEV.json</pre>
-        <pre id="unifiedSqlDiff"></pre>
+        <pre id="unifiedSqlDiff">--- target&#10;+++ source | Changes on: table: table_01&#10;@@ -1,2 +1,1 @@&#10; CREATE TABLE PROPERTY_TAX.table_01 (id int, name varchar(50), sku varchar(30));&#10;-CREATE UNIQUE CLUSTERED INDEX [ ClusteredIndex -20241206 -205038 ] ON PROPERTY_TAX.table_01(name);</pre>
     </div>
 </main>
 <footer>
