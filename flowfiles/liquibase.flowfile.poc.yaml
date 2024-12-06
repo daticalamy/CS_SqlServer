@@ -93,7 +93,7 @@ globalVariables:
   ###
   LB_SHOW_UPDATE_SQL: "F"
   LB_TEST_DRIFT: "T"
-  LB_TEST_ROLLBACKS: "T"
+  LB_TEST_ROLLBACKS: "F"
   LB_BASE_DIR: "."
   LIQUIBASE_COMMAND_TAG: "1.0"
 

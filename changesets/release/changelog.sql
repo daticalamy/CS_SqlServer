@@ -39,3 +39,27 @@ create table dbo.table_05 (
   sku varchar(30) 
 );
 --rollback drop table dbo.table_05
+
+--changeset amy_smith:01_cbae labels:cbae
+create table cbae.table_01 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table cbae.table_01
+
+--changeset amy_smith:01_lbae labels:lbae
+create table lbae.table_01 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table lbae.table_01
+
+--changeset amy_smith:01_pt labels:pt
+create table property_tax.table_01 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table property_tax.table_01
