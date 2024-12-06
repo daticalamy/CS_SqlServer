@@ -500,11 +500,11 @@
             Liquibase Checks Run Report
         </div>
         <div style="color: #414141; font-weight: lighter; border-bottom: 1px solid #0000001F; margin-bottom: 15px">
-            Report Generated 2024-12-06T20:37:31.073Z
+            Report Generated 2024-12-06T20:43:20.632Z
         </div>
         <div class="main__alert__title" style="color: white">
             <div class="main__alert__status">
-                0 INFO DETECTED!
+                3 INFO DETECTED!
             </div>
             <div class="main__alert__icon">
                                 <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"
@@ -548,10 +548,10 @@
                                     0
                                 </td>
                                 <td>
-                                    0
+                                    3
                                 </td>
                                 <td>
-                                    0
+                                    3
                                 </td>
                             </tr>
                             <tr>
@@ -813,7 +813,113 @@
                         Details by Database
                     </div>
                     <div class="section__title__alt">
-                        
+                        3 INFO
+                    </div>
+                </div>
+                <div class="summary__accordion__item">
+                    <div class="summary__accordion__header">
+                        <div class="summary__accordion__title">
+                            <div>table_01</div>
+                        </div>
+                        <div class="summary__accordion__middle">Type: Table</div>
+                        <div class="summary__accordion__icons">
+                            <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"
+                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                                <path d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 8c-.414 0-.75.336-.75.75v5.5c0 .414.336.75.75.75s.75-.336.75-.75v-5.5c0-.414-.336-.75-.75-.75zm-.002-3c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1z"
+                                      fill-rule="nonzero" fill="blue"/>
+                            </svg>
+                            3
+                            <i class="summary__accordion__icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16.5901 8.295L12.0001 12.875L7.41006 8.295L6.00006 9.705L12.0001 15.705L18.0001 9.705L16.5901 8.295Z"
+                                          fill="black" fill-opacity="0.54"/>
+                                </svg>
+                            </i>
+                        </div>
+                    </div>
+                    <div class="summary__accordion__content">
+                        <div class="validation__accordion__container">
+                            <table class="validation__table">
+                            <tbody>
+                            <tr>
+                                <th>Check Severity & Name</th>
+                                <th>Check Settings File</th>
+                                <th>Customization</th>
+                                <th>Message</th>
+                            </tr>
+                            <tr>
+                                <td class="check__name">
+                                    <div class="details__check_name">
+                                        <div>
+                                            <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"
+                                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                                                <path d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 8c-.414 0-.75.336-.75.75v5.5c0 .414.336.75.75.75s.75-.336.75-.75v-5.5c0-.414-.336-.75-.75-.75zm-.002-3c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1z"
+                                                      fill-rule="nonzero" fill="blue"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div style="word-wrap: break-word">CheckTablesForIndex</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="check__parameters">
+                                    <div>policychecks/liquibase.checks-settings.conf</div>
+                                </td>
+                                <td class="check__parameters">
+                                        <div>&lt;none&gt;</div>
+                                </td>
+                                <td class="summary__accordion__content__description">Table LPL_BTR_DEV.CBAE.table_01 found without an index, which can lead to performance issues</td>
+                            </tr>
+                            <tr>
+                                <td class="check__name">
+                                    <div class="details__check_name">
+                                        <div>
+                                            <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"
+                                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                                                <path d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 8c-.414 0-.75.336-.75.75v5.5c0 .414.336.75.75.75s.75-.336.75-.75v-5.5c0-.414-.336-.75-.75-.75zm-.002-3c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1z"
+                                                      fill-rule="nonzero" fill="blue"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div style="word-wrap: break-word">CheckTablesForIndex</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="check__parameters">
+                                    <div>policychecks/liquibase.checks-settings.conf</div>
+                                </td>
+                                <td class="check__parameters">
+                                        <div>&lt;none&gt;</div>
+                                </td>
+                                <td class="summary__accordion__content__description">Table LPL_BTR_DEV.LBAE.table_01 found without an index, which can lead to performance issues</td>
+                            </tr>
+                            <tr>
+                                <td class="check__name">
+                                    <div class="details__check_name">
+                                        <div>
+                                            <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"
+                                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                                                <path d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 8c-.414 0-.75.336-.75.75v5.5c0 .414.336.75.75.75s.75-.336.75-.75v-5.5c0-.414-.336-.75-.75-.75zm-.002-3c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1z"
+                                                      fill-rule="nonzero" fill="blue"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div style="word-wrap: break-word">CheckTablesForIndex</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="check__parameters">
+                                    <div>policychecks/liquibase.checks-settings.conf</div>
+                                </td>
+                                <td class="check__parameters">
+                                        <div>&lt;none&gt;</div>
+                                </td>
+                                <td class="summary__accordion__content__description">Table LPL_BTR_DEV.PROPERTY_TAX.table_01 found without an index, which can lead to performance issues</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -822,6 +928,62 @@
             <div class="summary__accordion">
                 <div class="section__title" style="padding: 16px">
                     Details by Check
+                </div>
+                <div class="summary__accordion__item">
+                    <div class="summary__accordion__header">
+                        <div class="summary__accordion__title">
+                            <div>CheckTablesForIndex</div>
+                        </div>
+                        <div class="summary__accordion__middle">Scope: Database</div>
+                        <div class="validation__accordion__icons">
+                                            <svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"
+                                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                                                <path d="m12.002 2.005c5.518 0 9.998 4.48 9.998 9.997 0 5.518-4.48 9.998-9.998 9.998-5.517 0-9.997-4.48-9.997-9.998 0-5.517 4.48-9.997 9.997-9.997zm0 8c-.414 0-.75.336-.75.75v5.5c0 .414.336.75.75.75s.75-.336.75-.75v-5.5c0-.414-.336-.75-.75-.75zm-.002-3c-.552 0-1 .448-1 1s.448 1 1 1 1-.448 1-1-.448-1-1-1z"
+                                                      fill-rule="nonzero" fill="blue"/>
+                                            </svg>
+                                            <div class="summary__accordion__middle">Info</div>
+                        </div>
+                        <div class="summary__accordion__icons">
+                            <div class="summary__accordion__misc">Flagged 0 Changesets & 3 Database Objects</div>
+                            <i class="summary__accordion__icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16.5901 8.295L12.0001 12.875L7.41006 8.295L6.00006 9.705L12.0001 15.705L18.0001 9.705L16.5901 8.295Z"
+                                          fill="black" fill-opacity="0.54"/>
+                                </svg>
+                            </i>
+                        </div>
+                    </div>
+                    <div class="summary__accordion__content">
+                        <div class="validation__accordion__container">
+                            <table style="table-layout: fixed">
+                                <tbody>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Customization</th>
+                                    <th>Identifier</th>
+                                    <th>Type</th>
+                                </tr>
+                                <tr>
+                                    <td class="summary__accordion__content__description">This check scans your target URL database tables to find tables which do not have an associated index.</td>
+                                    <td>
+                                        <div>&lt;none&gt;</div>
+                                    </td>
+                                    <td colspan="2">
+                                        <div style="width: 100%; display: flex; flex-direction: column">
+                                            <div class="validation__accordion__identifiers">
+                                                <div class="validation__accordion__identifier__item" style="padding-left: 10px" >table_01</div>
+                                                <div class="validation__accordion__identifier__item" style="overflow: auto">
+                                                    <div>Table</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

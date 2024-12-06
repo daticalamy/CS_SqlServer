@@ -1,6 +1,6 @@
 {
   "snapshot": {
-    "created": "2024-12-06T20:37:38.752",
+    "created": "2024-12-06T20:43:26.929",
     "database": {
       "productVersion": "15.00.4312",
       "shortName": "mssql",
@@ -16,7 +16,7 @@
           "catalog": {
             "default": true,
             "name": "LPL_BTR_DEV",
-            "snapshotId": "d5e1375"
+            "snapshotId": "6266215"
           }
         }
       ]
@@ -28,8 +28,8 @@
             "name": "id",
             "nullable": true,
             "order": "1!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1377",
-            "snapshotId": "d5e1378",
+            "relation": "liquibase.structure.core.Table#6266217",
+            "snapshotId": "6266218",
             "type": {
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
               "dataTypeId": "4!{java.lang.Integer}",
@@ -44,8 +44,8 @@
             "name": "name",
             "nullable": true,
             "order": "2!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1377",
-            "snapshotId": "d5e1379",
+            "relation": "liquibase.structure.core.Table#6266217",
+            "snapshotId": "6266219",
             "type": {
               "columnSize": "50!{java.lang.Integer}",
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
@@ -61,8 +61,8 @@
             "name": "sku",
             "nullable": true,
             "order": "3!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1377",
-            "snapshotId": "d5e1380",
+            "relation": "liquibase.structure.core.Table#6266217",
+            "snapshotId": "6266220",
             "type": {
               "columnSize": "30!{java.lang.Integer}",
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
@@ -78,8 +78,8 @@
             "name": "id",
             "nullable": true,
             "order": "1!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1382",
-            "snapshotId": "d5e1383",
+            "relation": "liquibase.structure.core.Table#6266222",
+            "snapshotId": "6266223",
             "type": {
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
               "dataTypeId": "4!{java.lang.Integer}",
@@ -94,8 +94,8 @@
             "name": "name",
             "nullable": true,
             "order": "2!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1382",
-            "snapshotId": "d5e1384",
+            "relation": "liquibase.structure.core.Table#6266222",
+            "snapshotId": "6266224",
             "type": {
               "columnSize": "50!{java.lang.Integer}",
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
@@ -111,8 +111,8 @@
             "name": "sku",
             "nullable": true,
             "order": "3!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1382",
-            "snapshotId": "d5e1385",
+            "relation": "liquibase.structure.core.Table#6266222",
+            "snapshotId": "6266225",
             "type": {
               "columnSize": "30!{java.lang.Integer}",
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
@@ -128,8 +128,8 @@
             "name": "id",
             "nullable": true,
             "order": "1!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1387",
-            "snapshotId": "d5e1388",
+            "relation": "liquibase.structure.core.Table#6266227",
+            "snapshotId": "6266228",
             "type": {
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
               "dataTypeId": "4!{java.lang.Integer}",
@@ -144,8 +144,8 @@
             "name": "name",
             "nullable": true,
             "order": "2!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1387",
-            "snapshotId": "d5e1389",
+            "relation": "liquibase.structure.core.Table#6266227",
+            "snapshotId": "6266229",
             "type": {
               "columnSize": "50!{java.lang.Integer}",
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
@@ -161,8 +161,8 @@
             "name": "sku",
             "nullable": true,
             "order": "3!{java.lang.Integer}",
-            "relation": "liquibase.structure.core.Table#d5e1387",
-            "snapshotId": "d5e1390",
+            "relation": "liquibase.structure.core.Table#6266227",
+            "snapshotId": "6266230",
             "type": {
               "columnSize": "30!{java.lang.Integer}",
               "columnSizeUnit": "BYTE!{liquibase.structure.core.DataType$ColumnSizeUnit}",
@@ -177,23 +177,23 @@
       "liquibase.structure.core.Schema": [
         {
           "schema": {
-            "catalog": "liquibase.structure.core.Catalog#d5e1375",
+            "catalog": "liquibase.structure.core.Catalog#6266215",
             "name": "CBAE",
-            "snapshotId": "d5e1376"
+            "snapshotId": "6266216"
           }
         },
         {
           "schema": {
-            "catalog": "liquibase.structure.core.Catalog#d5e1375",
+            "catalog": "liquibase.structure.core.Catalog#6266215",
             "name": "LBAE",
-            "snapshotId": "d5e1381"
+            "snapshotId": "6266221"
           }
         },
         {
           "schema": {
-            "catalog": "liquibase.structure.core.Catalog#d5e1375",
+            "catalog": "liquibase.structure.core.Catalog#6266215",
             "name": "PROPERTY_TAX",
-            "snapshotId": "d5e1386"
+            "snapshotId": "6266226"
           }
         }
       ]
@@ -202,43 +202,43 @@
         {
           "table": {
             "columns": [
-              "liquibase.structure.core.Column#d5e1378",
-              "liquibase.structure.core.Column#d5e1379",
-              "liquibase.structure.core.Column#d5e1380"
+              "liquibase.structure.core.Column#6266218",
+              "liquibase.structure.core.Column#6266219",
+              "liquibase.structure.core.Column#6266220"
             ]
             ,
             "default_tablespace": false,
             "name": "table_01",
-            "schema": "liquibase.structure.core.Schema#d5e1376",
-            "snapshotId": "d5e1377"
+            "schema": "liquibase.structure.core.Schema#6266216",
+            "snapshotId": "6266217"
           }
         },
         {
           "table": {
             "columns": [
-              "liquibase.structure.core.Column#d5e1383",
-              "liquibase.structure.core.Column#d5e1384",
-              "liquibase.structure.core.Column#d5e1385"
+              "liquibase.structure.core.Column#6266223",
+              "liquibase.structure.core.Column#6266224",
+              "liquibase.structure.core.Column#6266225"
             ]
             ,
             "default_tablespace": false,
             "name": "table_01",
-            "schema": "liquibase.structure.core.Schema#d5e1381",
-            "snapshotId": "d5e1382"
+            "schema": "liquibase.structure.core.Schema#6266221",
+            "snapshotId": "6266222"
           }
         },
         {
           "table": {
             "columns": [
-              "liquibase.structure.core.Column#d5e1388",
-              "liquibase.structure.core.Column#d5e1389",
-              "liquibase.structure.core.Column#d5e1390"
+              "liquibase.structure.core.Column#6266228",
+              "liquibase.structure.core.Column#6266229",
+              "liquibase.structure.core.Column#6266230"
             ]
             ,
             "default_tablespace": false,
             "name": "table_01",
-            "schema": "liquibase.structure.core.Schema#d5e1386",
-            "snapshotId": "d5e1387"
+            "schema": "liquibase.structure.core.Schema#6266226",
+            "snapshotId": "6266227"
           }
         }
       ]
