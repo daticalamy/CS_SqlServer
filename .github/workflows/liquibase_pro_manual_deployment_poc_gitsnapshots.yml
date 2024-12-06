@@ -132,6 +132,7 @@ jobs:
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log  
 
       - name: Check-in New Snapshot
+        if: always()
         run: |   
           git status
           git add reports/*
