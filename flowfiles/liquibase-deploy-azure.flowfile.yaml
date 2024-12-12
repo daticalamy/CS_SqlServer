@@ -1,0 +1,100 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  JIRA: ${JIRA:-null}
+  ENV: ${ENVIRONMENT}
+  CLIENT_ID: ${AZURE_CREDS_USR}
+  CLIENT_SECRET: ${AZURE_CREDS_PSW}
+  TENANT_ID: ${AZURE_TENANT_ID}
+  SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}
+  STORAGE_ACCT: ${AZURE_STORAGE_ACCOUNT}
+  CONTAINER: ${AZURE_CONTAINER_NAME}
+
+stages:
+  
+  AzureDownload:
+    # Download existing snapshot from Azure Storage
+    actions:
+      - type: shell
+        command: | 
+          az login --service-principal -u ${CLIENT_ID} -p ${CLIENT_SECRET} -t ${TENANT_ID}
+          az account set --subscription ${SUBSCRIPTION_ID}
+          mkdir -p snapshots
+          az storage blob download --account-name ${STORAGE_ACCT} --container-name ${CONTAINER} --name ${ENV}-snapshot.json --file ${WORKSPACE}/snapshots/${ENV}-snapshot.json
+          az logout
+
+  Drift-Detection:
+    # Check if manual updates were made to the environment since last deployment
+    actions:
+      - type: liquibase
+        command: diff
+        cmdArgs: { drift-severity: "1", report-path: "reports", referenceURL: "offline:postgres?snapshot=snapshots/${ENV}-snapshot.json", format: json }
+        
+  Validation:
+    actions: 
+      - type: liquibase
+        command: validate
+
+  Checks-Changelog:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: changelog}
+        globalArgs: { reports-name: "checks-report-deploy-${ENV}-changelog.html" }
+
+  Status:
+    actions:
+      - type: liquibase
+        command: status
+        cmdArgs: {verbose: true, context-filter: "${ENV}"}
+
+  Update-SQL:
+    actions:
+      - type: liquibase
+        command: update-sql
+        cmdArgs: {context-filter: "${ENV}"}
+
+  Update:
+    actions:
+      - type: liquibase
+        command: update
+        cmdArgs: {context-filter: "${ENV}"}
+        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
+
+  Checks-Database:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: database}
+        globalArgs: { reports-name: "checks-report-deploy-${ENV}-database.html" }
+        
+  New-Snapshot:
+    actions:
+      - type: liquibase
+        command: snapshot
+        cmdArgs: 
+          {  snapshot-format: json }
+        globalArgs: { output-file: 'snapshots/${ENV}-snapshot.json' }
+        
+      - type: shell
+        command: echo 'Snapshot created as snapshots/${ENV}-snapshot.json'
+        
+  AzureUpload:
+    actions:
+      - type: shell
+        command: | 
+          az login --service-principal -u ${CLIENT_ID} -p ${CLIENT_SECRET} -t ${TENANT_ID}
+          az account set --subscription ${SUBSCRIPTION_ID}
+          az storage container create --account-name ${STORAGE_ACCT} --name ${CONTAINER}
+          az storage blob upload-batch --destination ${CONTAINER} --source ./snapshots --account-name ${STORAGE_ACCT} --overwrite
+          az logout
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: history
