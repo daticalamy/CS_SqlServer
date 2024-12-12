@@ -4,7 +4,7 @@
 ##########  Download at https://learn.microsoft.com/en-us/cli/azure/install-azure-cli   ##########
 
 globalVariables:
-  ENV: ${ENVIRONMENT:-DEV}
+  ENV: ${LB_ENVIRONMENT}
   CLIENT_ID: ${AZURE_CREDS_USR}
   CLIENT_SECRET: ${AZURE_CREDS_PSW}
   TENANT_ID: ${AZURE_TENANT_ID}
