@@ -4,7 +4,7 @@
 #  Policy checks.
 #####################################################################
 name: 'Azure Snapshot Flow'
-run-name: Deployment of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
+run-name: Snapshot of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
 permissions:
   contents: write
@@ -14,7 +14,7 @@ on:
     inputs:
       # The type 'environment' will automatically pull in the environments created in Settings->Environments
       environment:
-        description: 'Environment to deploy to'
+        description: 'Environment for snapshot'
         type: environment
         required: true
       # For more info on log level, see: https://docs.liquibase.com/parameters/log-level.html
@@ -41,10 +41,6 @@ env:
   # To ensure the correct config gets located first, keep "." at the end of this path.
   # See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html
   LIQUIBASE_SEARCH_PATH: "liquibase-process,."
-
-  # Location of the Custom Policy Checks settings file from the Liquibase Configuration Repo.
-  # See https://docs.liquibase.com/liquibase-pro/policy-checks/custom-policy-checks/home.html
-  LIQUIBASE_COMMAND_CHECKS_SETTINGS_FILE: "policychecks/liquibase.checks-settings.conf"
 
   # Store the Liquibase Pro License key in a Github Action Repository Secret. The
   # same license key is used for all executions, so it is tracked at the repository level
@@ -74,8 +70,10 @@ env:
   LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
 
   # Azure settings
-  AZURE_CONTAINER_NAME: snapshots
-  
+  AZURE_CONTAINER_NAME: github-snapshot
+  AZURE_SUBSCRIPTION_ID: a38e082e-9dfc-49dd-a5e8-9d13e908b010
+  AZURE_TENANT_ID: fd6a63a1-3f33-4f34-802a-06ae5ad2217a
+  AZURE_STORAGE_ACCOUNT: cssnapshots  
 
 jobs:
   ####################################################################
