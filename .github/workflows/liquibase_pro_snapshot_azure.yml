@@ -70,7 +70,7 @@ env:
   LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
 
   # Azure settings
-  AZURE_CONTAINER_NAME: github-snapshot
+  AZURE_CONTAINER_NAME: github-snapshot-azcopy
   AZURE_SUBSCRIPTION_ID: a38e082e-9dfc-49dd-a5e8-9d13e908b010
   AZURE_TENANT_ID: fd6a63a1-3f33-4f34-802a-06ae5ad2217a
   AZURE_STORAGE_ACCOUNT: cssnapshots  
@@ -139,13 +139,24 @@ jobs:
         run: | 
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
           
-      # Try uploading outside Flow
-      - name: Upload snapshot
+      # Use Azure Storage Blob Upload
+#      - name: Upload snapshot
+#        run: | 
+#          az account set --subscription ${{ env.AZURE_SUBSCRIPTION_ID }}
+#          az storage container create --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --name ${{ env.AZURE_CONTAINER_NAME }}
+#          az storage blob upload-batch --destination ${{ env.AZURE_CONTAINER_NAME }} --source ./snapshots --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --overwrite
+#          az logout
+          
+      # Use azcopy for Azure Storage
+      - name: Copy file to Azure Blob Storage
+        env: 
+          AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
+          AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
+          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+          AZCOPY_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
         run: | 
-          az account set --subscription ${{ env.AZURE_SUBSCRIPTION_ID }}
-          az storage container create --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --name ${{ env.AZURE_CONTAINER_NAME }}
-          az storage blob upload-batch --destination ${{ env.AZURE_CONTAINER_NAME }} --source ./snapshots --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --overwrite
-          az logout
+          azcopy cp `
+            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json"
           
       - name: Create Reports Artifact
         if: always()
