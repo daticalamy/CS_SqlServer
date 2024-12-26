@@ -148,7 +148,7 @@ jobs:
 #          az logout
           
       # Use azcopy for Azure Storage
-      - name: Copy file to Azure Blob Storage
+      - name: Copy file to Azure Blob
         env: 
           AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
           AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
@@ -156,7 +156,7 @@ jobs:
           AZCOPY_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
         run: | 
           azcopy cp `
-            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json"
+            ${{ github.workspace }}\snapshots\DEV-snapshot.json "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json"
           
       - name: Create Reports Artifact
         if: always()
