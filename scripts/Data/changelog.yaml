@@ -1,0 +1,364 @@
+databaseChangeLog:
+- changeSet:
+    id: 1733845531324-1
+    author: michael.bodkin.-nd (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: core_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: creation_date
+            type: datetime(0)
+        - column:
+            name: expiration_date
+            type: datetime(0)
+        - column:
+            name: opsheet_id
+            type: VARCHAR(50)
+        - column:
+            name: parent_core_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: entity_name
+            type: VARCHAR(500)
+        - column:
+            constraints:
+              nullable: false
+            name: entity_short_name
+            type: VARCHAR(100)
+        - column:
+            constraints:
+              nullable: false
+            name: region_flag
+            type: TINYINT(3)
+        - column:
+            constraints:
+              nullable: false
+            name: destination_flag
+            type: TINYINT(3)
+        - column:
+            name: region_core_id
+            type: BIGINT
+        - column:
+            name: destination_core_id
+            type: BIGINT
+        - column:
+            name: region_name
+            type: VARCHAR(500)
+        - column:
+            name: region_short_name
+            type: VARCHAR(100)
+        - column:
+            name: destination_name
+            type: VARCHAR(500)
+        - column:
+            name: destination_short_name
+            type: VARCHAR(100)
+        - column:
+            constraints:
+              nullable: false
+            name: last_updated_on
+            type: datetime(0)
+        - column:
+            constraints:
+              nullable: false
+            name: last_updated_by
+            type: VARCHAR(50)
+        tableName: table1
+- changeSet:
+    id: 1733845531324-2
+    author: michael.bodkin.-nd (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: core_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: lane_id
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: lane_name
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: lane_type
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: lane_classification
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: lane_display_order
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: effective_date
+            type: datetime(0)
+        - column:
+            name: expiration_date
+            type: datetime(0)
+        - column:
+            constraints:
+              nullable: false
+            name: updated_by
+            type: VARCHAR(50)
+        - column:
+            name: updated_on
+            type: datetime(0)
+        tableName: table2
+- changeSet:
+    id: 1733845531324-3
+    author: michael.bodkin.-nd (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: lane_config_count_id
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: lane_count_sum_lane_mapping_id
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: calculation
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: calculated_from_lane_id
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: calculation_order
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: effective_date
+            type: datetime(0)
+        - column:
+            name: expiration_date
+            type: datetime(0)
+        - column:
+            constraints:
+              nullable: false
+            name: updated_by
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: updated_on
+            type: datetime(0)
+        tableName: table3
+- changeSet:
+    id: 1733845531324-4
+    author: michael.bodkin.-nd (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: minute_number
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: minute
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 5_min_time_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 5_min_time_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 5_min_number_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 5_min_number_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 10_min_time_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 10_min_time_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 10_min_number_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 10_min_number_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 15_min_time_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 15_min_time_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 15_min_number_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 15_min_number_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 20_min_time_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 20_min_time_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 20_min_number_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 20_min_number_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 30_min_time_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 30_min_time_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 30_min_number_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 30_min_number_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 60_min_time_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 60_min_time_end
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 60_min_number_begin
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: 60_min_number_end
+            type: VARCHAR(50)
+        tableName: table4
+- changeSet:
+    id: 1733845531324-5
+    author: michael.bodkin.-nd (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: core_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: business_date
+            type: datetime(0)
+        - column:
+            constraints:
+              nullable: false
+            name: schedule_id
+            type: VARCHAR(50)
+        - column:
+            name: schedule_minute_id
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: minute_number
+            type: INT
+        - column:
+            constraints:
+              nullable: false
+            name: lane_id
+            type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: guest_count
+            type: BIGINT
+        tableName: table5
+- changeSet:
+    id: 1733845531324-6
+    author: michael.bodkin.-nd (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: lane_id, business_date, minute_number
+        constraintName: UQ_min_lane_guest_counts_sum_lane_id_business_date_min_number
+        tableName: table5
+

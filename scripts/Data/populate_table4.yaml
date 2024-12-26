@@ -1,0 +1,15 @@
+databaseChangeLog:
+-  changeSet:
+     id: michael.bodkin.-nd:1
+     author: michael.bodkin.-nd
+     changes:
+     -  loadData:
+         commentLineStartsWith:  //
+         encoding:  UTF-8
+         file:  ./table4.csv
+         quotchar:  ''''
+         relativeToChangelogFile:  true
+         schemaName:  dbo 
+         separator:  ','
+         tableName:  table4
+         usePreparedStatements:  true

@@ -14,5 +14,11 @@ databaseChangeLog:
       path: scripts/Views
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
-      
-      
+
+  - include:
+      file: scripts/Data/changelog.yaml      
+      relativeToChangelogFile: true  
+
+  - include:
+      file: scripts/Data/populate_table4.yaml      
+      relativeToChangelogFile: true
