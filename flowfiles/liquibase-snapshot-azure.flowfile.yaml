@@ -9,6 +9,8 @@ globalVariables:
   SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}
   STORAGE_ACCT: ${AZURE_STORAGE_ACCOUNT}
   CONTAINER: ${AZURE_CONTAINER_NAME}
+#  CLIENT_ID: ${AZURE_CREDS_USR}
+#  CLIENT_SECRET: ${AZURE_CREDS_PSW}
   
 stages:
   Snapshot:
@@ -22,11 +24,12 @@ stages:
       - type: shell
         command: echo 'Snapshot created as snapshots/${ENV}-snapshot.json'
 
-  AzureUpload:
-    actions:
-      - type: shell
-        command: | 
-          az account set --subscription ${SUBSCRIPTION_ID}
-          az storage container create --account-name ${STORAGE_ACCT} --name ${CONTAINER}
-          az storage blob upload-batch --destination ${CONTAINER} --source ./snapshots --account-name ${STORAGE_ACCT} --overwrite
-          az logout
+#  AzureUpload:
+#    actions:
+#      - type: shell
+#        command: |
+#          az login --service-principal -u ${CLIENT_ID} -p ${CLIENT_SECRET} -t ${TENANT_ID}        
+#          az account set --subscription ${SUBSCRIPTION_ID}
+#          az storage container create --account-name ${STORAGE_ACCT} --name ${CONTAINER}
+#          az storage blob upload-batch --destination ${CONTAINER} --source ./snapshots --account-name ${STORAGE_ACCT} --overwrite
+#          az logout

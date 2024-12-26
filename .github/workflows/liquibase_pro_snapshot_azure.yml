@@ -140,11 +140,11 @@ jobs:
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
           
       # Try uploading outside Flow
-      - name: Upload outside of flow
+      - name: Upload snapshot
         run: | 
           az account set --subscription ${{ env.AZURE_SUBSCRIPTION_ID }}
-          az storage container create --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --name github-snapshot2
-          az storage blob upload-batch --destination github-snapshot2 --source ./snapshots --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --overwrite
+          az storage container create --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --name ${{ env.AZURE_CONTAINER_NAME }}
+          az storage blob upload-batch --destination ${{ env.AZURE_CONTAINER_NAME }} --source ./snapshots --account-name ${{ env.AZURE_STORAGE_ACCOUNT }} --overwrite
           az logout
           
       - name: Create Reports Artifact
