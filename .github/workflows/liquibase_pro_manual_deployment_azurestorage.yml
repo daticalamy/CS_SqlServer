@@ -149,7 +149,7 @@ jobs:
           AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
         run: | 
           azcopy cp `
-            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }} ${{ github.workspace }}\snapshots\DEV-snapshot.json"
+            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}" ${{ github.workspace }}\snapshots\DEV-snapshot.json
 
       # Execute the Flow file
 #      - name: Run flow
