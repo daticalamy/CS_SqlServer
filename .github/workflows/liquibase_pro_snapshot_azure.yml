@@ -73,7 +73,8 @@ env:
   AZURE_CONTAINER_NAME: github-snapshot-azcopy
   AZURE_SUBSCRIPTION_ID: a38e082e-9dfc-49dd-a5e8-9d13e908b010
   AZURE_TENANT_ID: fd6a63a1-3f33-4f34-802a-06ae5ad2217a
-  AZURE_STORAGE_ACCOUNT: cssnapshots  
+  AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}    
 
 jobs:
   ####################################################################
@@ -154,10 +155,10 @@ jobs:
           AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
           AZCOPY_AUTO_LOGIN_TYPE: AZCLI
           AZCOPY_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
         run: | 
-          az account show
           azcopy cp `
-            ${{ github.workspace }}\snapshots\DEV-snapshot.json "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json"
+            ${{ github.workspace }}\snapshots\DEV-snapshot.json "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}"
           
       - name: Create Reports Artifact
         if: always()
