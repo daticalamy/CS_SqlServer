@@ -76,7 +76,7 @@ globalVariables:
   ### Files
   ###
   DIFF_FILE: "Diff_${LB_ENVIRONMENT}.json"
-  SNAPSHOT_FILE: "snapshots/Snapshot_${LB_ENVIRONMENT}.json"
+  SNAPSHOT_FILE: "snapshots/${LB_ENVIRONMENT}-snapshot.json"
   ###
   ### Operational Reports
   ### Liquibase Pro creates operational reports for certain commands
@@ -146,7 +146,7 @@ stages:
         if: "exists('${SNAPSHOT_FILE}', false) && ${LB_TEST_DRIFT} == 'T'"
         command: diff
         globalArgs: { include-relations-for-computed-columns: "true", outputfile: "${LB_BASE_DIR}/snapshots/${DIFF_FILE}" }
-        cmdArgs: { drift-severity: "0", report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${DRIFT_REPORT}", referenceURL: "offline:mssql?snapshot=${SNAPSHOT_FILE}", format: json }
+        cmdArgs: { drift-severity: "1", report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${DRIFT_REPORT}", referenceURL: "offline:mssql?snapshot=${SNAPSHOT_FILE}", format: json }
       #
       # Tag database
       # https://docs.liquibase.com/commands/utility/tag.html

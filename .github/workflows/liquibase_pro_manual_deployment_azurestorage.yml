@@ -152,9 +152,9 @@ jobs:
             "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}" ${{ github.workspace }}\snapshots\DEV-snapshot.json
 
       # Execute the Flow file
-#      - name: Run flow
-#        run: |
-#          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
+      - name: Run flow
+        run: |
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
           
       - name: Create Reports Artifact
         if: always()
