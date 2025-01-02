@@ -166,7 +166,7 @@ jobs:
           AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
           AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
           AZCOPY_AUTO_LOGIN_TYPE: AZCLI
-          AZCOPY_TENANT_ID: 00d0a089-2a46-4805-a064-6f4eb32231f0
+          AZCOPY_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
         run: | 
           azcopy cp `
             ${{ github.workspace }}\snapshots\DEV-snapshot.json "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot2.json"
