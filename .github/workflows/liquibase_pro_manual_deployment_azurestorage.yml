@@ -158,6 +158,7 @@ jobs:
 
       # Use azcopy to reload new Snapshot back to Azure Storage
       - name: Copy file to Azure Blob
+        if: always()
         env: 
           AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
           AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
