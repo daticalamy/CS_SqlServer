@@ -149,12 +149,24 @@ jobs:
           AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
         run: | 
           azcopy cp `
-            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/DEV-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}" ${{ github.workspace }}\snapshots\DEV-snapshot.json
+            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/${{ env.LB_ENVIRONMENT }}-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}" ${{ github.workspace }}\snapshots\${{ env.LB_ENVIRONMENT }}-snapshot.json
 
       # Execute the Flow file
       - name: Run flow
         run: |
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
+
+      # Use azcopy to reload new Snapshot back to Azure Storage
+      - name: Copy file to Azure Blob
+        env: 
+          AZURE_STORAGE_ACCOUNT: ${{ env.AZURE_STORAGE_ACCOUNT }}
+          AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
+          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+          AZCOPY_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
+          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+        run: | 
+          azcopy cp `
+            ${{ github.workspace }}\snapshots\${{ env.LB_ENVIRONMENT }}-snapshot.json "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/${{ env.LB_ENVIRONMENT }}-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}"
           
       - name: Create Reports Artifact
         if: always()
