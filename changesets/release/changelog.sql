@@ -81,3 +81,11 @@ ON property_tax.table_02 (sku);
 ALTER TABLE property_tax.table_02 
 ADD column_b VARCHAR(20) NULL, column_c INT NULL ;
 --rollback ALTER TABLE property_tax.table_02 DROP COLUMN column_b; ALTER TABLE property_tax.table_02 DROP COLUMN column_c;
+
+--changeset amy_smith:03_pt context:!PROD
+create table property_tax.table_03 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table property_tax.table_03

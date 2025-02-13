@@ -116,4 +116,4 @@ jobs:
     steps:
       - name: Run update
         run: |
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} update --label-filter=${{ inputs.labels }} --logfile=logs/liquibase.log
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} update --context-filter=${{ inputs.environment }} --logfile=logs/liquibase.log
