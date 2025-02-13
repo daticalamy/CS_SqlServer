@@ -63,3 +63,11 @@ create table property_tax.table_01 (
   sku varchar(30) 
 );
 --rollback drop table property_tax.table_01
+
+--changeset amy_smith:02_pt labels:pt
+create table property_tax.table_02 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table property_tax.table_02
