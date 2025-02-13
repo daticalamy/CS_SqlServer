@@ -71,3 +71,13 @@ create table property_tax.table_02 (
   sku varchar(30) 
 );
 --rollback drop table property_tax.table_02
+
+--changeset amy_smith:02_pt_index labels:hotfix1
+CREATE UNIQUE INDEX table_02_pt_sku
+ON property_tax.table_02 (sku);
+--rollback DROP INDEX table_02_pt_sku ON property_tax.table_02;
+
+--changeset amy_smith:02_pt_newcols
+ALTER TABLE property_tax.table_02 
+ADD column_b VARCHAR(20) NULL, column_c INT NULL ;
+--rollback ALTER TABLE property_tax.table_02 DROP COLUMN column_b; ALTER TABLE property_tax.table_02 DROP COLUMN column_c;
