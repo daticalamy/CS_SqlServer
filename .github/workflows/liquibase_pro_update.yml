@@ -17,7 +17,7 @@ on:
       labels:
         description: 'Run update for only these labels'
         type: string
-        required: true
+        required: false
       # For more info on log level, see: https://docs.liquibase.com/parameters/log-level.html
       log-level:
         description: 'Liquibase log level'
