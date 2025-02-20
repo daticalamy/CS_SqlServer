@@ -34,6 +34,9 @@ env:
   # the Liquibase Configuration Repo which orchestrates the database changes.
   # See https://docs.liquibase.com/commands/flow/flow.html
   FLOW_FILE: "flowfiles/liquibase-update.yaml"
+
+  # Used by POC Flow File
+  LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
   
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
