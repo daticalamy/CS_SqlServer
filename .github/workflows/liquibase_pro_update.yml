@@ -30,6 +30,11 @@ on:
 #  Set up the environment
 #####################################################################
 env:
+  # The top level Flow File that gets cloned into the workspace from
+  # the Liquibase Configuration Repo which orchestrates the database changes.
+  # See https://docs.liquibase.com/commands/flow/flow.html
+  FLOW_FILE: "flowfiles/liquibase-update.yaml"
+  
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
   # See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html
@@ -114,6 +119,7 @@ jobs:
     environment: ${{needs.init.outputs.environment}}
 
     steps:
-      - name: Run update
+      # Execute the Update Flow file
+      - name: Run update flow
         run: |
-          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} update --context-filter=${{ inputs.environment }} --logfile=logs/liquibase.log
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
