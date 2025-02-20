@@ -3,7 +3,7 @@
 
 globalVariables:
   ENV: "${LB_ENVIRONMENT}"
-  LABELS: "${labels}"
+  LABELS: "${LB_LABELS}"
 
 stages:
   ChangeLogSync:

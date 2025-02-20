@@ -37,6 +37,7 @@ env:
 
   # Used by POC Flow File
   LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
+  LB_LABELS: ${{ inputs.labels }}
 
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
