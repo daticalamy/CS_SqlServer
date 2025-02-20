@@ -1,6 +1,8 @@
 --liquibase formatted sql
 
---changeset amy_smith:01 context:!PROD
+--changeset amy_smith:01
+--preconditions onFail:MARK_RAN 
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'table_12'
 create table dbo.table_12 (
   id int, 
   name varchar(50),

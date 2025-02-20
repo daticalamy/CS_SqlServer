@@ -97,3 +97,13 @@ create table property_tax.table_04 (
   sku varchar(30) 
 );
 --rollback drop table property_tax.table_04
+
+--changeset amy_smith:05_pt
+--preconditions onFail:MARK_RAN 
+--precondition-sql-check expectedResult:0 SELECT COUNT(*) FROM property_tax.table_05
+create table property_tax.table_05 (
+  id int, 
+  name varchar(50),
+  sku varchar(30) 
+);
+--rollback drop table property_tax.table_05

@@ -1,0 +1,23 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: "${LB_ENVIRONMENT}"
+  LABELS: "${labels}"
+
+stages:
+  ChangeLogSync:
+    actions:
+      - type: liquibase
+        command: changelog-sync
+        cmdArgs: {label-filter: "${LABELS}"}
+        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: history
