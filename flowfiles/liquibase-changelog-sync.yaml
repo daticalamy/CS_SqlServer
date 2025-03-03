@@ -2,7 +2,6 @@
 ##########  learn more http://docs.liquibase.com/flow  ##########
 
 globalVariables:
-  ENV: "${LB_ENVIRONMENT}"
   LABELS: "${LB_LABELS}"
 
 stages:
@@ -11,7 +10,6 @@ stages:
       - type: liquibase
         command: changelog-sync
         cmdArgs: {label-filter: "${LABELS}"}
-        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
 
 ## The endStage ALWAYS RUNS. 
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.

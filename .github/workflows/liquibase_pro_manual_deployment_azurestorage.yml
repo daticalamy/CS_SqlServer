@@ -3,7 +3,7 @@
 #  changes using Liquibase Pro, Liquibase Pro Flows, and Custom
 #  Policy checks.
 #####################################################################
-name: 'Liquibase Pro Manual Deployment with Azure Storage'
+name: 'Manual Deploy with Azure Storage - POC'
 run-name: Deployment of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
 permissions:

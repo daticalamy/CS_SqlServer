@@ -3,7 +3,7 @@
 #  changes using Liquibase Pro, Liquibase Pro Flows, and Custom
 #  Policy checks.
 #####################################################################
-name: 'Liquibase Pro Deployment Workflow (POC Flow)'
+name: 'Manual Deploy with GIT Storage - POC'
 run-name: Deployment of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
 permissions:
