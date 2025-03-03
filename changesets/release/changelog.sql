@@ -72,11 +72,6 @@ create table property_tax.table_02 (
 );
 --rollback drop table property_tax.table_02
 
---changeset amy_smith:02_pt_index labels:hotfix1
-CREATE UNIQUE INDEX table_02_pt_sku
-ON property_tax.table_02 (sku);
---rollback DROP INDEX table_02_pt_sku ON property_tax.table_02;
-
 --changeset amy_smith:03_pt context:!PROD
 create table property_tax.table_03 (
   id int, 
