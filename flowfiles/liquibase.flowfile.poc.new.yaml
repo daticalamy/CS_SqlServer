@@ -166,16 +166,20 @@ stages:
         command: update-sql
 
       #
-      # Update database
-      # https://docs.liquibase.com/commands/update/update.html
+      # Update database (with rollback testing)
+      # https://docs.liquibase.com/commands/update/update-testing-rollback.html
       #
       - type: liquibase
-        if: "!CONTAINS('${LB_ENVIRONMENT}', 'production')"
+        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
         command: update-testing-rollback
         cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
-        
+
+      #
+      # Update database
+      # https://docs.liquibase.com/commands/update/update.html
+      #        
       - type: liquibase
-        if: "CONTAINS('${LB_ENVIRONMENT}', 'production')"
+        if: "${LB_TEST_ROLLBACKS} == 'F' || CONTAINS('${LB_ENVIRONMENT}', 'production')"
         command: update
         cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
         
