@@ -161,6 +161,9 @@ stages:
       # SQL executed can be found in the update report
       # https://docs.liquibase.com/commands/update/update-sql.html
       #
+
+  Updates:
+    actions:
       - type: liquibase
         if: "${LB_SHOW_UPDATE_SQL} == 'T'"
         command: update-sql
