@@ -162,7 +162,7 @@ stages:
       # https://docs.liquibase.com/commands/update/update-sql.html
       #
 
-  Updates:
+  Updates1:
     actions:
       - type: liquibase
         if: "${LB_SHOW_UPDATE_SQL} == 'T'"
@@ -191,6 +191,9 @@ stages:
       - type: liquibase
         command: rollback
         cmdArgs: { tag: "${LIQUIBASE_COMMAND_TAG}" }
+
+  Updates2:
+    actions:
       #
       # Test rollbacks
       # Typically non-production only
