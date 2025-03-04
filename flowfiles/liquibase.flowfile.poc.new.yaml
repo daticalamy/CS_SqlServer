@@ -178,7 +178,6 @@ stages:
       # https://docs.liquibase.com/commands/rollback/rollback-sql.html
       #
       - type: liquibase
-        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
         command: rollback-sql
         cmdArgs: { tag: "${LIQUIBASE_COMMAND_TAG}" }
       #
@@ -187,7 +186,6 @@ stages:
       # https://docs.liquibase.com/commands/rollback/rollback-by-tag.html
       #
       - type: liquibase
-        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
         command: rollback
         cmdArgs: { tag: "${LIQUIBASE_COMMAND_TAG}" }
       #
@@ -196,7 +194,6 @@ stages:
       # https://docs.liquibase.com/commands/update/update.html
       #
       - type: liquibase
-        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
         command: update
         cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
       #
