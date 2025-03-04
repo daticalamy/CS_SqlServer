@@ -93,9 +93,9 @@ globalVariables:
   ###
   LB_SHOW_UPDATE_SQL: "F"
   LB_TEST_DRIFT: "T"
-  LB_TEST_ROLLBACKS: "T"
+  LB_TEST_ROLLBACKS: "F"
   LB_BASE_DIR: "."
-  LIQUIBASE_COMMAND_TAG: "2.0"
+  LIQUIBASE_COMMAND_TAG: "${CI_JOB_ID}"
  
 ###
 ### Stages to execute
