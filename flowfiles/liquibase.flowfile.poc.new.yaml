@@ -95,7 +95,7 @@ globalVariables:
   LB_TEST_DRIFT: "T"
   LB_TEST_ROLLBACKS: "F"
   LB_BASE_DIR: "."
-  LIQUIBASE_COMMAND_TAG: "${CI_JOB_ID}"
+  LIQUIBASE_COMMAND_TAG: "${LIQUIBASE_COMMAND_TAG}"
  
 ###
 ### Stages to execute
