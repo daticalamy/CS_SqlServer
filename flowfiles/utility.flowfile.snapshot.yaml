@@ -1,0 +1,13 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: "${LB_ENVIRONMENT}"
+
+stages:
+  Update:
+    actions:
+      - type: liquibase
+        command: snapshot
+        cmdArgs: {context-filter: "${ENV}"}
+        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
