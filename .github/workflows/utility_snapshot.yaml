@@ -114,8 +114,7 @@ jobs:
 
   ##########################################################################################
   #  Perform the Database change control operations specified.
-  #  In this case, find undeployed changes matching the labels and update the DATABASECHANGELOG
-  #  to mark them as deployed.
+  #  In this case, perform snapshot of selected environment.
   ###########################################################################################
   liquibase-snapshot:
     name: Database Snapshot
@@ -131,8 +130,8 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}    
     
-      # Execute the Update Flow file
-      - name: Run update flow
+      # Execute the Snapshot Flow file
+      - name: Run snapshot flow
         run: |
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
 

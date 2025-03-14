@@ -2,12 +2,20 @@
 ##########  learn more http://docs.liquibase.com/flow  ##########
 
 globalVariables:
-  ENV: "${LB_ENVIRONMENT}"
+  ENV: ${LB_ENVIRONMENT}
+  TENANT_ID: ${AZURE_TENANT_ID}
+  SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}
+  STORAGE_ACCT: ${AZURE_STORAGE_ACCOUNT}
+  CONTAINER: ${AZURE_CONTAINER_NAME}
 
 stages:
-  Update:
+  Snapshot:
     actions:
       - type: liquibase
         command: snapshot
-        cmdArgs: {context-filter: "${ENV}"}
-        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
+        cmdArgs: 
+          {  snapshot-format: json }
+        globalArgs: { output-file: 'snapshots/${ENV}-snapshot.json' }
+        
+      - type: shell
+        command: echo 'Snapshot created as snapshots/${ENV}-snapshot.json'
