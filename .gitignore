@@ -2,3 +2,4 @@ logs/
 liquibase.properties
 win_reports/
 reports/
+generatechangelogs/
