@@ -1,0 +1,20 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: ${LB_ENVIRONMENT}
+  TENANT_ID: ${AZURE_TENANT_ID}
+  SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}
+  STORAGE_ACCT: ${AZURE_STORAGE_ACCOUNT}
+  CONTAINER: ${AZURE_CONTAINER_NAME}
+
+stages:
+  Snapshot:
+    actions:
+      - type: liquibase
+        command: generate-changelog
+        cmdArgs: 
+          {  changelog-file: 'snapshots/${ENV}-changelog.xml' }
+        
+      - type: shell
+        command: echo 'Generate Changelog created as snapshots/${ENV}-changelog.xml'
