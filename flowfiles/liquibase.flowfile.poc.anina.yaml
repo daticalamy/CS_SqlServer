@@ -95,7 +95,7 @@ globalVariables:
   LB_TEST_DRIFT: "T"
   LB_TEST_ROLLBACKS: "T"
   LB_BASE_DIR: "."
-  LIQUIBASE_COMMAND_TAG: "${LIQUIBASE_COMMAND_TAG}"
+  LIQUIBASE_COMMAND_TAG: "1.0"
  
 ###
 ### Stages to execute
@@ -164,25 +164,41 @@ stages:
       - type: liquibase
         if: "${LB_SHOW_UPDATE_SQL} == 'T'"
         command: update-sql
-
-      #
-      # Update database (with rollback testing)
-      # https://docs.liquibase.com/commands/update/update-testing-rollback.html
-      #
-      - type: liquibase
-        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
-        command: update-testing-rollback
-        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
-
+      #  cmdArgs: {url: "${LIQUIBASE_COMMAND_URL}" }
       #
       # Update database
       # https://docs.liquibase.com/commands/update/update.html
-      #        
+      #
       - type: liquibase
-        if: "${LB_TEST_ROLLBACKS} == 'F' || CONTAINS('${LB_ENVIRONMENT}', 'production')"
         command: update
         cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
-        
+      #
+      # Test rollbacks
+      # Typically non-production only
+      # https://docs.liquibase.com/commands/rollback/rollback-sql.html
+      #
+      - type: liquibase
+        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
+        command: rollback-sql
+        cmdArgs: { tag: "${LIQUIBASE_COMMAND_TAG}" }
+      #
+      # Test rollbacks
+      # Typically non-production only
+      # https://docs.liquibase.com/commands/rollback/rollback-by-tag.html
+      #
+      - type: liquibase
+        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
+        command: rollback
+        cmdArgs: { tag: "${LIQUIBASE_COMMAND_TAG}" }
+      #
+      # Test rollbacks
+      # Typically non-production only
+      # https://docs.liquibase.com/commands/update/update.html
+      #
+      - type: liquibase
+        if: "${LB_TEST_ROLLBACKS} == 'T' && !CONTAINS('${LB_ENVIRONMENT}', 'production')"
+        command: update
+        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${UPDATE_REPORT}" }
       #
       # Create updated snapshot
       # https://docs.liquibase.com/commands/inspection/snapshot.html
@@ -223,3 +239,4 @@ endStage:
       command: snapshot
       globalArgs: { include-relations-for-computed-columns: "true", outputfile: "${SNAPSHOT_FILE}" }
       cmdArgs: { snapshotFormat: "json" }
+ 
