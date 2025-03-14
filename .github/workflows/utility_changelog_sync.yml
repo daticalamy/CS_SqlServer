@@ -2,7 +2,7 @@
 #  GitHub Action to perform changelog-sync of database
 #  changes using Liquibase Pro.
 #####################################################################
-name: 'Liquibase Pro ChangelogSync Workflow'
+name: 'Utility - ChangelogSync'
 run-name: Changelog-sync of ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
 on:
@@ -33,7 +33,7 @@ env:
   # The top level Flow File that gets cloned into the workspace from
   # the Liquibase Configuration Repo which orchestrates the database changes.
   # See https://docs.liquibase.com/commands/flow/flow.html
-  FLOW_FILE: "flowfiles/liquibase-changelog-sync.yaml"
+  FLOW_FILE: "flowfiles/utility.flowfile.changelogsync.yaml"
 
   # Used by POC Flow File
   LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
