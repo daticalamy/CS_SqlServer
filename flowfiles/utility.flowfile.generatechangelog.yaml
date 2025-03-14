@@ -14,7 +14,7 @@ stages:
       - type: liquibase
         command: generate-changelog
         cmdArgs: 
-          {  changelog-file: 'snapshots/${ENV}-changelog.xml' }
+          {  changelog-file: 'generatechangelogs/${ENV}-changelog.xml' }
         
       - type: shell
-        command: echo 'Generate Changelog created as snapshots/${ENV}-changelog.xml'
+        command: echo 'Generate Changelog created as generatechangelogs/${ENV}-changelog.xml'

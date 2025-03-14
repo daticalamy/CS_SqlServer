@@ -145,4 +145,4 @@ jobs:
           AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
         run: | 
           azcopy cp `
-            ${{ github.workspace }}\snapshots\${{ env.LB_ENVIRONMENT }}-changelog.xml "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/${{ env.LB_ENVIRONMENT }}-changelog.xml?${{ env.AZURE_STORAGE_SAS_TOKEN }}"
+            ${{ github.workspace }}\generatechangelogs\* "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/${{ env.LB_ENVIRONMENT }}-changelog.xml?${{ env.AZURE_STORAGE_SAS_TOKEN }}" --recursive=true
