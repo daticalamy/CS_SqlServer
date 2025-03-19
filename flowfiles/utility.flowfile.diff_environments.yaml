@@ -1,0 +1,15 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: ${LB_ENVIRONMENT}
+  REF_ENV: ${LB_REF_ENVIRONMENT}
+  LB_BASE_DIR: "."
+  DRIFT_REPORT: "Diff_${LB_ENVIRONMENT}_to_${LB_REF_ENVIRONMENT}.html"
+
+stages:
+  Snapshot:
+    actions:
+      - type: liquibase
+        command: diff
+        cmdArgs: { report-enabled: "true", report-path: "${LB_BASE_DIR}/reports", report-name: "${DRIFT_REPORT}", format: json }
