@@ -24,7 +24,7 @@ jobs:
 
       - name: Fetch secrets for both environments
         run: |
-          env
+          set
           pwd
           echo "Fetching secrets for ${{ github.event.inputs.env1 }} and ${{ github.event.inputs.env2 }}..."
           env1_secrets=$(env | grep '^ENV1_SECRET_' | sed 's/^ENV1_SECRET_//')
