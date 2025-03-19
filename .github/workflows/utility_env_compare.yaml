@@ -28,6 +28,10 @@ jobs:
           
           echo "$env1_secrets" > env1_secrets.txt
           echo "$env2_secrets" > env2_secrets.txt
+          
+          echo "SECRET_VALUE=${SECRET_VALUE}"
+        env:
+          SECRET_VALUE: ${{ secrets.TEST_STRING }}
 
       - name: Compare secrets
         run: |
