@@ -37,6 +37,7 @@ env:
 
   # Used by POC Flow File
   LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
+  LB_REF_ENVIRONMENT: ${{ secrets.LB_REF_ENVIRONMENT }}
   
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
@@ -80,6 +81,7 @@ jobs:
     runs-on: [self-hosted]
     outputs:
       environment: ${{ steps.set-environment.outputs.environment }}
+      ref-environment: ${{ steps.set-ref-environment.outputs.environment }}
 
     steps:
       # Determine the environment based on the branch(es) that triggered this workflow.
@@ -87,6 +89,17 @@ jobs:
       # shared between jobs.
       - name: Set Environment
         id: set-environment
+        run: |
+          echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          if("${{ inputs.environment }}" -eq "QA" ) {
+            echo "environment=QA" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+          if("${{ inputs.environment }}" -eq "PROD" ) {
+            echo "environment=PROD" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+
+      - name: Set Ref Environment
+        id: set-ref-environment
         run: |
           echo "environment=DEV" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
           if("${{ inputs.environment }}" -eq "QA" ) {
@@ -111,10 +124,10 @@ jobs:
 
   ##########################################################################################
   #  Perform the Database change control operations specified.
-  #  In this case, perform snapshot of selected environment.
+  #  In this case, perform diff of selected environments.
   ###########################################################################################
-  liquibase-snapshot:
-    name: Database Snapshot
+  liquibase-diff:
+    name: Database Diff
     needs: [init, checkout-repo]
     runs-on: [self-hosted]
 
@@ -125,3 +138,11 @@ jobs:
       - name: Run diff flow
         run: |
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
+
+      - name: Create Reports Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            reports/*

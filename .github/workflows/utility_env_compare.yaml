@@ -1,0 +1,43 @@
+name: Compare Environment Secrets
+
+on:
+  workflow_dispatch:
+    inputs:
+      env1:
+        description: 'First environment to compare'
+        required: true
+        type: environment
+      env2:
+        description: 'Second environment to compare'
+        required: true
+        type: environment
+
+jobs:
+  compare-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch secrets for both environments
+        run: |
+          echo "Fetching secrets for ${{ github.event.inputs.env1 }} and ${{ github.event.inputs.env2 }}..."
+          env1_secrets=$(env | grep '^ENV1_SECRET_' | sed 's/^ENV1_SECRET_//')
+          env2_secrets=$(env | grep '^ENV2_SECRET_' | sed 's/^ENV2_SECRET_//')
+          
+          echo "$env1_secrets" > env1_secrets.txt
+          echo "$env2_secrets" > env2_secrets.txt
+
+      - name: Compare secrets
+        run: |
+          echo "Comparing secrets between ${{ github.event.inputs.env1 }} and ${{ github.event.inputs.env2 }}..."
+          comm -3 <(sort env1_secrets.txt) <(sort env2_secrets.txt) > secrets_diff.txt || true
+          
+          echo "Comparison result:"
+          cat secrets_diff.txt
+
+      - name: Upload Comparison Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: secrets-comparison
+          path: secrets_diff.txt

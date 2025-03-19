@@ -8,7 +8,7 @@ globalVariables:
   DRIFT_REPORT: "Diff_${LB_ENVIRONMENT}_to_${LB_REF_ENVIRONMENT}.html"
 
 stages:
-  Snapshot:
+  Diff:
     actions:
       - type: liquibase
         command: diff
