@@ -13,40 +13,36 @@ on:
         type: environment
 
 jobs:
-  fetch-secrets-env1:
+  fetch-env1-secrets:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.env1 }}
     outputs:
-      secrets_list: ${{ steps.get-secrets.outputs.secrets }}
+      env1_secrets: ${{ steps.save-secrets.outputs.env1_secrets }}
+      env2_secrets: ${{ steps.save-secrets.outputs.env2_secrets }}
     steps:
-      - name: Get environment secrets
-        id: get-secrets
+      - name: Fetch secrets for both environments
+        id: save-secrets
         run: |
-          echo "SECRETS=$(env | awk -F= '{print $1}' | grep -v 'PATH' | tr '\n' ' ')" >> $GITHUB_ENV
-      - name: Output secrets list
-        run: echo "secrets=${SECRETS}"
-  
-  fetch-secrets-env2:
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.env2 }}
-    outputs:
-      secrets_list: ${{ steps.get-secrets.outputs.secrets }}
-    steps:
-      - name: Get environment secrets
-        id: get-secrets
-        run: |
-          echo "SECRETS=$(env | awk -F= '{print $1}' | grep -v 'PATH' | tr '\n' ' ')" >> $GITHUB_ENV
-      - name: Output secrets list
-        run: echo "secrets=${SECRETS}"
+          echo "Fetching secrets for ${{ github.event.inputs.env1 }} and ${{ github.event.inputs.env2 }}..."
+          env1_secrets=$(env | grep '^ENV1_SECRET_' | sed 's/^ENV1_SECRET_//')
+          env2_secrets=$(env | grep '^ENV2_SECRET_' | sed 's/^ENV2_SECRET_//')
+
+          echo "env1_secrets<<EOF" >> $GITHUB_OUTPUT
+          echo "$env1_secrets" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "env2_secrets<<EOF" >> $GITHUB_OUTPUT
+          echo "$env2_secrets" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
   compare-secrets:
     runs-on: ubuntu-latest
-    needs: [fetch-secrets-env1, fetch-secrets-env2]
+    needs: fetch-secrets
     steps:
       - name: Compare secrets
         run: |
-          echo "Secrets in ${{ github.event.inputs.env1 }}: ${{ needs.fetch-secrets-env1.outputs.secrets_list }}" > env1_secrets.txt
-          echo "Secrets in ${{ github.event.inputs.env2 }}: ${{ needs.fetch-secrets-env2.outputs.secrets_list }}" > env2_secrets.txt
+          echo "Comparing secrets between ${{ github.event.inputs.env1 }} and ${{ github.event.inputs.env2 }}..."
+          echo "${{ needs.fetch-secrets.outputs.env1_secrets }}" > env1_secrets.txt
+          echo "${{ needs.fetch-secrets.outputs.env2_secrets }}" > env2_secrets.txt
           
           comm -3 <(sort env1_secrets.txt) <(sort env2_secrets.txt) > secrets_diff.txt || true
           

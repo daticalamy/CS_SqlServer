@@ -1,0 +1,151 @@
+#####################################################################
+#  GitHub Action to perform changelog sync of database
+#  using Liquibase Pro.
+#####################################################################
+name: 'Utility - Changelog Sync'
+run-name: generate changelog sync ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHub Actions Run workflow dialog
+    inputs:
+      # The type 'environment' will automatically pull in the environments created in Settings->Environments
+      environment:
+        description: 'Environment to generate changelog'
+        type: environment
+        required: true
+      # For more info on log level, see: https://docs.liquibase.com/parameters/log-level.html
+      log-level:
+        description: 'Liquibase log level'
+        required: false
+        default: 'INFO'
+        type: choice
+        options: [ 'SEVERE','WARNING','INFO','FINE','OFF' ]
+
+####################################################################
+#  Set up the environment
+#####################################################################
+env:
+  # The top level Flow File that gets cloned into the workspace from
+  # the Liquibase Configuration Repo which orchestrates the database changes.
+  # See https://docs.liquibase.com/commands/flow/flow.html
+  FLOW_FILE: "liquibase-process/flowfiles/utility.flowfile.changelogsync.yaml"
+
+  repo-name: fa1
+ 
+  LIQUIBASE_COMMAND_SCHEMAS: FA1,PropertyTax
+ 
+  # Used by POC Flow File
+  ###LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
+  LB_ENVIRONMENT: ${{ inputs.environment }}
+ 
+  # The Liquibase Search Path controls how Liquibase finds it's configurations.
+  # To ensure the correct config gets located first, keep "." at the end of this path.
+  # See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html
+  LIQUIBASE_SEARCH_PATH: "liquibase-process,."
+
+  # Store the Liquibase Pro License key in a Github Action Repository Secret. The
+  # same license key is used for all executions, so it is tracked at the repository level
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_PRO_LICENSE_KEY }}
+ 
+  # JDBC URL of the database per environment. Based on the incoming branch (one of DEV, QA, or PROD),
+  # the corresponding secret will be taken from the Environment secrets.
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  #LIQUIBASE_COMMAND_URL: ${{ secrets.LIQUIBASE_COMMAND_URL }}
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_COMMAND_URL }}
+
+  # Credentials for the environment's database. Based on the incoming branch (one of DEV, QA, or PROD),
+  # the corresponding secrets will be taken from the Environment secrets.
+  # See https://docs.liquibase.com/parameters/command-parameters.html
+  ####LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_COMMAND_USERNAME }}
+  LIQUIBASE_COMMAND_USERNAME: ${{ vars.LIQUIBASE_COMMAND_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}
+
+  # Logging Settings
+  # See https://docs.liquibase.com/parameters/log-format.html
+  LIQUIBASE_LOG_FORMAT: JSON
+  LIQUIBASE_LOG_LEVEL: INFO
+ 
+  # Override Liquibase Schema Names
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
+
+  # Override Properties File
+  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
+
+  #### Azure settings
+  ###AZURE_CONTAINER_NAME: github-snapshot-azcopy
+  ###AZURE_SUBSCRIPTION_ID: a38e082e-9dfc-49dd-a5e8-9d13e908b010
+  ###AZURE_TENANT_ID: fd6a63a1-3f33-4f34-802a-06ae5ad2217a
+  ###AZURE_STORAGE_ACCOUNT: cssnapshots
+  ###AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+
+jobs:
+  ####################################################################
+  # Initialization runs first because it has no 'needs' value.
+  ####################################################################
+  init:
+    name: Initialization
+    # This runs on a self-hosted runner with Liquibase preinstalled.
+    runs-on: [self-hosted, BLD03]
+    outputs:
+      environment: ${{ steps.set-environment.outputs.environment }}
+
+    steps:
+      # Determine the environment based on the branch(es) that triggered this workflow.
+      # Output "DEV", "QA", or "PROD" to $GITHUB_OUTPUT where job output parameters are
+      # shared between jobs.
+      - name: Set Environment
+        id: set-environment
+        run: |
+          echo "environment=development" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          if("${{ inputs.environment }}" -eq "integration" ) {
+            echo "environment=integration" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+          if("${{ inputs.environment }}" -eq "production" ) {
+            echo "environment=production" | Out-File -FilePath $Env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+
+  ###################################################################
+  #  Check out the source code
+  ####################################################################
+  checkout-repo:
+    name: Check out repositories
+    needs: [init]
+    runs-on: [self-hosted, BLD03]
+
+    steps:
+      # Check out the source code
+      - name: Checkout Database Source repo
+        uses: actions/checkout@v3
+
+      # Check out the Liquibase Configuration Repo to a folder, "liquibase-process"
+      - name: Checkout Liquibase Configuration repo
+        uses: actions/checkout@v4
+        with:
+          repository: mn-dor/Liquibase-Workflow
+          path: liquibase-process
+          token: ${{ secrets.LIQUIBASE_PAT }}
+
+  ##########################################################################################
+  #  Perform the Database change control operations specified.
+  #  In this case, perform snapshot of selected environment.
+  ###########################################################################################
+  liquibase-changelogsync:
+    name: Changelog Sync
+    needs: [init, checkout-repo]
+    runs-on: [self-hosted, BLD03]
+
+    environment: ${{needs.init.outputs.environment}}
+
+    steps:
+      # Authenticate with Azure using Service Principal
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_G67P }}    
+   
+      # Execute the generate changelog Flow file
+      - name: Run changelogsync flow
+        run: |
+          liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log

@@ -9,7 +9,7 @@ globalVariables:
   CONTAINER: ${AZURE_CONTAINER_NAME}
 
 stages:
-  Snapshot:
+  ChangeLog:
     actions:
       - type: liquibase
         command: generate-changelog
