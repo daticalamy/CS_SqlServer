@@ -2,7 +2,7 @@
 #  GitHub Action to perform changelog sync of database
 #  using Liquibase Pro.
 #####################################################################
-name: 'Utility - Changelog Sync'
+name: 'Utility - Changelog Sync 2'
 run-name: generate changelog sync ${{github.ref}} to ${{ inputs.environment }} by ${{ github.actor }}
 
 on:
