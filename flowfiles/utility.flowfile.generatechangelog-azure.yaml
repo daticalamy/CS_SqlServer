@@ -1,0 +1,16 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: ${LB_ENVIRONMENT}
+
+stages:
+  ChangeLog:
+    actions:
+      - type: liquibase
+        command: generate-changelog
+        cmdArgs: 
+          {  changelog-file: 'generatechangelogs/${ENV}-changelog.mssql.sql' }
+        
+      - type: shell
+        command: echo 'Generate Changelog created as generatechangelogs/${ENV}-changelog.mssql.sql'
