@@ -1,0 +1,16 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: ${LB_ENVIRONMENT}
+  CONTAINER: ${AZURE_CONTAINER_NAME}
+
+stages:
+
+  Drift-Detection:
+    # Check if manual updates were made to the environment since last deployment
+    actions:
+      - type: liquibase
+        command: diff
+        cmdArgs: { drift-severity: "1", report-path: "reports", referenceURL: "offline:postgres?snapshot=${ENV}-snapshot.json", format: json }
+        globalArgs: {search-path: "az://${CONTAINER}"}

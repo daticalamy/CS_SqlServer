@@ -33,7 +33,7 @@ env:
   # The top level Flow File that gets cloned into the workspace from
   # the Liquibase Configuration Repo which orchestrates the database changes.
   # See https://docs.liquibase.com/commands/flow/flow.html
-  FLOW_FILE: "flowfiles/utility.flowfile.drift-detection.yaml"
+  FLOW_FILE: "flowfiles/utility.flowfile.drift-detection-azure.yaml"
 
   # Used by POC Flow File
   LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
@@ -71,9 +71,6 @@ env:
   LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
 
   # Azure settings
-  AZURE_SUBSCRIPTION_ID: a38e082e-9dfc-49dd-a5e8-9d13e908b010
-  AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }} 
-  
   LIQUIBASE_AZURE_STORAGE_ACCOUNT: ${{ vars.LIQUIBASE_AZURE_STORAGE_ACCOUNT }}
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -131,37 +128,7 @@ jobs:
     environment: ${{needs.init.outputs.environment}}
 
     steps:
-      # Authenticate with Azure using Service Principal
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}    
-
-      # Use azcopy to pull down Snapshot from Azure Storage
-      - name: Copy snapshot from Azure Blob
-        env: 
-          AZURE_STORAGE_ACCOUNT: ${{ env.LIQUIBASE_AZURE_STORAGE_ACCOUNT }}
-          AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
-          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
-          AZCOPY_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
-          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
-        run: | 
-          azcopy cp `
-            "https://${{ env.AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/${{ env.LB_ENVIRONMENT }}-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}" ${{ github.workspace }}\snapshots\${{ env.LB_ENVIRONMENT }}-snapshot.json
-    
-      # Execute the Snapshot Flow file
-      - name: Run snapshot flow
+      # Execute the Drift Detection Flow file
+      - name: Run drift detection flow
         run: |
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
-
-      # Use azcopy for Azure Storage
-      - name: Copy file to Azure Blob
-        env: 
-          LIQUIBASE_AZURE_STORAGE_ACCOUNT: ${{ env.LIQUIBASE_AZURE_STORAGE_ACCOUNT }}
-          AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
-          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
-          AZCOPY_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
-          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
-        run: | 
-          azcopy cp `
-            ${{ github.workspace }}\snapshots\${{ env.LB_ENVIRONMENT }}-snapshot.json "https://${{ env.LIQUIBASE_AZURE_STORAGE_ACCOUNT }}.blob.core.windows.net/${{ env.AZURE_CONTAINER_NAME }}/${{ env.LB_ENVIRONMENT }}-snapshot.json?${{ env.AZURE_STORAGE_SAS_TOKEN }}"
