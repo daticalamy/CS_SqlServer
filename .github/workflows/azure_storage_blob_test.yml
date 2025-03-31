@@ -155,7 +155,7 @@ jobs:
       # Take snapshot outside Flow File
       - name: Download snapshot
         run: |
-          az storage blob upload --container-name snapshots --file snapshots/Snapshot_${{ inputs.environment }}.json --name Snapshot_${{ inputs.environment }}.json --overwrite
+          az storage blob download --container-name snapshots --file snapshots/Snapshot_${{ inputs.environment }}.json --name Snapshot_${{ inputs.environment }}.json --overwrite
           
       - name: Create Reports Artifact
         if: always()
