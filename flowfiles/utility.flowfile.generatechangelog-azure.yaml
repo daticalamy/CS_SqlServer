@@ -2,8 +2,7 @@
 ##########  learn more http://docs.liquibase.com/flow  ##########
 
 globalVariables:
-#  ENV: ${LB_ENVIRONMENT}
-  ENV: DEV
+  ENV: ${LB_ENVIRONMENT}
 
 stages:
   ChangeLog:
