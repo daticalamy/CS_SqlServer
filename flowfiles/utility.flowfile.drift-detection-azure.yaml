@@ -7,17 +7,19 @@ globalVariables:
 
 stages:
 
+  Drift-Detection-Liquibase:
+    # Check if manual updates were made to the environment since last deployment
+    # Make sure that search-path is set via an ENV VAR or in the liquibase.properties file.
+    # Search-path cannot be set as a globalArg to Flow.
+    actions:
+      - type: liquibase
+        command: diff
+        cmdArgs: { referenceURL: "offline:postgres?snapshot=${ENV}-snapshot.json" }
+#        globalArgs: { search-path: "az://${CONTAINER}" }
+
   Drift-Detection-Shell:
     # Check if manual updates were made to the environment since last deployment
     actions:
       - type: shell
         command: | 
           liquibase --search-path=az://${CONTAINER} diff --reference-url=offline:postgres?snapshot=${ENV}-snapshot.json
-
-#  Drift-Detection-Liquibase:
-    # Check if manual updates were made to the environment since last deployment
-#    actions:
-#      - type: liquibase
-#        command: diff
-#        cmdArgs: { referenceURL: "offline:postgres?snapshot=${ENV}-snapshot.json" }
-#        globalArgs: { search-path: "az://${CONTAINER}" }
