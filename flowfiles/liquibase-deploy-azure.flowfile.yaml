@@ -2,7 +2,6 @@
 ##########  learn more http://docs.liquibase.com/flow  ##########
 
 globalVariables:
-  JIRA: ${JIRA:-null}
   ENV: ${ENVIRONMENT}
   CLIENT_ID: ${AZURE_CREDS_USR}
   CLIENT_SECRET: ${AZURE_CREDS_PSW}

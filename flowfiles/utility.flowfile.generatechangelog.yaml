@@ -14,7 +14,7 @@ stages:
       - type: liquibase
         command: generate-changelog
         cmdArgs: 
-          {  changelog-file: 'generatechangelogs/${ENV}-changelog.xml' }
+          {  changelog-file: 'generatechangelogs/${ENV}-changelog.xml', overwrite-output-file: "true" }
         
       - type: shell
         command: echo 'Generate Changelog created as generatechangelogs/${ENV}-changelog.xml'
