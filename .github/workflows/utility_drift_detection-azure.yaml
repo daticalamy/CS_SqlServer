@@ -41,7 +41,7 @@ env:
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
   # See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html
-  LIQUIBASE_SEARCH_PATH: "liquibase-process,."
+  LIQUIBASE_SEARCH_PATH: "liquibase-process,az://snapshots,."
 
   # Store the Liquibase Pro License key in a Github Action Repository Secret. The
   # same license key is used for all executions, so it is tracked at the repository level
