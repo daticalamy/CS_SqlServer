@@ -2,7 +2,8 @@
 ##########  learn more http://docs.liquibase.com/flow  ##########
 
 globalVariables:
-  ENV: ${LB_ENVIRONMENT}
+#  ENV: ${LB_ENVIRONMENT}
+  ENV: DEV
 
 stages:
   ChangeLog:
@@ -10,7 +11,7 @@ stages:
       - type: liquibase
         command: generate-changelog
         cmdArgs: 
-          {  changelog-file: 'generatechangelogs/${ENV}-changelog.mssql.sql' }
+          {  changelog-file: 'az://generatechangelogs/${ENV}-changelog.mssql.sql' }
         
       - type: shell
-        command: echo 'Generate Changelog created as generatechangelogs/${ENV}-changelog.mssql.sql'
+        command: echo 'Generate Changelog created as az://generatechangelogs/${ENV}-changelog.mssql.sql'
