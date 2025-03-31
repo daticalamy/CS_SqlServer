@@ -67,7 +67,7 @@ env:
   LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
 
   # Azure settings
-  AZURE_CONTAINER_NAME: github-snapshot-azcopy
+  AZURE_CONTAINER_NAME: snapshots
   AZURE_SUBSCRIPTION_ID: a38e082e-9dfc-49dd-a5e8-9d13e908b010
   AZURE_TENANT_ID: fd6a63a1-3f33-4f34-802a-06ae5ad2217a
   AZURE_STORAGE_ACCOUNT: cssnapshots
