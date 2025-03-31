@@ -9,8 +9,13 @@ stages:
 
   Drift-Detection:
     # Check if manual updates were made to the environment since last deployment
+#    actions:
+#      - type: liquibase
+#        command: diff
+#        cmdArgs: { drift-severity: "1", report-path: "reports", referenceURL: "offline:postgres?snapshot=${ENV}-snapshot.json", format: json }
+#        globalArgs: {search-path: "az://${CONTAINER}"}
+
     actions:
-      - type: liquibase
-        command: diff
-        cmdArgs: { drift-severity: "1", report-path: "reports", referenceURL: "offline:postgres?snapshot=${ENV}-snapshot.json", format: json }
-        globalArgs: {search-path: "az://${CONTAINER}"}
+      - type: shell
+        command: | 
+          liquibase --search-path=az://${CONTAINER} diff --reference-url=offline:postgres?snapshot=${ENV}-snapshot.json
