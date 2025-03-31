@@ -10,7 +10,7 @@ stages:
       - type: liquibase
         command: generate-changelog
         cmdArgs: 
-          {  changelog-file: 'az://generatechangelogs/${ENV}-changelog.mssql.sql' }
+          {  changelog-file: 'az://generatechangelogs/${ENV}-changelog.mssql.sql', overwrite-output-file: "true" }
         
       - type: shell
         command: echo 'Generate Changelog created as az://generatechangelogs/${ENV}-changelog.mssql.sql'
