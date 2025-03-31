@@ -133,6 +133,8 @@ jobs:
       # Execute the Snapshot Flow file
       - name: Run snapshot flow
         run: |
+          whoami
+          env
           liquibase --license-key=${{ secrets.LIQUIBASE_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
 
       # Use azcopy for Azure Storage
