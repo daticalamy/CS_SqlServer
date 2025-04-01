@@ -41,7 +41,7 @@ env:
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
   # See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html
-  LIQUIBASE_SEARCH_PATH: "liquibase-process,."
+  LIQUIBASE_SEARCH_PATH: "liquibase-process,az://generatechangelogs,."
 
   # Store the Liquibase Pro License key in a Github Action Repository Secret. The
   # same license key is used for all executions, so it is tracked at the repository level
@@ -68,7 +68,13 @@ env:
   LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
   
   # Override Properties File
-  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties 
+  LIQUIBASE_DEFAULTS_FILE: liquibase.windows.properties
+
+  # Azure settings
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: ${{ vars.LIQUIBASE_AZURE_STORAGE_ACCOUNT }}
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
 jobs:
   ####################################################################
