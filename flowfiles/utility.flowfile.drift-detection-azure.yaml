@@ -16,4 +16,5 @@ stages:
       - type: liquibase
         command: diff
         cmdArgs: { referenceURL: "offline:postgres?snapshot=${REF_ENV}-snapshot.json" }
+        globalArgs: {reports-path: "az://reports"}
 #        globalArgs: { search-path: "az://${CONTAINER}" }
