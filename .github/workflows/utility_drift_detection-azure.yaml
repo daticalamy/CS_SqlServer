@@ -14,8 +14,8 @@ on:
         description: 'Environment to compare'
         type: environment
         required: true
-      snapshot:
-        description: 'Snapshot for comparison'
+      snapshot_environment:
+        description: 'Snapshot Environment for comparison'
         type: environment
         required: true
       # For more info on log level, see: https://docs.liquibase.com/parameters/log-level.html
@@ -37,6 +37,7 @@ env:
 
   # Used by POC Flow File
   LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
+  REF_ENVIRONMENT: ${{ inputs.snapshot_environment }}
   
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
