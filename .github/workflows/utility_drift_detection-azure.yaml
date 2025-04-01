@@ -33,7 +33,7 @@ env:
   # The top level Flow File that gets cloned into the workspace from
   # the Liquibase Configuration Repo which orchestrates the database changes.
   # See https://docs.liquibase.com/commands/flow/flow.html
-  FLOW_FILE: "utility.flowfile.drift-detection-azure.yaml"
+  FLOW_FILE: "flowfiles/utility.flowfile.drift-detection-azure.yaml"
 
   # Used by POC Flow File
   LB_ENVIRONMENT: ${{ secrets.LB_ENVIRONMENT }}
@@ -42,7 +42,7 @@ env:
   # The Liquibase Search Path controls how Liquibase finds it's configurations.
   # To ensure the correct config gets located first, keep "." at the end of this path.
   # See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html
-  LIQUIBASE_SEARCH_PATH: "liquibase-process,az://snapshots,az://flowfiles,az://generatechangelogs,."
+  LIQUIBASE_SEARCH_PATH: "liquibase-process,az://snapshots,."
 
   # Store the Liquibase Pro License key in a Github Action Repository Secret. The
   # same license key is used for all executions, so it is tracked at the repository level
