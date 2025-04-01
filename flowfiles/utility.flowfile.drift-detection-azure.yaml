@@ -3,7 +3,7 @@
 
 globalVariables:
   ENV: ${LB_ENVIRONMENT}
-  REF_ENV: ${REF_ENVIRONMENT}
+  REF_ENV: ${LB_REF_ENVIRONMENT}
   CONTAINER: ${AZURE_CONTAINER_NAME}
 
 stages:
@@ -16,5 +16,3 @@ stages:
       - type: liquibase
         command: diff
         cmdArgs: { referenceURL: "offline:postgres?snapshot=${REF_ENV}-snapshot.json" }
-        globalArgs: {reports-path: "az://reports"}
-#        globalArgs: { search-path: "az://${CONTAINER}" }
