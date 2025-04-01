@@ -1,9 +1,9 @@
 #####################################################################
-#  GitHub Action to perform snapshot of database
+#  GitHub Action to perform diff comparison between environments.
 #  using Liquibase Pro.
 #####################################################################
 name: 'Utility - Drift Detection - Azure EXT'
-run-name: Compare ${{ inputs.environment }} environment to ${{ inputs.snapshot }} snapshot for branch ${{github.ref}} by ${{ github.actor }}
+run-name: Compare ${{ inputs.environment }} environment to ${{ inputs.snapshot_environment }} snapshot for branch ${{github.ref}} by ${{ github.actor }}
 
 on:
   workflow_dispatch:
