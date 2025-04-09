@@ -1,0 +1,190 @@
+#####################################################################
+#  GitHub Action to perform comparison of database
+#  changes to a snapshot for Drift Detection.
+#####################################################################
+name: 'Utility - Diff'
+run-name: Compare ${{ inputs.environment }} environment to ${{ inputs.snapshot_environment }} snapshot for branch ${{github.ref}} by ${{ github.actor }}
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment'
+        required: true
+        type: string
+      snapshot_environment:
+        description: 'Snapshot Environment for comparison'
+        required: true
+        type: string
+      database-schema:
+        description: 'db schema name, also for creating container url'
+        required: true
+        type: string
+      LIQUIBASE_COMMAND_USERNAME:
+        description: 'SQL Username'
+        required: true
+        type: string
+      LIQUIBASE_COMMAND_URL:
+        description: 'sql connection string'
+        required: true
+        type: string
+
+    secrets:
+      LIQUIBASE_PAT:
+        required: true
+      LIQUIBASE_PRO_LICENSE_KEY :
+        description: 'Liquibase license file'
+        required: true
+      AZURE_CREDENTIALS:
+        description: 'Azure Credentials'
+        required: true
+      LIQUIBASE_COMMAND_PASSWORD:
+        description: 'SQL Password'
+        required: true
+      AZURE_TENANT_ID:
+        description: 'Azure Tenant id'
+        required: true
+
+
+#####################################################################
+#  Set up the environment
+#####################################################################
+env:
+  # The top level Flow File that gets cloned into the workspace from
+  # the Liquibase Configuration Repo which orchestrates the database changes.
+  # See https://docs.liquibase.com/commands/flow/flow.html
+  FLOW_FILE: "liquibase-process/flowfiles/utility.flowfile.diff.yaml"
+
+  # The Liquibase Search Path controls how Liquibase finds it's configurations.
+  # To ensure the correct config gets located first, keep "." at the end of this path.
+  # See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html
+  LIQUIBASE_SEARCH_PATH: "liquibase-process,."
+
+  # Store the Liquibase Pro License key in a Github Action Repository Secret. The
+  # same license key is used for all executions, so it is tracked at the repository level
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_PRO_LICENSE_KEY }}
+
+  # JDBC URL of the database per environment. Based on the incoming branch (one of DEV, QA, or PROD),
+  # the corresponding secret will be taken from the Environment secrets.
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ inputs.LIQUIBASE_COMMAND_URL }}
+
+  # Credentials for the environment's database. Based on the incoming branch (one of DEV, QA, or PROD),
+  # the corresponding secrets will be taken from the Environment secrets.
+  # See https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ inputs.LIQUIBASE_COMMAND_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}
+
+  # Logging Settings
+  # See https://docs.liquibase.com/parameters/log-format.html
+  LIQUIBASE_LOG_FORMAT: JSON
+  LIQUIBASE_LOG_LEVEL: INFO
+ 
+  # Override Liquibase Schema Names
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LBP
+
+  #LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: CBAE
+  LIQUIBASE_COMMAND_SCHEMAS: ${{ inputs.database-schema }}
+
+  # blob url
+  blob-url: "https://g67pliquibasest01.blob.core.windows.net/snapshots/${{inputs.database-schema}}"
+
+jobs:
+
+  ####################################################################
+  #  Check out the source code and configuration
+  ####################################################################
+  checkout-repo:
+    name: Check out repositories
+    runs-on: [self-hosted]
+
+    steps:
+      # Check out the source code
+      - name: Checkout Database Source repo
+        uses: actions/checkout@v4
+
+  download-snapshot:
+   name: download Snapshot from blob container
+   needs: [checkout-repo]
+   runs-on: [self-hosted]
+   steps:
+    - name: Azure CLI Login
+      uses: azure/login@v2
+      with:
+         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Download from blob container
+      env:
+        AZURE_STORAGE_ACCOUNT: g67pliquibasest01
+        AZURE_CONTAINER_NAME: snapshots
+        SNAPSHOTS_FOLDER: snapshots
+        AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+        AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      run: |
+        azcopy cp `
+          "${{ env.blob-url}}/*" ${{ github.workspace }}\${{ env.SNAPSHOTS_FOLDER}}
+
+  #####################################################################
+  #  Perform the Database change control operations specified
+  #  in the flowfile.
+  #####################################################################
+  liquibase-drift-detection:
+    name: Database Comparison
+    needs: [checkout-repo, download-snapshot]
+    runs-on: [self-hosted]
+
+    environment: ${{inputs.environment}}
+
+    steps:
+      - name: Set Command url
+        if: ${{inputs.LIQUIBASE_COMMAND_USERNAME != ''}}
+        shell: pwsh
+        run: |
+            $SQLConnStr = "${{ inputs.LIQUIBASE_COMMAND_URL }};User=${{ inputs.LIQUIBASE_COMMAND_USERNAME }};Password=${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}"
+            Write-Output "sql connection string name is $SQLConnStr"
+            Write-Output "LIQUIBASE_COMMAND_URL=$SQLConnStr" >> $Env:GITHUB_ENV
+           
+      # Execute the Flow file.
+      - name: Run flow
+        env:
+          LB_ENVIRONMENT: ${{inputs.environment}}
+          LB_REF_ENVIRONMENT: ${{ inputs.snapshot_environment }}
+          LIQUIBASE_COMMAND_URL: ${{ env.LIQUIBASE_COMMAND_URL }}
+          AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
+          SNAPSHOTS_FOLDER: snapshots
+          DIFFCHANGELOG_FOLDER: diff-changelogs
+        run: |
+          liquibase --license-key=${{ secrets.LIQUIBASE_PRO_LICENSE_KEY }} flow --flow-file=${{ env.FLOW_FILE }} --logfile=logs/liquibase.log
+
+      - name: Create Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            reports/*
+           
+  save-diff-changelog:
+     name: Save Diff Changelog to blob container
+     needs: [liquibase-drift-detection]
+     runs-on: [self-hosted]
+     if: always()
+     steps:
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Copy file to Azure Blob Storage
+        env:
+          AZURE_STORAGE_ACCOUNT: ${{ vars.LIQUIBASE_AZURE_STORAGE_ACCOUNT }}
+          AZURE_CONTAINER_NAME: ${{ env.AZURE_CONTAINER_NAME }}
+          DIFFCHANGELOG_FOLDER: diff-changelogs
+          AZCOPY_AUTO_LOGIN_TYPE: AZCLI
+          AZCOPY_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          azcopy rm ${{ env.blob-url}}
+          azcopy cp `
+            "${{ github.workspace }}\${{ env.DIFFCHANGELOG_FOLDER }}\*" ${{ env.blob-url}}

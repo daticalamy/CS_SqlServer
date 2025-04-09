@@ -1,0 +1,53 @@
+name: Compare an Environment to a Snapshot
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: environment
+        description: Select the environment
+      snapshot_environment:
+        description: Snapshot Environment for comparison
+        type: environment
+        required: true
+        
+env:
+  database-schema: dbo
+ 
+jobs:
+           
+  liquibase-variable-setup:
+    runs-on: [self-hosted]
+    environment: ${{ inputs.environment }}
+    outputs:
+      database-schema: ${{ steps.set-liquibase-defaults.outputs.database-schema }}
+      liquibase-username: ${{ steps.set-liquibase-defaults.outputs.liquibase-username }}
+      liquibase-url: ${{ steps.set-liquibase-defaults.outputs.liquibase-url }}
+    steps:          
+      - name: set liquibase url and username as outputs
+        id: set-liquibase-defaults
+        run: |
+            echo "liquibase-username=${{ vars.LIQUIBASE_COMMAND_USERNAME || '' }}" >> $GITHUB_OUTPUT
+            echo "liquibase-url=${{ vars.LIQUIBASE_COMMAND_URL }}" >> $GITHUB_OUTPUT
+            echo "database-schema=${{ env.database-schema }}" >> $GITHUB_OUTPUT
+
+  database-compare:
+    name: Compare database schemas
+    needs: [liquibase-variable-setup]
+    uses: ./.github/workflows/utility_diff.yml
+    with:
+      environment: ${{inputs.environment}}
+      snapshot_environment: ${{inputs.snapshot_environment}}
+      database-schema: ${{needs.liquibase-variable-setup.outputs.database-schema}}
+      LIQUIBASE_COMMAND_URL: ${{ needs.liquibase-variable-setup.outputs.liquibase-url }}
+      LIQUIBASE_COMMAND_USERNAME: ${{ needs.liquibase-variable-setup.outputs.liquibase-username }}
+    secrets:
+      LIQUIBASE_PRO_LICENSE_KEY: ${{ secrets.LIQUIBASE_PRO_LICENSE_KEY }}
+      LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      

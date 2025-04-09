@@ -3,3 +3,5 @@ liquibase.properties
 win_reports/
 reports/
 generatechangelogs/
+snapshots/
+diffchangelogs/
