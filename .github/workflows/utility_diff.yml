@@ -33,8 +33,6 @@ on:
         type: string
 
     secrets:
-      LIQUIBASE_PAT:
-        required: true
       LIQUIBASE_PRO_LICENSE_KEY :
         description: 'Liquibase license file'
         required: true

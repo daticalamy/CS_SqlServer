@@ -14,11 +14,11 @@ stages:
     actions:
       - type: liquibase
         command: diff
-        cmdArgs: { report-path: "reports", referenceURL: "offline:mssql?snapshot=${SNAPSHOTS_FOLDER}/${ENV}-snapshot.json", format: json }
+        cmdArgs: { report-path: "reports", referenceURL: "offline:mssql?snapshot=${SNAPSHOTS_FOLDER}/${REF_ENV}-snapshot.json", format: json }
 
   Diff-Changelog:
     # Create a changelog that can be used to sync environments
     actions:
       - type: liquibase
         command: diff-changelog
-        cmdArgs: { referenceURL: "offline:mssql?snapshot=${SNAPSHOTS_FOLDER}/${ENV}-snapshot.json", changelog-file: "${DIFFCHANGELOG_FOLDER}/${ENV}-to-${REF_ENV}-diffchangelog.mssql.sql" }
+        cmdArgs: { referenceURL: "offline:mssql?snapshot=${SNAPSHOTS_FOLDER}/${REF_ENV}-snapshot.json", changelog-file: "${DIFFCHANGELOG_FOLDER}/${ENV}-to-${REF_ENV}-diffchangelog.mssql.sql" }
