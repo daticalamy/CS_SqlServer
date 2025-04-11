@@ -9,7 +9,7 @@
 1. Set repository visibility to Private.
 1. Click **Create Repository**.
 
-### Step 2: Setup the Runners
+### Step 2: Setup the GitHub Runners
 1. Open the repository on GitHub.
 1. Go to **Settings** > **Actions** > **Runners**.
 1. << STEPS FOR SETTING UP RUNNERS >>
@@ -18,17 +18,17 @@
 1. Open the repository on GitHub.
 1. Go to **Settings** > **Secrets and variables** > **Actions**.
 1. Click **New repository secret**.
-1. You will need to add secrets for
+1. You will need to add secrets for the below items:
 
 | Secret        | Description
 | ------------- | -------------
 | LIQUIBASE_PRO_LICENSE_KEY | Format: jdbc:sqlserver://hostname;portNumber=1433;databaseName=databaseName;integratedSecurity=true;
-| LIQUIBASE_COMMAND_PASSWORD | <Instructions on how to find>
-| LIQUIBASE_PAT | <Instructions on how to find or generate>
-| AZURE_CREDENTIALS | <Instructions on how to find and format>
-| AZURE_CREDENTIALS_G67P | <Are both CREDS needed?>
-| AZURE_TENANT_ID | <Instructions on how to find>
-| AZURE_STORAGE_ACCOUNT | <Instructions on how to find>
+| LIQUIBASE_COMMAND_PASSWORD | << Instructions on how to find >>
+| LIQUIBASE_PAT | << Instructions on how to find or generate >>
+| AZURE_CREDENTIALS | << Instructions on how to find >>
+| AZURE_CREDENTIALS_G67P | << Are both of these CREDS values necessary? >>
+| AZURE_TENANT_ID | << Instructions on how to find >>
+| AZURE_STORAGE_ACCOUNT | << Instructions on how to find >>
 
 ### Step 4: Setup the GitHub Variables
 1. Open the repository on GitHub.
