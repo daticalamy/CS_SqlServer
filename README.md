@@ -19,14 +19,15 @@
 1. Go to **Settings** > **Secrets and variables** > **Actions**.
 1. Click **New repository secret**.
 1. You will need to add secrets for
-- LIQUIBASE_PRO_LICENSE_KEY
-- LIQUIBASE_COMMAND_PASSWORD
-- LIQUIBASE_PAT
-- AZURE_CREDENTIALS
-- AZURE_CREDENTIALS_G67P
-- AZURE_TENANT_ID
-- AZURE_STORAGE_ACCOUNT
-1. << INSTRUCTIONS FOR HOW TO FIND THE VALUES ABOVE >>
+| Secret        | Description
+| ------------- | -------------
+| LIQUIBASE_PRO_LICENSE_KEY | Format: jdbc:sqlserver://hostname;portNumber=1433;databaseName=databaseName;integratedSecurity=true;
+| LIQUIBASE_COMMAND_PASSWORD | <Instructions on how to find>
+| LIQUIBASE_PAT | <Instructions on how to find or generate>
+| AZURE_CREDENTIALS | <Instructions on how to find and format>
+| AZURE_CREDENTIALS_G67P | <Are both CREDS needed?>
+| AZURE_TENANT_ID | <Instructions on how to find>
+| AZURE_STORAGE_ACCOUNT | <Instructions on how to find>
 
 ### Step 4: Setup the GitHub Variables
 1. Open the repository on GitHub.
@@ -34,12 +35,12 @@
 1. Click on **Variables** tab.
 1. Click **New repository variable**.
 1. You will need to add variables for
- - LIQUIBASE_COMMAND_SCHEMAS
-   - Comma separated list
- - LIQUIBASE_COMMAND_USERNAME
- - LIQUIBASE_COMMAND_URL
-   - eg. jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=DBNAME;trustServerCertificate=true
- - LIQUIBASE_RUNNER
+  - LIQUIBASE_COMMAND_SCHEMAS
+    - Comma separated list
+  - LIQUIBASE_COMMAND_USERNAME
+  - LIQUIBASE_COMMAND_URL
+    - eg. jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=DBNAME;trustServerCertificate=true
+  - LIQUIBASE_RUNNER
 1. << INSTRUCTIONS FOR HOW TO FIND THE VALUES ABOVE >>
 
 ### Step 2: Setup the Runners
