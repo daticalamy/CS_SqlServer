@@ -10,12 +10,12 @@
 1. Click **Create Repository**.
 
 ### Step 2: Setup the GitHub Runners
-1. Open the repository on GitHub.
+1. Open the new repository on GitHub.
 1. Go to **Settings** > **Actions** > **Runners**.
 1. << STEPS FOR SETTING UP RUNNERS >>
 
 ### Step 3: Setup the GitHub Secrets
-1. Open the repository on GitHub.
+1. Open the new repository on GitHub.
 1. Go to **Settings** > **Secrets and variables** > **Actions**.
 1. Click **New repository secret**.
 1. You will need to add secrets for the below items:
@@ -31,7 +31,7 @@
 | AZURE_STORAGE_ACCOUNT | << Instructions on how to find >>
 
 ### Step 4: Setup the GitHub Variables
-1. Open the repository on GitHub.
+1. Open the new repository on GitHub.
 1. Go to **Settings** > **Secrets and variables** > **Actions**.
 1. Click on **Variables** tab.
 1. Click **New repository variable**.
@@ -50,28 +50,51 @@
 
 ### Step 1: Create an Azure Storage Account
 1. Log into the [Azure Portal](https://portal.azure.com).
-2. Navigate to **Storage accounts**.
-3. Click **Create** and provide the required details.
-4. Select **BlobStorage** as the account type.
-5. Click **Review + Create**, then **Create**.
+1. Navigate to **Storage accounts**.
+1. Click **Create** and provide the required details.
+1. Select **BlobStorage** as the account type.
+1. Click **Review + Create**, then **Create**.
 
-### Step 2: Create a Blob Container
+### Step 2: Create three Blob Containers
 1. Open the newly created storage account.
-2. Go to **Containers** and click **+ Container**.
-3. Name it (e.g., `liquibase-backups`) and set the appropriate access level.
-4. Click **Create**.
-
-### Step 3: Configure Connection String
-1. Navigate to **Access keys** in the storage account.
-2. Copy the **connection string**.
-3. Store it in GitHub Secrets under `AZURE_STORAGE_CONNECTION_STRING`.
+1. Go to **Data storage** > **Containers** and click **+ Container**.
+1. Create two containers: `snapshots`, `generatechangelogs`, and `generatechangelogs`
+1. Click **Create** for each container to create it.
 
 ---
 
 ## Creating Initial Changelog
 
+### Step 1: Run GenerateChangeLog
+1. Open the new repository on GitHub.
+1. Navigate to **Actions** > **Utility - GenerateChangeLog**.
+1. Run the utility by selecting **Run Workflow**.
+1. Select **Environment to perform Generate-Changelog** and click **Run Workflow**. 
+1. Download the changelog logging in to [Azure Portal](https://portal.azure.com).
+1. Navigate to **Storage accounts** and select the storage account you created in #Configuring Azure Blob Storage.
+1. Select **Data storage** > **Containers** > **generatechangelogs**
+1. Find the desired changelog, use the three **...**, and select **Download**.
+
+### Step 2: Add newly generated changelog to your Liquibase project
+1. Find the changelog in your **Downloads** folder.
+1. Copy the contents to the << NAME OF DEFAULT CHANGELOG >> changelog in your repository on GitHub.
+
+### Step 3: Run ChangeLogSync in each environment
+The changes in this changelog already exist on the database. A ChangeLogSync needs to be run to tell Liquibase not to try and re-run the changes.  
+
+1. Open the new repository on GitHub.
+1. Navigate to **Actions** > **Utility - ChangelogSync**.
+1. Run the utility by selecting **Run Workflow**.
+1. Select **Environment to run changelog-sync** and click **Run Workflow**. 
+1. Repeat for each Environment.
+---
+
+## Running Liquibase
+
 ### Step 1: Run Generate Change Log
-1.
+1. Open the new repository on GitHub.
+1. Go to **Actions** > **Utility - GenerateChangeLog**.
+
 
 ### Step 2: Add generate changelog to Liquibase project
 1.
