@@ -34,12 +34,12 @@
 1. Click on **Variables** tab.
 1. Click **New repository variable**.
 1. You will need to add variables for
-- LIQUIBASE_COMMAND_SCHEMAS
-  - Comma separated list
-- LIQUIBASE_COMMAND_USERNAME
-- LIQUIBASE_COMMAND_URL
-  - eg. jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=DBNAME;trustServerCertificate=true
-- LIQUIBASE_RUNNER
+ - LIQUIBASE_COMMAND_SCHEMAS
+   - Comma separated list
+ - LIQUIBASE_COMMAND_USERNAME
+ - LIQUIBASE_COMMAND_URL
+   - eg. jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=DBNAME;trustServerCertificate=true
+ - LIQUIBASE_RUNNER
 1. << INSTRUCTIONS FOR HOW TO FIND THE VALUES ABOVE >>
 
 ### Step 2: Setup the Runners
