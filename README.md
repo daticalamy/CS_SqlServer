@@ -1,18 +1,50 @@
 # Liquibase Pro Implementation Runbook
 
-## 1. Configuring the GIT Repository
+## Creating a new project
 
-### Step 1: Create a New Repository
-1. Log into GitHub and navigate to your organization or personal account.
-2. Click on **New Repository**.
-3. Provide a repository name (e.g., `liquibase-pro-implementation`).
-4. Set repository visibility (public or private as required).
-5. Initialize the repository with a `README.md` file.
-6. Click **Create Repository**.
+### Step 1: Create the Repository
+1. Log into GitHub and navigate template repository << ADD REPO NAME & URL HERE >>.
+1. Click on **Use this template** to **Create a new repostiory**.
+1. Provide a Repository Name (e.g., `liquibase-pro-implementation`).
+1. Set repository visibility to Private.
+1. Click **Create Repository**.
 
-### Step 2: Clone the Repository
-1. Open a terminal or Git Bash.
-2. Clone the repository:
+### Step 2: Setup the Runners
+1. Open the repository on GitHub.
+1. Go to **Settings** > **Actions** > **Runners**.
+1. << STEPS FOR SETTING UP RUNNERS >>
+
+### Step 3: Setup the GitHub Secrets
+1. Open the repository on GitHub.
+1. Go to **Settings** > **Secrets and variables** > **Actions**.
+1. Click **New repository secret**.
+1. You will need to add secrets for
+- LIQUIBASE_PRO_LICENSE_KEY
+- LIQUIBASE_COMMAND_PASSWORD
+- LIQUIBASE_PAT
+- AZURE_CREDENTIALS
+- AZURE_CREDENTIALS_G67P
+- AZURE_TENANT_ID
+- AZURE_STORAGE_ACCOUNT
+1. << INSTRUCTIONS FOR HOW TO FIND THE VALUES ABOVE >>
+
+### Step 4: Setup the GitHub Variables
+1. Open the repository on GitHub.
+1. Go to **Settings** > **Secrets and variables** > **Actions**.
+1. Click on **Variables** tab.
+1. Click **New repository variable**.
+1. You will need to add variables for
+- LIQUIBASE_COMMAND_SCHEMAS
+  - Comma separated list
+- LIQUIBASE_COMMAND_USERNAME
+- LIQUIBASE_COMMAND_URL
+  - eg. jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=DBNAME;trustServerCertificate=true
+- LIQUIBASE_RUNNER
+1. << INSTRUCTIONS FOR HOW TO FIND THE VALUES ABOVE >>
+
+### Step 2: Setup the Runners
+1. Go to Settings, Actions.
+2. << STEPS FOR SETTING UP RUNNERS >>
    ```sh
    git clone https://github.com/YOUR_ORG/liquibase-pro-implementation.git
    ```
@@ -21,7 +53,8 @@
    cd liquibase-pro-implementation
    ```
 
-### Step 3: Set Up Branching Strategy
+
+### Step 3: Set Up Branches
 1. Create development and feature branches:
    ```sh
    git checkout -b develop

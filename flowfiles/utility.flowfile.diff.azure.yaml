@@ -5,6 +5,8 @@ globalVariables:
   ENV: ${LB_ENVIRONMENT}
   REF_ENV: ${LB_REF_ENVIRONMENT}
   CONTAINER: ${AZURE_CONTAINER_NAME}
+# SNAPSHOTS_FOLDER: ${SNAPSHOTS_FOLDER}
+# DIFFCHANGELOG_FOLDER: ${DIFFCHANGELOG_FOLDER}
 
 stages:
 
@@ -16,3 +18,11 @@ stages:
       - type: liquibase
         command: diff
         cmdArgs: { referenceURL: "offline:postgres?snapshot=${REF_ENV}-snapshot.json" }
+    # cmdArgs: { report-path: "reports", referenceURL: "offline:mssql?snapshot=${SNAPSHOTS_FOLDER}/${REF_ENV}-snapshot.json", format: json }
+
+  Diff-Changelog:
+    # Create a changelog that can be used to sync environments
+    actions:
+      - type: liquibase
+        command: diff-changelog
+        cmdArgs: { referenceURL: "offline:mssql?snapshot=${SNAPSHOTS_FOLDER}/${REF_ENV}-snapshot.json", changelog-file: "${DIFFCHANGELOG_FOLDER}/${ENV}-to-${REF_ENV}-diffchangelog.mssql.sql" }
