@@ -22,7 +22,7 @@
 
 | Secret        | Description
 | ------------- | -------------
-| LIQUIBASE_PRO_LICENSE_KEY | Format: jdbc:sqlserver://hostname;portNumber=1433;databaseName=databaseName;integratedSecurity=true;
+| LIQUIBASE_PRO_LICENSE_KEY | << Instructions on how to find >>
 | LIQUIBASE_COMMAND_PASSWORD | << Instructions on how to find >>
 | LIQUIBASE_PAT | << Instructions on how to find or generate >>
 | AZURE_CREDENTIALS | << Instructions on how to find >>
@@ -35,14 +35,14 @@
 1. Go to **Settings** > **Secrets and variables** > **Actions**.
 1. Click on **Variables** tab.
 1. Click **New repository variable**.
-1. You will need to add variables for
-  - LIQUIBASE_COMMAND_SCHEMAS
-    - Comma separated list
-  - LIQUIBASE_COMMAND_USERNAME
-  - LIQUIBASE_COMMAND_URL
-    - eg. jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=DBNAME;trustServerCertificate=true
-  - LIQUIBASE_RUNNER
-1. << INSTRUCTIONS FOR HOW TO FIND THE VALUES ABOVE >>
+1. You will need to add variables for the below items:
+
+| Variable        | Description
+| ------------- | -------------
+| LIQUIBASE_COMMAND_SCHEMAS | Comma separated list
+| LIQUIBASE_COMMAND_USERNAME | << Instructions on how to find >>
+| LIQUIBASE_COMMAND_URL | Format: jdbc:sqlserver://hostname;portNumber=1433;databaseName=databaseName;integratedSecurity=true;
+| LIQUIBASE_RUNNER | << Instructions on how to find >>
 
 ### Step 2: Setup the Runners
 1. Go to Settings, Actions.
