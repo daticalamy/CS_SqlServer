@@ -19,6 +19,7 @@
 1. Go to **Settings** > **Secrets and variables** > **Actions**.
 1. Click **New repository secret**.
 1. You will need to add secrets for
+
 | Secret        | Description
 | ------------- | -------------
 | LIQUIBASE_PRO_LICENSE_KEY | Format: jdbc:sqlserver://hostname;portNumber=1433;databaseName=databaseName;integratedSecurity=true;
