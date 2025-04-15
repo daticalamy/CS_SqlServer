@@ -58,7 +58,7 @@
 ### Step 2: Create three Blob Containers
 1. Open the newly created storage account.
 1. Go to **Data storage** > **Containers** and click **+ Container**.
-1. Create two containers: `snapshots`, `generatechangelogs`, and `generatechangelogs`
+1. Create three containers: `snapshots`, `generatechangelogs`, and `generatechangelogs`
 1. Click **Create** for each container to create it.
 
 ---
@@ -91,16 +91,10 @@ The changes in this changelog already exist on the database. A ChangeLogSync nee
 
 ## Running Liquibase
 
-### Step 1: Run Generate Change Log
-1. Open the new repository on GitHub.
-1. Go to **Actions** > **Utility - GenerateChangeLog**.
-
-
-### Step 2: Add generate changelog to Liquibase project
-1.
-
-### Step 3: Run ChangeLog Sync
-1. 
+### Step 1: Deploy database changes
+1. Open the project repository on GitHub.
+1. Go to **Actions** > **Deploy database changes**.
+1. Select **Environment** and click **Run Workflow**. 
 
 ---
 
@@ -118,15 +112,14 @@ The changes in this changelog already exist on the database. A ChangeLogSync nee
 ---
 
 ## Upgrading Liquibase
-
-### Step 1: ....
-1.
-
-### Step 2: ....
-1.
-
-### Step 3: ....
-1. 
+1. As per [Upgrade Documentation](https://docs.liquibase.com/workflows/liquibase-community/upgrading-liquibase.html) read the Release Notes. 
+1. Check your PATH environment variable or use `where liquibase` or `which liquibase` to find the current installation directory for Liquibase 
+1. Install the new version in a new directory adjacent to the existing install.
+1. Depending on where the old installation is intalled, perform the following:
+  -  If the PATH contains a versioned folder, update the PATH to the new version.
+  -  If the PATH contains a non-versioned folder, eg. C:\Apps\liquibase, rename the old folder to a versioned folder and rename the new version to the non-versioned folder.
+1. Source the shell to pick up any environment variable changes.
+1. Run `liquibase -v` to ensure the new version is in place.
 
 ---
 
