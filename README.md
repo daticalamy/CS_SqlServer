@@ -118,8 +118,8 @@ The changes in this changelog already exist on the database. A ChangeLogSync nee
 1. Depending on where the old installation is intalled, perform the following:
   -  If the PATH contains a versioned folder, update the PATH to the new version.
   -  If the PATH contains a non-versioned folder, eg. C:\Apps\liquibase, rename the old folder to a versioned folder and rename the new version to the non-versioned folder.
-1. Source the shell to pick up any environment variable changes.
-1. Run `liquibase -v` to ensure the new version is in place.
+5. Source the shell to pick up any environment variable changes.
+6. Run `liquibase -v` to ensure the new version is in place.
 
 ---
 
