@@ -3,10 +3,6 @@
 
 globalVariables:
   ENV: ${LB_ENVIRONMENT}
-  TENANT_ID: ${AZURE_TENANT_ID}
-  SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}
-  STORAGE_ACCT: ${AZURE_STORAGE_ACCOUNT}
-  CONTAINER: ${AZURE_CONTAINER_NAME}
 
 stages:
   ChangeLog:
@@ -14,7 +10,7 @@ stages:
       - type: liquibase
         command: generate-changelog
         cmdArgs: 
-          {  changelog-file: 'generatechangelogs/${ENV}-changelog.xml', overwrite-output-file: "true" }
+          {  changelog-file: 'generatechangelogs/${ENV}-changelog.mssql.sql', overwrite-output-file: "true" }
         
       - type: shell
-        command: echo 'Generate Changelog created as generatechangelogs/${ENV}-changelog.xml'
+        command: echo 'Generate Changelog created as generatechangelogs/${ENV}-changelog.mssql.sql'
