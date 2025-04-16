@@ -21,5 +21,4 @@ databaseChangeLog:
 
   - include:
       file: scripts/Data/populate_table4.yaml      
-      relativeToChangelogFile: truedatabaseChangeLog: []
-
+      relativeToChangelogFile: true
