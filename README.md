@@ -5,14 +5,14 @@
 ### Step 1: Create the Repository
 1. Log into GitHub and navigate template repository << ADD REPO NAME & URL HERE >>.
 1. Click on **Use this template** to **Create a new repostiory**.
-1. Provide a Repository Name (e.g., `liquibase-pro-implementation`).
+1. Provide a Repository Name (e.g., `liquibase-pro-project-abc`).
 1. Set repository visibility to Private.
 1. Click **Create Repository**.
 
 ### Step 2: Setup the GitHub Runners
 1. Open the new repository on GitHub.
 1. Go to **Settings** > **Actions** > **Runners**.
-1. << STEPS FOR SETTING UP RUNNERS >>
+1. << INTERNAL STEPS FOR SETTING UP RUNNERS >>
 
 ### Step 3: Setup the GitHub Secrets
 1. Open the new repository on GitHub.
@@ -58,7 +58,7 @@
 ### Step 2: Create three Blob Containers
 1. Open the newly created storage account.
 1. Go to **Data storage** > **Containers** and click **+ Container**.
-1. Create three containers: `snapshots`, `generatechangelogs`, and `generatechangelogs`
+1. Create three containers: `snapshots`, `generatechangelogs`, and `diffchangelogs`
 1. Click **Create** for each container to create it.
 
 ---
