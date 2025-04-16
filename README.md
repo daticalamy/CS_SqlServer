@@ -64,13 +64,14 @@
 ---
 
 ## Creating Initial Changelog
+Perform the below steps to create an initial changelog containing all the existing objects on a database.
 
 ### Step 1: Run GenerateChangeLog
 1. Open the new repository on GitHub.
 1. Navigate to **Actions** > **Utility - GenerateChangeLog**.
 1. Run the utility by selecting **Run Workflow**.
 1. Select **Environment to perform Generate-Changelog** and click **Run Workflow**. 
-1. Download the changelog logging in to [Azure Portal](https://portal.azure.com).
+1. Download the changelog by logging in to [Azure Portal](https://portal.azure.com).
 1. Navigate to **Storage accounts** and select the storage account you created in #Configuring Azure Blob Storage.
 1. Select **Data storage** > **Containers** > **generatechangelogs**
 1. Find the desired changelog, use the three **...**, and select **Download**.
@@ -99,21 +100,42 @@ The changes in this changelog already exist on the database. A ChangeLogSync nee
 ---
 
 ## Syncing Environments
+Perform the below steps to detect drift between environments. These steps will create a Drift Detection Report and create a changelog that can be used to sync the environments.
+ - The environment is the Target environment.
+ - The snapshot environment is the Source environment.
+The diff changelog represents the changes that need to be run on the Target environment to have it match the Source environment.
 
-### Step 1: ....
-1.
+### Step 1: Run Drift Detection
+1. Open the repository on GitHub.
+1. Navigate to **Actions** > **Compare an Environment to a Snapshot**.
+1. Run the utility by selecting **Run Workflow**.
+1. Select **environment** (as the Target environment) and **snapshot-environment** (as the Source environment).
+1. Click **Run Workflow**. 
+1. Download the report and changelog by logging in to [Azure Portal](https://portal.azure.com).
+1. Navigate to **Storage accounts** and select the proper storage account.
+1. Select **Data storage** > **Containers** > **diff-changelogs**
+1. Find the desired report and diff-changelog, use the three **...**, and select **Download**.
 
-### Step 2: ....
-1.
+### Step 2: Add newly generated changelog to your Liquibase project
+1. Find the diff-changelog in your **Downloads** folder.
+1. Place the diff-changelog in the changelog path for your project.
+1. Run the deployment for the Target environment.
 
-### Step 3: ....
-1. 
+### Step 3: Run ChangeLogSync or archive changelog
+Decide next steps: 
+ - If the changesets are not duplicated in the existing changelog, you’ll probably want to keep the diff changelog in the changelog path but run changelog-sync for any environments that already have the changes.
+   1. Open the new repository on GitHub.
+   1. Navigate to **Actions** > **Utility - ChangelogSync**.
+   1. Run the utility by selecting **Run Workflow**.
+   1. Select **Environment to run changelog-sync** and click **Run Workflow**. 
+   1. Repeat for each Environment where changes were not deployed.
+ - If the changesets are unique to a particular environment or duplicated in the existing changelog, move the diff changelog to an archive folder outside the changelog path.
 
 ---
 
 ## Upgrading Liquibase
 1. As per [Upgrade Documentation](https://docs.liquibase.com/workflows/liquibase-community/upgrading-liquibase.html) read the Release Notes. 
-1. Check your PATH environment variable or use `where liquibase` or `which liquibase` to find the current installation directory for Liquibase 
+1. Check your PATH environment variable or use `where liquibase` or `which liquibase` to find the current installation directory for Liquibase. 
 1. Install the new version in a new directory adjacent to the existing install.
 1. Depending on where the old installation is intalled, perform the following:
   -  If the PATH contains a versioned folder, update the PATH to the new version.
