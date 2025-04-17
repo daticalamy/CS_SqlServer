@@ -1,9 +1,6 @@
-# multi-db.flow.yaml
-# Author: Don DeArmond III
-
 stages:
   liquibaseUpdate:
-    # Run Update on Latest Repo State
+    # Run Update
     actions:
       - type: shell
         command: |
@@ -18,7 +15,6 @@ stages:
 endStage:
   actions:
     # Show history
-    # https://docs.liquibase.com/commands/change-tracking/history.html
       - type: shell
         command: |
           set "dbs=%DATABASES%"

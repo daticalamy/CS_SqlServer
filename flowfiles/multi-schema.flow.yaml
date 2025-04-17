@@ -1,0 +1,25 @@
+stages:
+  liquibaseUpdate:
+    # Run Update
+    actions:
+      - type: shell
+        command: |
+          set "schemas=%SCHEMAS%"
+          set "schemas=%schemas:,= %"
+          for %%S in (%schemas%) do (
+            echo ### Deploying to %%S ###
+            liquibase update -D"schemaName"=%%S --context-filter=%%S
+          )
+          
+
+endStage:
+  actions:
+    # Show history
+      - type: shell
+        command: |
+          set "schemas=%SCHEMAS%"
+          set "schemas=%schemas:,= %"
+          for %%S in (%schemas%) do (
+            echo ### Deployment history ###
+            liquibase history
+          )
