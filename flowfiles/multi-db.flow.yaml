@@ -1,0 +1,29 @@
+# multi-db.flow.yaml
+# Author: Don DeArmond III
+
+stages:
+  liquibaseUpdate:
+    # Run Update on Latest Repo State
+    actions:
+      - type: shell
+        command: |
+          set "dbs=%DATABASES%"
+          set "dbs=%dbs:,= %"
+          for %%D in (%dbs%) do (
+            echo ### Deploying to %%D ###
+            liquibase update --url=jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=%%D;trustServerCertificate=true
+          )
+          
+
+endStage:
+  actions:
+    # Show history
+    # https://docs.liquibase.com/commands/change-tracking/history.html
+      - type: shell
+        command: |
+          set "dbs=%DATABASES%"
+          set "dbs=%dbs:,= %"
+          for %%D in (%dbs%) do (
+            echo ### Deployment history for %%D ###
+            liquibase history --url=jdbc:sqlserver://demo-db1-win.liquibase.net:1433;databaseName=%%D;trustServerCertificate=true
+          )
