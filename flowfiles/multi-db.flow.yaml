@@ -1,3 +1,5 @@
+### Setup an environment variable with comma-separated db names called DATABASES
+
 stages:
   liquibaseUpdate:
     # Run Update
