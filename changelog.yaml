@@ -34,3 +34,8 @@ databaseChangeLog:
       context: LBAE
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: scripts/ServiceNowFiles
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
