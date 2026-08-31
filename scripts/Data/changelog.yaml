@@ -361,4 +361,3 @@ databaseChangeLog:
         columnNames: lane_id, business_date, minute_number
         constraintName: UQ_min_lane_guest_counts_sum_lane_id_business_date_min_number
         tableName: table5
-

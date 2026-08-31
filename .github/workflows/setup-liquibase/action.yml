@@ -1,0 +1,66 @@
+# .github/workflows/setup-liquibase/action.yml
+name: 'Setup Liquibase Environment'
+description: 'Sets up Java and Liquibase Secure'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Liquibase Secure
+      uses: liquibase/setup-liquibase@v3
+      with:
+        version: '6.0.0-RC8'
+        edition: 'secure'
+        download-url-base: 'https://repo.liquibase.com/non-releases/secure/{version}/liquibase-secure-{version}.tar.gz'
+
+#    - name: Setup Liquibase Secure
+#      uses: liquibase/setup-liquibase@v2
+#      with:
+#        version: '5.1.0'
+#        edition: 'secure'
+
+#    - name: Install Liquibase from local zip
+#      shell: powershell
+#      run: |
+#        $src  = "C:\liquibase-installers\liquibase-secure-5.1.1.zip"
+#        $dest = "C:\liquibase-secure"
+#
+#        if (-not (Test-Path $src)) {
+#          Write-Error "Liquibase zip not found at $src - please place it there manually before running."
+#          exit 1
+#        }
+#
+#        Expand-Archive -LiteralPath $src -DestinationPath $dest -Force
+#        echo "$dest" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+#        Write-Host "Liquibase installed to $dest and added to PATH"
+
+#    - name: Download mssql-jdbc_auth native DLL
+#      shell: powershell
+#      run: |
+#        $Version    = "13.2.1.x64"
+#        $DllName    = "mssql-jdbc_auth-$Version.dll"
+#        $DllUrl     = "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc_auth/$Version/$DllName"
+#        $InstallDir = "C:\mssql-auth"
+#        $DllPath    = Join-Path $InstallDir $DllName
+#
+#        New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+#
+#        Write-Host "Downloading $DllName from Maven Central..."
+#        Invoke-WebRequest -Uri $DllUrl -OutFile $DllPath -UseBasicParsing
+#
+#        if (-not (Test-Path $DllPath)) {
+#          Write-Error "DLL download failed - $DllPath not found."
+#          exit 1
+#        }
+#        Write-Host "Download complete: $((Get-Item $DllPath).Length) bytes"
+
+#    - name: Set PATH for Liquibase
+#      shell: powershell
+#      run: |
+#        $InstallDir = "C:\mssql-auth"        
+#        echo $InstallDir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append

@@ -10,23 +10,15 @@
 ##  Standard value options:
 ##    ALLOWED_LIST: <comma-separated list>
 ##    ATTRIBUTE: <ID, AUTHOR, CONTEXT, CONTEXT_FILTER, LABELS, DBMS, RUN_ON_CHANGE, RUN_ALWAYS, FAIL_ON_ERROR, ON_VALIDATION_FAIL, RUN_IN_TRANSACTION, LOGICAL_FILE_PATH, OBJECT_QUOTING_STRATEGY, CREATED, RUN_ORDER, IGNORE, RUN_WITH, RUN_WITH_SPOOL_FILE>
-##    BILLING_MODE: <PROVISIONED, PAY_PER_REQUEST>
 ##    CASE_SENSITIVE: <true, false>
-##    CHANGE_TYPE_LIST: <comma-separated list; valid values: RENAMEVIEW, DROPFOREIGNKEYCONSTRAINT, DROPTABLE, DROPUNIQUECONSTRAINT, SQLFILE, MERGECOLUMNS, RENAMETRIGGER, TAGDATABASE, ADDNOTNULLCONSTRAINT, SETCOLUMNREMARKS, DISABLECHECKCONSTRAINT, ADDUNIQUECONSTRAINT, CREATEFUNCTION, CREATETRIGGER, DROPINDEX, DROPSEQUENCE, CREATESEQUENCE, DROPPACKAGE, OUTPUT, STOP, DROPNOTNULLCONSTRAINT, ENABLETRIGGER, SETTABLEREMARKS, DROPTRIGGER, DROPCOLUMN, DROPPROCEDURE, SQL, EXECUTECOMMAND, ADDCHECKCONSTRAINT, CREATEVIEW, DROPFUNCTION, CREATETABLE, DROPPACKAGEBODY, ENABLECHECKCONSTRAINT, LOADUPDATEDATA, CUSTOMCHANGE, DROPSYNONYM, INSERT, DROPDEFAULTVALUE, ADDCOLUMN, CREATEPROCEDURE, LOADDATA, CREATEINDEX, DROPALLFOREIGNKEYCONSTRAINTS, CREATEPACKAGEBODY, CREATESYNONYM, DISABLETRIGGER, DELETE, RENAMESEQUENCE, ADDDEFAULTVALUE, DROPPRIMARYKEY, UPDATE, MODIFYDATATYPE, ADDFOREIGNKEYCONSTRAINT, DROPCHECKCONSTRAINT, EMPTY, MARKUNUSED, ALTERSEQUENCE, ADDAUTOINCREMENT, RENAMECOLUMN, ADDLOOKUPTABLE, DROPVIEW, CREATEPACKAGE, ADDPRIMARYKEY, RENAMETABLE>
+##    CHANGE_TYPE_LIST: <comma-separated list; valid values: RENAMEVIEW, DROPFOREIGNKEYCONSTRAINT, DROPTABLE, DROPUNIQUECONSTRAINT, DROPCOLLECTION, SQLFILE, MERGECOLUMNS, RENAMETRIGGER, MONGOFILE, TAGDATABASE, ADDNOTNULLCONSTRAINT, INSERTMANY, CREATECOLLECTION, SETCOLUMNREMARKS, DISABLECHECKCONSTRAINT, ADMINCOMMAND, ADDUNIQUECONSTRAINT, CREATEFUNCTION, CREATETRIGGER, DROPINDEX, DROPSEQUENCE, CREATESEQUENCE, DROPPACKAGE, OUTPUT, STOP, DROPNOTNULLCONSTRAINT, ENABLETRIGGER, SETTABLEREMARKS, DROPTRIGGER, DROPCOLUMN, RUNCOMMAND, DROPPROCEDURE, SQL, EXECUTECOMMAND, ADDCHECKCONSTRAINT, CREATEVIEW, DROPFUNCTION, CREATETABLE, DROPPACKAGEBODY, MONGO, ENABLECHECKCONSTRAINT, LOADUPDATEDATA, CUSTOMCHANGE, DROPSYNONYM, INSERT, DROPDEFAULTVALUE, ADDCOLUMN, CREATEPROCEDURE, LOADDATA, INSERTONE, CREATEINDEX, DROPALLFOREIGNKEYCONSTRAINTS, CREATEPACKAGEBODY, CREATESYNONYM, DISABLETRIGGER, DELETE, RENAMESEQUENCE, ADDDEFAULTVALUE, DROPPRIMARYKEY, UPDATE, MODIFYDATATYPE, ADDFOREIGNKEYCONSTRAINT, DROPCHECKCONSTRAINT, EMPTY, MARKUNUSED, ALTERSEQUENCE, ADDAUTOINCREMENT, RENAMECOLUMN, ADDLOOKUPTABLE, DROPVIEW, CREATEPACKAGE, ADDPRIMARYKEY, RENAMETABLE>
 ##    COLUMN_NAME: <non-empty string>
 ##    CONSTRAINT: <NOT_NULL, UNIQUE, PRIMARYKEY, FOREIGNKEY, DEFAULT>
 ##    CONSTRAINT_OPERATOR: <STARTS_WITH, ENDS_WITH, CONTAINS, REGEXP, ALL>
-##    DBMS: <DYNAMODB>
 ##    DEFAULTS_FILENAME: <valid filename>
-##    DELETION_PROTECTION_ENABLED: <true,false>
-##    DYNAMO_CHANGE_TYPE: <CREATE_GLOBAL_SECONDARY_INDEX, PARTIQL, PARTIQL_FILE, DELETE_DYNAMO_TABLE, CREATE_DYNAMO_TABLE, UPDATE_TABLE_PROVISIONED_THROUGHPUT, UPDATE_DYNAMO_TABLE, UPDATE_GLOBAL_SECONDARY_INDEX, DELETE_GLOBAL_SECONDARY_INDEX>
-##    ENCODING: <non-empty string>
-##    END_DELIMITER: <non-empty string>
 ##    EXCEPTIONS_LIST: <comma-separated list>
-##    INDEX_NAME: <non-empty string>
+##    FILETYPE: <sql, xml, json, yml, yaml>
 ##    JDBC_URL: <non-empty string>
-##    KEY_SCHEMA_HASH_NAME: <non-empty string>
-##    KEY_SCHEMA_RANGE_NAME: <non-empty string>
 ##    LOGIC_CONDITIONAL: <non-empty string>
 ##    LOOKAHEAD_MESSAGE: <non-empty string>
 ##    LOOKAHEAD_SEARCH_STRING: <a string, or a valid regular expression>
@@ -45,12 +37,7 @@
 ##    PATTERN_B: <a string, or a valid regular expression>
 ##    PRIMARY_SEARCH_STRING: <a string, or a valid regular expression>
 ##    PRIVILEGE_LIST: <comma-separated list of valid database privileges>
-##    PROJECTION_TYPE: <KEYS_ONLY, INCLUDE, ALL>
 ##    PROJECT_DIR: <path to a directory>
-##    PROJECT_NONKEY_ATTRIBUTES: <comma-separated list>
-##    PROVISIONED_THROUGHPUT_READ_CAPACITY: <PositiveNonZeroIntGetter>
-##    PROVISIONED_THROUGHPUT_WRITE_CAPACITY: <PositiveNonZeroIntGetter>
-##    RELATIVE_TO_CHANGELOG: <true, false>
 ##    REQUIRES_SNAPSHOT: <true, false>
 ##    RUN_IN_TRANSACTION_VALUE: <true,false>
 ##    SAMPLE_CHANGELOG_NAME: <valid filename>
@@ -63,12 +50,11 @@
 ##    SEARCH_STRING: <a string, or a valid regular expression>
 ##    SPLIT_STATEMENTS: <true, false>
 ##    STRIP_COMMENTS: <true, false>
-##    TABLE_CLASS: <STANDARD, STANDARD_INFREQUENT_ACCESS>
 ##    TABLE_NAME: <string>
 ##    USERNAME: <non-empty string>
 
-fileCreated: 2025-05-12T14:58:58.694Z
-fileModified: 2025-05-12T21:29:00.668Z
+fileCreated: 2024-02-23T17:05:17.619Z
+fileModified: 2024-10-09T18:30:25.929Z
 rules:
 - description: This check warns a user when SQL contains 'GRANT' statements so that
     they can ensure that the privilege being granted won't lead to security issues.
@@ -122,27 +108,8 @@ rules:
   name: Warn on Detection of 'SELECT *'
   severity: '0'
   shortName: SqlSelectStarWarn
-- description: This check scans SQL for the presence of specific patterns in specified
-    changelog paths, and warns the user when they are found.
-  enabled: true
-  id: '6ee0b1cc-4cd0-348f-8681-dd363433766e'
-  name: Check for specific patterns in sql
-  parameters:
-  - parameter: SEARCH_STRING
-    value: (?i)(?:CREATE|ALTER)\s+TABLE\s+.*?\b(?:VARCHAR|NVARCHAR|VARBINARY)\s*\(\s*MAX\s*\)
-  - parameter: MESSAGE
-    value: Warning! Avoid using MAX. Consider VARCHAR(8000) or less instead.
-  - parameter: STRIP_COMMENTS
-    value: true
-  - parameter: PATH_FILTER_REGEX
-    value: null
-  - parameter: SPLIT_STATEMENTS
-    value: false
-  parentRuleId: '6fe07581-c90d-3add-9057-1547a1439727'
-  severity: '0'
-  shortName: NoTableUsingMaxColumn
-- description: This check scans SQL for the presence of specific patterns in specified
-    changelog paths, and warns the user when they are found.
+- description: This check scans SQL for the presence of specific patterns and warns
+    the user when they are found.
   enabled: false
   id: '6fe07581-c90d-3add-9057-1547a1439727'
   name: Check for specific patterns in sql
@@ -151,7 +118,7 @@ rules:
     value: null
   - parameter: MESSAGE
     value: A match for regular expression <SEARCH_STRING> was detected in Changeset
-      <CHANGESET> in changelog path <PATH_FILTER_REGEX>.
+      <CHANGESET>.
   - parameter: STRIP_COMMENTS
     value: true
   - parameter: PATH_FILTER_REGEX
@@ -161,43 +128,30 @@ rules:
   parentRuleId: null
   severity: '0'
   shortName: SqlUserDefinedPatternCheck
-- description: This check triggers when a changeset contains the supplied pattern
-    string or regex, but does not have an end delimiter set specifically in the changeset
-    or via options such as 'pro-global-end-delimiter' or 'endDelimiter' attribute
-    in a modifyChangesets tag.
-  enabled: false
-  id: 'd2fc6f01-8ddd-35f3-bc03-f516a8f611ac'
-  name: End delimiter exists when pattern exists
-  parameters:
-  - parameter: SEARCH_STRING
-    value: null
-  - parameter: CASE_SENSITIVE
-    value: true
-  - parameter: STRIP_COMMENTS
-    value: true
-  - parameter: MESSAGE
-    value: The pattern '<SEARCH_STRING>' was found without an end delimiter in Changeset
-      '<CHANGESET>'.
-  parentRuleId: null
-  severity: '0'
-  shortName: EndDelimiterExistsWhenPatternExists
 - description: Check triggers if the user-supplied regex pattern A is followed by
     the user-supplied regex pattern B
   enabled: false
   id: '840a30f4-b3c5-3ad5-ac9b-6251d1f7b99d'
   name: Pattern a followed by pattern b
   parameters:
+  - parameter: PRIMARY_SEARCH_STRING
+    value: null
+  - parameter: LOOKAHEAD_SEARCH_STRING
+    value: null
+  - parameter: CASE_SENSITIVE
+    value: true
+  - parameter: LOOKAHEAD_MESSAGE
+    value: 'Match found: ''<PRIMARY_SEARCH_STRING>'' is followed by ''<LOOKAHEAD_SEARCH_STRING>''
+      in Changeset ''<CHANGESET>''.'
+  - parameter: STRIP_COMMENTS
+    value: true
   - parameter: PATTERN_A
     value: null
   - parameter: PATTERN_B
     value: null
-  - parameter: CASE_SENSITIVE
-    value: true
   - parameter: MESSAGE
     value: 'Match found: ''<PATTERN_A>'' is followed by ''<PATTERN_B>'' in Changeset
       ''<CHANGESET>''.'
-  - parameter: STRIP_COMMENTS
-    value: true
   parentRuleId: null
   severity: '0'
   shortName: PatternAFollowedByPatternB
@@ -207,17 +161,24 @@ rules:
   id: 'e5faa299-31c1-361e-89f3-8c5ad9e49a22'
   name: Pattern a preceded by pattern b
   parameters:
+  - parameter: PRIMARY_SEARCH_STRING
+    value: null
+  - parameter: LOOKBEHIND_SEARCH_STRING
+    value: null
+  - parameter: CASE_SENSITIVE
+    value: true
+  - parameter: LOOKBEHIND_MESSAGE
+    value: 'Match found: ''<LOOKBEHIND_SEARCH_STRING>'' is preceded by ''<PRIMARY_SEARCH_STRING>''
+      in Changeset ''<CHANGESET>''.'
+  - parameter: STRIP_COMMENTS
+    value: true
   - parameter: PATTERN_A
     value: null
   - parameter: PATTERN_B
     value: null
-  - parameter: CASE_SENSITIVE
-    value: true
   - parameter: MESSAGE
     value: 'Match found: ''<PATTERN_A>'' is preceded by ''<PATTERN_B>'' in Changeset
       ''<CHANGESET>''.'
-  - parameter: STRIP_COMMENTS
-    value: true
   parentRuleId: null
   severity: '0'
   shortName: PatternAPrecededByPatternB
@@ -227,17 +188,24 @@ rules:
   id: 'f9a6e39d-0799-3041-9b5a-6b61db4bc630'
   name: Pattern a not followed by pattern b
   parameters:
+  - parameter: PRIMARY_SEARCH_STRING
+    value: null
+  - parameter: LOOKAHEAD_SEARCH_STRING
+    value: null
+  - parameter: CASE_SENSITIVE
+    value: true
+  - parameter: NEGATIVE_LOOKAHEAD_MESSAGE
+    value: 'Match found: ''<PRIMARY_SEARCH_STRING>'' is not followed by ''<LOOKAHEAD_SEARCH_STRING>''
+      in Changeset ''<CHANGESET>''.'
+  - parameter: STRIP_COMMENTS
+    value: true
   - parameter: PATTERN_A
     value: null
   - parameter: PATTERN_B
     value: null
-  - parameter: CASE_SENSITIVE
-    value: true
   - parameter: MESSAGE
     value: 'Match found: ''<PATTERN_A>'' is NOT followed by ''<PATTERN_B>'' in Changeset
       ''<CHANGESET>''.'
-  - parameter: STRIP_COMMENTS
-    value: true
   parentRuleId: null
   severity: '0'
   shortName: PatternANotFollowedByPatternB
@@ -247,17 +215,24 @@ rules:
   id: 'a089037f-4fd5-3873-a07e-16105ded71c0'
   name: Pattern a not preceded by pattern b
   parameters:
+  - parameter: PRIMARY_SEARCH_STRING
+    value: null
+  - parameter: LOOKBEHIND_SEARCH_STRING
+    value: null
+  - parameter: CASE_SENSITIVE
+    value: true
+  - parameter: NEGATIVE_LOOKBEHIND_MESSAGE
+    value: 'Match found: ''<LOOKBEHIND_SEARCH_STRING>'' is not preceded by ''<PRIMARY_SEARCH_STRING>''
+      in Changeset ''<CHANGESET>''.'
+  - parameter: STRIP_COMMENTS
+    value: true
   - parameter: PATTERN_A
     value: null
   - parameter: PATTERN_B
     value: null
-  - parameter: CASE_SENSITIVE
-    value: true
   - parameter: MESSAGE
     value: 'Match found: ''<PATTERN_A>'' is NOT preceded by ''<PATTERN_B>'' in Changeset
       ''<CHANGESET>''. '
-  - parameter: STRIP_COMMENTS
-    value: true
   parentRuleId: null
   severity: '0'
   shortName: PatternANotPrecededByPatternB
@@ -271,51 +246,6 @@ rules:
   parentRuleId: null
   severity: '0'
   shortName: TableColumnLimit
-- description: This checks triggers when the Max Affected Rows Allowed value is exceeded
-    by the number of rows DELETED by a SQL statement.  The SQL statement is executed
-    against the database, and then rolled back.
-  enabled: false
-  id: '99b1c0d2-6dda-3acb-85f3-68002c3b07c1'
-  name: Check Affected Rows Count on Delete
-  parameters:
-  - parameter: MAX_ROWS
-    value: 50
-  - parameter: MESSAGE
-    value: <AFFECTED_ROWS> rows will be affected, which is more than the allowed '<THRESHOLD>'
-      rows. The SQL statement is '<STATEMENT>' in '<CHANGESET>'.
-  parentRuleId: null
-  severity: '0'
-  shortName: MaxAffectedRowsAllowedDelete
-- description: This checks triggers when the Max Affected Rows Allowed value is exceeded
-    by the number of rows INSERTED by a SQL statement.  The SQL statement is executed
-    against the database, and then rolled back.
-  enabled: false
-  id: 'bbd74a72-77d4-3517-9125-c771f790178b'
-  name: Check Affected Rows Count on Insert
-  parameters:
-  - parameter: MAX_ROWS
-    value: 50
-  - parameter: MESSAGE
-    value: <AFFECTED_ROWS> rows will be affected, which is more than the allowed '<THRESHOLD>'
-      rows. The SQL statement is '<STATEMENT>' in '<CHANGESET>'.
-  parentRuleId: null
-  severity: '0'
-  shortName: MaxAffectedRowsAllowedInsert
-- description: This checks triggers when the Max Affected Rows Allowed value is exceeded
-    by the number of rows UPDATED by a SQL statement.  The SQL statement is executed
-    against the database, and then rolled back.
-  enabled: false
-  id: 'e9e2055d-e837-3418-96ac-352416cd43ee'
-  name: Check Affected Rows Count on Update
-  parameters:
-  - parameter: MAX_ROWS
-    value: 50
-  - parameter: MESSAGE
-    value: <AFFECTED_ROWS> rows will be affected, which is more than the allowed '<THRESHOLD>'
-      rows. The SQL statement is '<STATEMENT>' in '<CHANGESET>'.
-  parentRuleId: null
-  severity: '0'
-  shortName: MaxAffectedRowsAllowedUpdate
 - description: This check confirms the listed object names conform to the supplied
     pattern.
   enabled: false
@@ -333,50 +263,6 @@ rules:
   parentRuleId: null
   severity: '0'
   shortName: ObjectNameMustMatch
-- description: Executes a custom check script.
-  enabled: false
-  id: '6bd513b6-7d9a-3a54-986c-235f7fe27285'
-  name: Custom Check Template
-  parameters:
-  - parameter: SCRIPT_DESCRIPTION
-    value: When adding a new column, throw warning when table already has > X columns.
-  - parameter: SCRIPT_SCOPE
-    value: CHANGELOG
-  - parameter: SCRIPT_MESSAGE
-    value: The table being altered or created has more than 20 columns.
-  - parameter: SCRIPT_TYPE
-    value: PYTHON
-  - parameter: SCRIPT_PATH
-    value: python/check_column_count.py
-  - parameter: SCRIPT_ARGS
-    value: columns="20"
-  - parameter: REQUIRES_SNAPSHOT
-    value: true
-  parentRuleId: '68592fc1-8c79-3026-990f-da80c1c6d6e0'
-  severity: '2'
-  shortName: CheckColumnCount
-- description: Executes a custom check script.
-  enabled: false
-  id: '68592fc1-8c79-3026-990f-da80c1c6d6e0'
-  name: Custom Check Template
-  parameters:
-  - parameter: SCRIPT_DESCRIPTION
-    value: Custom check
-  - parameter: SCRIPT_SCOPE
-    value: CHANGELOG
-  - parameter: SCRIPT_MESSAGE
-    value: The message to display when the check is triggered
-  - parameter: SCRIPT_TYPE
-    value: PYTHON
-  - parameter: SCRIPT_PATH
-    value: null
-  - parameter: SCRIPT_ARGS
-    value: null
-  - parameter: REQUIRES_SNAPSHOT
-    value: false
-  parentRuleId: null
-  severity: '0'
-  shortName: CustomCheckTemplate
 - description: This check confirms the listed object names do not match the supplied
     pattern.
   enabled: false
@@ -407,21 +293,6 @@ rules:
   parentRuleId: null
   severity: '0'
   shortName: SqlGrantSpecificPrivsWarn
-- description: ' This check triggers when a changeset contains the user-specified
-    runInTransactions value of ''true'' or ''false''. Note: Changesets without a runInTransactions
-    value are not checked.'
-  enabled: false
-  id: '1fdc2bbb-67a4-3d45-baad-09e69f1108cd'
-  name: Check Changeset runInTransaction value
-  parameters:
-  - parameter: RUN_IN_TRANSACTION_VALUE
-    value: false
-  - parameter: MESSAGE
-    value: A match for regular expression <SEARCH_STRING> was detected in Changeset
-      <CHANGESET>.
-  parentRuleId: null
-  severity: '0'
-  shortName: CheckRunInTransactionValue
 - description: This check warns a user when a table is being truncated so that they
     can ensure that truncating the table won't lead to unintentional loss of data.
   enabled: false
@@ -644,19 +515,6 @@ rules:
   name: Table must have a comment
   severity: '0'
   shortName: TableCommentCheck
-- description: This check triggers when specified attributes do not match TRUE or
-    FALSE, as configured by the user.
-  enabled: false
-  id: '8339bc72-ae9e-3678-8a86-2af1b8aa2d1c'
-  name: Changeset attributes set true or false
-  parameters:
-  - parameter: ATTRIBUTE
-    value: null
-  - parameter: SEARCH_STRING
-    value: null
-  parentRuleId: null
-  severity: '0'
-  shortName: ChangesetAttributesSetTrueOrFalse
 - description: This check triggers when specific user-supplied patterns are found
     in Table Comments.
   enabled: false
@@ -672,32 +530,6 @@ rules:
   parentRuleId: null
   severity: '0'
   shortName: TableCommentPatternCheck
-- description: This check triggers when specified attributes do not match the user-supplied
-    string or regex pattern.
-  enabled: false
-  id: '84092e22-894a-3452-a778-5bfae8ba03ca'
-  name: Changeset attributes and value
-  parameters:
-  - parameter: ATTRIBUTE
-    value: null
-  - parameter: SEARCH_STRING
-    value: null
-  parentRuleId: null
-  severity: '0'
-  shortName: ChangesetAttributesAndValue
-- description: This check triggers when the logic conditional evaluates to true
-  enabled: false
-  id: 'b3fc0c29-7070-345d-acdd-761e28e99766'
-  name: Chained checks template
-  parameters:
-  - parameter: LOGIC_CONDITIONAL
-    value: null
-  - parameter: MESSAGE
-    value: The conditions in '<chained checks shortname>' were met for '<logic conditional>'.  The
-      chained checks include <checknames>.
-  parentRuleId: null
-  severity: '0'
-  shortName: ChainedChecksTemplate
 - description: Check for and alert when specified table does not contain the required
     constraint(s).
   enabled: false
@@ -727,48 +559,145 @@ rules:
   name: Require Changeset ID is valid UUID
   severity: '0'
   shortName: RequireChangesetIDisUUID
-- description: This check triggers when a XML,YAML, or JSON changeset contains the
-    Dynamo-specific deleteDynamoTable changetype.
+- description: This check triggers when a changeset contains the supplied pattern
+    string or regex, but does not have an end delimiter set specifically in the changeset
+    or via options such as 'pro-global-end-delimiter' or 'endDelimiter' attribute
+    in a modifyChangesets tag.
   enabled: false
-  id: '05145e51-8100-3fde-9b37-2dce28931cc7'
-  name: Warn on Dynamo-specific deleteDynamoTable changetype
-  severity: '0'
-  shortName: DynamoDeleteDynamoTableCheck
-- description: This check triggers when a XML,YAML, or JSON changeset contains the
-    Dynamo-specific deleteGlobalSecondaryIndex changetype.
-  enabled: false
-  id: 'baa51654-b8c3-30cd-8376-1f8bc3c5d9fb'
-  name: Warn on Dynamo-specific deleteGlobalSecondaryIndex changetype
-  severity: '0'
-  shortName: DynamoDeleteGlobalSecondaryIndexCheck
-- description: This check triggers when Dynamo changetype attributes do not match
-    the user-supplied string or regex pattern.
-  enabled: false
-  id: '7906393d-e077-3d46-b8bf-0edc4078afc0'
-  name: Dynamo changetype attributes
+  id: 'd2fc6f01-8ddd-35f3-bc03-f516a8f611ac'
+  name: End delimiter exists when pattern exists
   parameters:
-  - parameter: DYNAMO_CHANGE_TYPE
+  - parameter: SEARCH_STRING
+    value: null
+  - parameter: CASE_SENSITIVE
+    value: true
+  - parameter: STRIP_COMMENTS
+    value: true
+  - parameter: MESSAGE
+    value: The pattern '<SEARCH_STRING>' was found without an end delimiter in Changeset
+      '<CHANGESET>'.
+  parentRuleId: null
+  severity: '0'
+  shortName: EndDelimiterExistsWhenPatternExists
+- description: ' This check triggers when a changeset contains the user-specified
+    runInTransactions value of ''true'' or ''false''. Note: Changesets without a runInTransactions
+    value are not checked.'
+  enabled: false
+  id: '1fdc2bbb-67a4-3d45-baad-09e69f1108cd'
+  name: Check Changeset runInTransaction value
+  parameters:
+  - parameter: RUN_IN_TRANSACTION_VALUE
+    value: false
+  - parameter: MESSAGE
+    value: A match for regular expression <SEARCH_STRING> was detected in Changeset
+      <CHANGESET>.
+  parentRuleId: null
+  severity: '0'
+  shortName: CheckRunInTransactionValue
+- description: This check triggers when the logic conditional evaluates to true
+  enabled: false
+  id: 'b3fc0c29-7070-345d-acdd-761e28e99766'
+  name: Chained checks template
+  parameters:
+  - parameter: LOGIC_CONDITIONAL
+    value: null
+  - parameter: MESSAGE
+    value: The conditions in '<chained checks shortname>' were met for '<logic conditional>'.  The
+      chained checks include <checknames>.
+  parentRuleId: null
+  severity: '0'
+  shortName: ChainedChecksTemplate
+- description: This checks triggers when the Max Affected Rows Allowed value is exceeded
+    by the number of rows DELETED by a SQL statement.  The SQL statement is executed
+    against the database, and then rolled back.
+  enabled: false
+  id: '99b1c0d2-6dda-3acb-85f3-68002c3b07c1'
+  name: Check Affected Rows Count on Delete
+  parameters:
+  - parameter: MAX_ROWS
+    value: 50
+  - parameter: MESSAGE
+    value: <AFFECTED_ROWS> rows will be affected, which is more than the allowed '<THRESHOLD>'
+      rows. The SQL statement is '<STATEMENT>' in '<CHANGESET>'.
+  parentRuleId: null
+  severity: '0'
+  shortName: MaxAffectedRowsAllowedDelete
+- description: This checks triggers when the Max Affected Rows Allowed value is exceeded
+    by the number of rows INSERTED by a SQL statement.  The SQL statement is executed
+    against the database, and then rolled back.
+  enabled: false
+  id: 'bbd74a72-77d4-3517-9125-c771f790178b'
+  name: Check Affected Rows Count on Insert
+  parameters:
+  - parameter: MAX_ROWS
+    value: 50
+  - parameter: MESSAGE
+    value: <AFFECTED_ROWS> rows will be affected, which is more than the allowed '<THRESHOLD>'
+      rows. The SQL statement is '<STATEMENT>' in '<CHANGESET>'.
+  parentRuleId: null
+  severity: '0'
+  shortName: MaxAffectedRowsAllowedInsert
+- description: This checks triggers when the Max Affected Rows Allowed value is exceeded
+    by the number of rows UPDATED by a SQL statement.  The SQL statement is executed
+    against the database, and then rolled back.
+  enabled: false
+  id: 'e9e2055d-e837-3418-96ac-352416cd43ee'
+  name: Check Affected Rows Count on Update
+  parameters:
+  - parameter: MAX_ROWS
+    value: 50
+  - parameter: MESSAGE
+    value: <AFFECTED_ROWS> rows will be affected, which is more than the allowed '<THRESHOLD>'
+      rows. The SQL statement is '<STATEMENT>' in '<CHANGESET>'.
+  parentRuleId: null
+  severity: '0'
+  shortName: MaxAffectedRowsAllowedUpdate
+- description: Executes a custom check script.
+  enabled: false
+  id: '68592fc1-8c79-3026-990f-da80c1c6d6e0'
+  name: Custom Check Template
+  parameters:
+  - parameter: SCRIPT_DESCRIPTION
+    value: Custom check
+  - parameter: SCRIPT_SCOPE
+    value: CHANGELOG
+  - parameter: SCRIPT_MESSAGE
+    value: The message to display when the check is triggered
+  - parameter: SCRIPT_TYPE
+    value: PYTHON
+  - parameter: SCRIPT_PATH
+    value: null
+  - parameter: SCRIPT_ARGS
+    value: null
+  - parameter: REQUIRES_SNAPSHOT
+    value: false
+  parentRuleId: null
+  severity: '0'
+  shortName: CustomCheckTemplate
+- description: This check triggers when specified attributes do not match TRUE or
+    FALSE, as configured by the user.
+  enabled: false
+  id: '8339bc72-ae9e-3678-8a86-2af1b8aa2d1c'
+  name: Changeset attributes set true or false
+  parameters:
+  - parameter: ATTRIBUTE
+    value: null
+  - parameter: SEARCH_STRING
     value: null
   parentRuleId: null
   severity: '0'
-  shortName: DynamoChangetypeAttributes
-- description: This check scans SQL for the presence of specific patterns in specified
-    changelog paths, and warns the user when they are found.
-  enabled: true
-  id: 'fd71140d-5751-343f-a2dc-0f7732bf8beb'
-  name: Check for specific patterns in sql
+  shortName: ChangesetAttributesSetTrueOrFalse
+- description: This check triggers when specified attributes do not match the user-supplied
+    string or regex pattern.
+  enabled: false
+  id: '84092e22-894a-3452-a778-5bfae8ba03ca'
+  name: Changeset attributes and value
   parameters:
-  - parameter: SEARCH_STRING
-    value: (?i)(?:CREATE|ALTER)\s+TABLE\s+.*?\b(?:FLOAT)
-  - parameter: MESSAGE
-    value: 'Best Practice Warning: Avoid using FLOAT datatype. Consider DECIMAL instead.'
-  - parameter: STRIP_COMMENTS
-    value: true
-  - parameter: PATH_FILTER_REGEX
+  - parameter: ATTRIBUTE
     value: null
-  - parameter: SPLIT_STATEMENTS
-    value: false
-  parentRuleId: '6fe07581-c90d-3add-9057-1547a1439727'
+  - parameter: SEARCH_STRING
+    value: null
+  parentRuleId: null
   severity: '0'
-  shortName: NoColumnFloatType
+  shortName: ChangesetAttributesAndValue
 version: '1.1'

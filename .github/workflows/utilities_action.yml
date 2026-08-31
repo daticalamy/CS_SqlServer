@@ -1,0 +1,99 @@
+####################################################################
+#  GitHub Action to perform various Liquibase utilities.
+#####################################################################
+name: 'Liquibase Secure Utilities'
+run-name: ${{ inputs.environment}} utilities by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+      # The type 'environment' will automatically pull in the environments created in GitHub
+      environment:
+        description: 'Environment'
+        type: environment
+        required: true     
+
+      utility:
+        description: 'Utility to run'
+        type: choice
+        required: true
+        options:
+        - changelog-sync
+        - connect
+        - generate-changelog-zip
+        - history
+        - release-locks
+        - snapshot-zip
+        - status
+       
+####################################################################
+#  Set up the environment
+#####################################################################
+env:  
+  # License key
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  #LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL_INTEGRATED_SECURITY }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  #LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
+  #LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: flows,checks,changelogs
+
+  # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
+  
+  ENVIRONMENT: ${{ inputs.environment }}
+  LB_UTILITY: ${{ inputs.utility }}
+  
+  # Drift Detection
+  LB_SCHEMAS: "DBO,Sales"
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+
+  # History Table
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+
+jobs:
+  #########################################################################
+  #  Run Utilities
+  #########################################################################
+
+  database-utilities:
+    runs-on: [self-hosted, Windows]
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+ 
+    - name: Liquibase Utilities Flow
+      run: liquibase flow --flow-file=liquibase-utilities.flowfile.yaml
+        
+    - name: Upload Generate Changelog Artifact
+      if: github.event.inputs.utility == 'generate-changelog-zip'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.environment }}-changelog.oracle.zip
+        path: generatechangelogs
+        
+    - name: Upload Snapshot Artifact
+      if: github.event.inputs.utility == 'snapshot-zip'
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.environment }}-snapshot.zip
+        path: snapshots

@@ -1,0 +1,91 @@
+####################################################################
+#  GitHub Action to perform diff / drift detection between two 
+#  database environments.
+#####################################################################
+name: 'Liquibase Diff'
+run-name: ${{ inputs.source_environment}} and ${{ inputs.target_environment}} diff by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+
+      source_environment:
+        description: 'Source Environment'
+        type: environment
+        required: true
+
+      target_environment:
+        description: 'Target Environment'
+        required: true
+        type: choice
+        options:
+          - DEV
+          - TEST
+          - PROD 
+
+####################################################################
+#  Set up the environment
+#####################################################################
+env:
+  # Azure Storage account and container to hold reports
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  
+  # Pro License key
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  
+  # Default schema: Specify schema for all changes
+  # LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: Sales
+  # LIQUIBASE_COMMAND_REFERENCE_DEFAULT_SCHEMA_NAME: Sales
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: flows, checks, changelogs
+  
+  # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
+  
+  ENVIRONMENT: ${{ inputs.source_environment }}
+  
+  LB_SCHEMAS: "DBO,Sales"
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+
+  # History Table
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+
+
+jobs:
+  #########################################################################
+  #  Diff
+  #########################################################################
+
+  diff:
+    runs-on: [self-hosted]
+    environment: ${{ inputs.source_environment }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+ 
+    - name: Liquibase Diff Flow
+      run: liquibase flow --flow-file=liquibase-drift.flowfile.yaml

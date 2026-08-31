@@ -1,0 +1,75 @@
+globalVariables:
+  TAG: ${LB_TAG}
+  CLONED_URL: ${LB_CLONED_URL}
+  
+stages:
+
+  # Validate changes
+  Validation:
+    actions: 
+      - type: liquibase
+        command: validate
+
+  Status:
+    actions:
+      - type: liquibase
+        command: status
+        cmdArgs: {verbose: true}
+
+      - type: control
+        if: "status.changesetCount == 0"
+        command: exit
+        cmdArgs: {exitCode: 0, exitMessage: "Exiting with an error status of 0 because the database is up-to-date"}
+
+  # Moved to separate flow
+  # Checks-Changelog:
+  #  actions:
+  #    - type: liquibase
+  #      command: checks run
+  #      cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
+  #      globalArgs: { reports-name: "checks-report-premerge-changelog.html"}
+
+  Update-SQL:
+    actions:
+      - type: liquibase
+        command: update-sql
+        globalArgs: { reports-name: "sql-premerge-report.html"}
+
+  # Create Clone Database
+  Create-EphemeralDB:
+    actions:
+      - type: shell
+        command: |
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "DBCC clonedatabase([${LB_DATABASENAME}], [${LB_DATABASENAME}_eph]) with verify_clonedb"
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "alter database [${LB_DATABASENAME}_eph] set read_write"
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "INSERT INTO [${LB_DATABASENAME}_eph].${LIQUIBASE_LIQUIBASE_SCHEMA_NAME}.DATABASECHANGELOG SELECT * FROM ${LB_DATABASENAME}.${LIQUIBASE_LIQUIBASE_SCHEMA_NAME}.DATABASECHANGELOG"
+
+  # Deploy to ephemeral database
+  Tag-and-Deploy-to-EphemeralDB:
+    actions:
+      - type: liquibase
+        command: tag
+        cmdArgs: { URL: "${CLONED_URL}", tag: "${TAG}" }
+        
+      # Run the update (with testing rollback)
+      - type: liquibase
+        command: update-testing-rollback
+        cmdArgs: { URL: "${CLONED_URL}", reports-name: "clone-report.html" }
+
+      - type: liquibase
+        command: history
+        cmdArgs: { URL: "${CLONED_URL}" }
+        
+endStage:
+  actions:
+   # Drop Ephemeral Database if it exists   
+    - type: shell
+      command: |
+        DB_EXISTS=$(sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -h -1 -Q "SELECT CASE WHEN DB_ID('${LB_DATABASENAME}_eph') IS NOT NULL THEN 'EXISTS' ELSE 'NOT_EXISTS' END")
+        echo "Database status: $DB_EXISTS"
+        if [[ "$DB_EXISTS" == *"NOT_EXISTS"* ]]; then
+          echo "Database does not exist - no drop necessary"
+        else
+          echo "Database exists - dropping"
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "drop database [${LB_DATABASENAME}_eph]"
+        fi

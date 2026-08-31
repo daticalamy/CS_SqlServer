@@ -1,0 +1,98 @@
+#############################################################################
+#  GitHub Action to run Liquibase Python Policy Checks.
+##############################################################################
+name: 'Liquibase Checks'
+run-name: ${{ inputs.environment}} checks of current repo by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+      # The type 'environment' will automatically pull in the environments created in GitHub
+      environment:
+        description: 'Environment for checks'
+        type: environment
+        required: true
+        default: DEV
+
+####################################################################
+#  Set up the environment
+#####################################################################
+env:
+  # Azure Storage account and container to hold reports
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  
+  # Pro License key
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  
+  # Default schema: Specify schema for all changes
+  # LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: Sales
+  # LIQUIBASE_COMMAND_REFERENCE_DEFAULT_SCHEMA_NAME: Sales
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: flows, checks, changelogs
+  
+  # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
+
+  # Checks Settings
+  LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off  
+  LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true
+  # LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_PATH: pythonchecks
+  XDG_CACHE_HOME: /tmp
+  LIQUIBASE_SCRIPT_PYTHON_EXECUTABLE_PATH: checks/pii_poc_env/bin/python
+  # The Full Path below causes an "Python virtual environment" error. Needs to be a relative path for this action.
+  # LIQUIBASE_SCRIPT_PYTHON_EXECUTABLE_PATH: venv/bin/graalpy
+  # LIQUIBASE_SCRIPT_PYTHON_EXECUTABLE_PATH: /__w/CS_liquibase_github_actions/CS_liquibase_github_actions/venv/bin/graalpy
+  PYTHON_CHECKS_GITHUB_TOKEN: ${{ secrets.PYTHON_CHECKS_GITHUB_TOKEN }}
+
+  CURRENT_BRANCH: main
+  ENVIRONMENT: ${{ inputs.environment }}  
+  BRANCH: ${{ github.ref_name }}
+
+  # Reports
+  LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+  
+  # History Table
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+ 
+jobs:
+  #########################################################################
+  #  Checks
+  #########################################################################
+
+  database-checks:
+    runs-on: [self-hosted]
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+      
+    - name: Liquibase Checks Flow
+      id: lbp-policy-checks
+      continue-on-error: true
+      run: | 
+        liquibase flow --flow-file=liquibase-checks.flowfile.yaml

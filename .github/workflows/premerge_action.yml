@@ -1,0 +1,115 @@
+####################################################################
+#  GitHub Action prior to allowing merge
+#  using Liquibase Secure, Flows, Custom Policy checks and Azure Storage.
+#  This action spins up a temporary/ephemeral database 
+#  Liquibase changesets and destroys the copy at the end.
+#####################################################################
+name: 'Liquibase Premerge Job' 
+run-name: premerge of current repo by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+      # The type 'environment' will automatically pull in the environments created in GitHub
+      environment:
+        description: "Environment to validate"
+        type: environment
+        required: true
+        default: DEV
+        
+  # pull_request:
+    # branches:
+      # - '[A-Z][A-Z][A-Z]-[0-9]*'  # Three uppercase letters, dash, numbers
+      # - 'release-[0-9]*.[0-9]*.[0-9]*'  # Semantic versioning pattern
+      # - main
+
+##########################################################################
+#  Set up the premerge environment (will be clone of first db, eg. DEV)
+###########################################################################
+env:
+  # Azure Storage account and container to hold reports
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  
+  # Pro License key
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: flows, checks, changelogs
+  
+  # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
+  
+  ENVIRONMENT: DEV
+  LB_TAG: ${{ github.ref_name }}
+
+  # Reports
+  LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+
+  # History Table
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+
+  # Prevalidate Settings
+  LB_CLONED_URL: "jdbc:sqlserver://${{ secrets.LIQUIBASE_HOSTNAME }}:${{ secrets.LIQUIBASE_PORT }};databaseName=${{ secrets.LIQUIBASE_DATABASE_NAME }}_eph;trustServerCertificate=true"
+  LB_DATABASENAME: "${{ secrets.LIQUIBASE_DATABASE_NAME }}"
+  LB_HOSTNAME: "${{ secrets.LIQUIBASE_HOSTNAME }}"
+  LB_PORT: "${{ secrets.LIQUIBASE_PORT }}"
+  
+  # Checks Settings
+  LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off
+
+jobs:
+  #########################################################################
+  #  Validation
+  #########################################################################
+
+  database-prevalidation:
+    runs-on: [self-hosted]
+    environment: DEV
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+    
+    # Required to run commands for Cloning DB
+    - name: Install MSSQL Client tools
+      uses: ./.github/workflows/install-mssql-client-tools
+
+    - name: Liquibase Checks Flow
+      id: lbp-policy-checks
+      continue-on-error: true
+      run: | 
+        set +e
+        CHECKS_STATUS=$(liquibase flow --flow-file=liquibase-checks.flowfile.yaml 2>&1)
+        EXIT_CODE=$?
+        set -e
+        if [ $EXIT_CODE -eq 1 ]; then
+          echo "::error::Policy checks did not pass, but allowing merge."
+          echo "::error::In non-build environments, this deployment will require Manual Approval."
+          exit $EXIT_CODE
+        fi
+        
+    - name: Liquibase Premerge Flow
+      run: liquibase flow --flow-file=liquibase-premerge.flowfile.yaml

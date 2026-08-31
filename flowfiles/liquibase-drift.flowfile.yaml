@@ -1,0 +1,14 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  REF_ENV: ${TARGET_ENVIRONMENT}
+  ENV: ${SOURCE_ENVIRONMENT}
+
+stages:
+
+  Drift-Detection:
+    # Check if manual updates were made to the environment since last deployment
+    actions:
+      - type: shell
+        command: liquibase diff --report-name="drift-report-${REF_ENV}-to-${ENV}.html" --drift-severity=1

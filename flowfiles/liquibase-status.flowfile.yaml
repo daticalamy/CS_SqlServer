@@ -1,0 +1,21 @@
+# This flowfile returns data to the calling pipeline in order to determine if additional stages need to run.
+
+stages:
+
+  # Validate changes
+  Validation:
+    actions: 
+      - type: liquibase
+        command: validate
+
+  # Return exitMessage to calling pipeline if there are no changes        
+  Status:
+    actions:
+      - type: liquibase
+        command: status
+        cmdArgs: {verbose: true}
+
+      - type: control
+        if: "status.changesetCount == 0"
+        command: exit
+        cmdArgs: {exitCode: 0, exitMessage: "Exiting with an error status of 0 because the database is up-to-date"}

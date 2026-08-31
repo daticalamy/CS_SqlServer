@@ -1,0 +1,53 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ENV: ${ENVIRONMENT}
+  SCHEMAS: ${LB_SCHEMAS}
+  UTILITY: ${LB_UTILITY}
+
+stages:
+  Utility:
+    actions:
+    
+      - type: shell
+        command: echo 'Running ${UTILITY}'    
+    
+      - type: liquibase
+        if: "${UTILITY} == changelog-sync"
+        command: changelog-sync
+
+      - type: liquibase
+        if: "${UTILITY} == connect"
+        command: connect
+        
+      - type: liquibase
+        if: "${UTILITY} == generate-changelog-zip"
+        command: generate-changelog
+        cmdArgs: { changelog-file: 'generatechangelogs/${ENV}/${ENV}-changelog.oracle.xml', overwrite-output-file: "true", schemas: "${SCHEMAS}" }
+        
+      - type: shell
+        if: "${UTILITY} == generate-changelog-zip"
+        command: echo 'Generate Changelog saved to generatechangelogs/${ENV}/${ENV}-changelog.oracle.xml'
+
+      - type: liquibase
+        if: "${UTILITY} == history"
+        command: history
+
+      - type: liquibase
+        if: "${UTILITY} == release-locks"
+        command: release-locks
+
+      - type: liquibase
+        if: "${UTILITY} == snapshot-zip"
+        command: snapshot
+        cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}"}
+        globalArgs: { output-file: 'snapshots/${ENV}-snapshot.json' }
+        
+      - type: shell
+        if: "${UTILITY} == snapshot-zip"
+        command: echo 'Snapshot saved to snapshots/${ENV}-snapshot.json'
+
+      - type: liquibase
+        if: "${UTILITY} == status"
+        command: status

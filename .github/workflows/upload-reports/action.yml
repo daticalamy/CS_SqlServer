@@ -1,0 +1,40 @@
+# .github/workflows/upload-reports/action.yml
+name: 'Upload Reports Artifact'
+description: 'Creates artifact for reports and optionally zips for upload to another service'
+
+inputs:
+  job-type:
+    description: 'Type of job (checks or deploy)'
+    required: true
+  upload-other:
+    description: 'Whether to upload to another service'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set timestamp
+      shell: bash
+      run: echo "TIMESTAMP=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+
+    - name: Upload GitHub Artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: REPORTS-${{ inputs.job-type }}-${{ env.TIMESTAMP }}-${{ github.run_id }}.${{ github.run_number }}.zip
+        path: reports
+
+    - name: Create zip file for another service
+      if: inputs.upload-other == 'true'
+      id: create_zip
+      shell: bash
+      run: |
+        if [ -d "reports" ] && [ "$(ls -A reports)" ]; then
+          zip -r REPORTS-${{ env.TIMESTAMP }}-${{ github.run_id }}.${{ github.run_number }}.zip reports/
+          echo "zip_created=true" >> $GITHUB_OUTPUT
+          echo "Reports zipped successfully"
+        else
+          echo "zip_created=false" >> $GITHUB_OUTPUT
+          echo "No reports directory found or directory is empty - skipping zip creation"
+        fi

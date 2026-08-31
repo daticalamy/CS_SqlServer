@@ -1,150 +1,165 @@
-# Liquibase Pro Implementation Runbook
+# Liquibase Pro GitHub Actions
 
-## Creating a new project
+This repository contains a set of GitHub Actions workflows for managing database changes using Liquibase Secure. These workflows support a complete DevOps pipeline for database deployments with policy enforcement, drift detection, and rollback capabilities.
 
-### Step 1: Create the Repository
-1. Log into GitHub and navigate template repository << ADD REPO NAME & URL HERE >>.
-1. Click on **Use this template** to **Create a new repostiory**.
-1. Provide a Repository Name (e.g., `liquibase-pro-project-abc`).
-1. Set repository visibility to Private.
-1. Click **Create Repository**.
+## Overview
 
-### Step 2: Setup the GitHub Runners
-1. Open the new repository on GitHub.
-1. Go to **Settings** > **Actions** > **Runners**.
-1. << INTERNAL STEPS FOR SETTING UP RUNNERS >>
+All workflows use Liquibase Secure with secure connections, Azure Storage for reporting, and custom flow files for orchestrating database operations. The workflows are designed to work with SQL Server databases and support multiple environments (DEV, TEST, PROD).
 
-### Step 3: Setup the GitHub Secrets
-1. Open the new repository on GitHub.
-1. Go to **Settings** > **Secrets and variables** > **Actions**.
-1. Click **New repository secret**.
-1. You will need to add secrets for the below items:
+## Workflows
 
-| Secret        | Description
-| ------------- | -------------
-| LIQUIBASE_PRO_LICENSE_KEY | << Instructions on how to find >>
-| LIQUIBASE_COMMAND_PASSWORD | << Instructions on how to find >>
-| LIQUIBASE_PAT | << Instructions on how to find or generate >>
-| AZURE_CREDENTIALS | << Instructions on how to find >>
-| AZURE_CREDENTIALS_G67P | << Are both of these CREDS values necessary? >>
-| AZURE_TENANT_ID | << Instructions on how to find >>
-| AZURE_STORAGE_ACCOUNT | << Instructions on how to find >>
+### 1. Build Action (`lbp_build_action.yml`)
+**Purpose**: Performs a build on the first database environment (typically DEV) with policy checks and deployment.
 
-### Step 4: Setup the GitHub Variables
-1. Open the new repository on GitHub.
-1. Go to **Settings** > **Secrets and variables** > **Actions**.
-1. Click on **Variables** tab.
-1. Click **New repository variable**.
-1. You will need to add variables for the below items:
+- **Trigger**: Manual workflow dispatch
+- **Environment**: User-selectable (defaults to DEV)
+- **Key Features**:
+  - Runs Liquibase policy checks (allows build to continue even if checks fail)
+  - Executes build flow using `liquibase-build.flowfile.yaml`
+  - Supports optional tagging
+  - Generates JSON-formatted logs and reports stored in Azure Storage
+- **Use Case**: Initial development database builds and testing changes
 
-| Variable        | Description
-| ------------- | -------------
-| LIQUIBASE_COMMAND_SCHEMAS | Comma separated list
-| LIQUIBASE_COMMAND_USERNAME | << Instructions on how to find >>
-| LIQUIBASE_COMMAND_URL | Format: jdbc:sqlserver://hostname;portNumber=1433;databaseName=databaseName;integratedSecurity=true;
-| LIQUIBASE_RUNNER | << Instructions on how to find >>
+### 2. Checks Action (`lbp_checks_action.yml`)
+**Purpose**: Runs Liquibase Python policy checks without performing deployments.
 
----
+- **Trigger**: Manual workflow dispatch
+- **Environment**: User-selectable (defaults to DEV)
+- **Key Features**:
+  - Executes policy checks using `liquibase-checks.flowfile.yaml`
+- **Use Case**: Standalone policy validation and compliance checking
 
-## Configuring Azure Blob Storage
+### 3. Deploy Action (`lbp_deploy_action.yml`)
+**Purpose**: Environment-targeted deployment with conditional manual approval based on policy check results.
 
-### Step 1: Create an Azure Storage Account
-1. Log into the [Azure Portal](https://portal.azure.com).
-1. Navigate to **Storage accounts**.
-1. Click **Create** and provide the required details.
-1. Select **BlobStorage** as the account type.
-1. Click **Review + Create**, then **Create**.
+- **Trigger**: Manual workflow dispatch
+- **Environment**: User-selectable
+- **Key Features**:
+  - Three-stage process: Policy Checks → Manual Approval (if needed) → Deployment
+  - Automatic deployment if policy checks pass
+  - Manual approval gate if policy checks fail
+  - Optional drift detection
+  - Uses `liquibase-deploy.flowfile.yaml` for deployment execution
+- **Use Case**: Production deployments with governance and approval workflows
 
-### Step 2: Create three Blob Containers
-1. Open the newly created storage account.
-1. Go to **Data storage** > **Containers** and click **+ Container**.
-1. Create three containers: `snapshots`, `generatechangelogs`, and `diffchangelogs`
-1. Click **Create** for each container to create it.
+### 4. Diff Action (`lbp_diff_action.yml`)
+**Purpose**: Compares database schemas between two environments to detect differences and drift.
 
----
+- **Trigger**: Manual workflow dispatch
+- **Environments**: Source (any environment) and Target (DEV/TEST/PROD)
+- **Key Features**:
+  - Uses `liquibase-drift.flowfile.yaml` for drift detection
+  - Compares multiple schemas (DBO, Sales)
+  - Generates difference reports stored in Azure Storage
+- **Use Case**: Environment synchronization validation and drift detection
 
-## Creating Initial Changelog
-Perform the below steps to create an initial changelog containing all the existing objects on a database.
+### 5. Premerge Action (`lbp_premerge_action.yml`)
+**Purpose**: Validates changes in an ephemeral database environment before allowing code merges.
 
-### Step 1: Run GenerateChangeLog
-1. Open the new repository on GitHub.
-1. Navigate to **Actions** > **Utility - GenerateChangeLog**.
-1. Run the utility by selecting **Run Workflow**.
-1. Select **Environment to perform Generate-Changelog** and click **Run Workflow**. 
-1. Download the changelog by logging in to [Azure Portal](https://portal.azure.com).
-1. Navigate to **Storage accounts** and select the storage account you created in #Configuring Azure Blob Storage.
-1. Select **Data storage** > **Containers** > **generatechangelogs**
-1. Find the desired changelog, use the three **...**, and select **Download**.
+- **Trigger**: Manual workflow dispatch (commented PR trigger available)
+- **Environment**: DEV (creates ephemeral clone)
+- **Key Features**:
+  - Creates temporary database clone for testing
+  - Runs policy checks and validation
+  - Uses `liquibase-premerge.flowfile.yaml`
+  - Includes MSSQL client tools installation
+  - Destroys ephemeral environment after testing
+- **Use Case**: Pre-merge validation and CI/CD integration
 
-### Step 2: Add newly generated changelog to your Liquibase project
-1. Find the changelog in your **Downloads** folder.
-1. Copy the contents to the << NAME OF DEFAULT CHANGELOG >> changelog in your repository on GitHub.
+### 6. Rollback Action (`lbp_rollback_action.yml`)
+**Purpose**: Rolls back database changes to a specific tag or label.
 
-### Step 3: Run ChangeLogSync in each environment
-The changes in this changelog already exist on the database. A ChangeLogSync needs to be run to tell Liquibase not to try and re-run the changes.  
+- **Trigger**: Manual workflow dispatch
+- **Environment**: User-selectable
+- **Key Features**:
+  - Two rollback options: by tag or by label
+  - User-specified rollback target
+  - Uses `liquibase-rollback.flowfile.yaml`
+  - Supports multiple schemas (DBO, Sales)
+- **Use Case**: Emergency rollbacks and change reversions
 
-1. Open the new repository on GitHub.
-1. Navigate to **Actions** > **Utility - ChangelogSync**.
-1. Run the utility by selecting **Run Workflow**.
-1. Select **Environment to run changelog-sync** and click **Run Workflow**. 
-1. Repeat for each Environment.
----
+### 7. Snapshot Action (`lbp_snapshot_action.yml`)
+**Purpose**: Creates database snapshots for reference purposes and Drift Detection.
 
-## Running Liquibase
+- **Trigger**: Manual workflow dispatch
+- **Environment**: User-selectable
+- **Key Features**:
+  - Uses `liquibase-snapshot.flowfile.yaml`
+  - Snapshots stored in Azure Storage
+  - Supports multiple schemas (DBO, Sales)
+- **Use Case**: Database state capture for backup, comparison, and audit purposes
 
-### Step 1: Deploy database changes
-1. Open the project repository on GitHub.
-1. Go to **Actions** > **Deploy database changes**.
-1. Select **Environment** and click **Run Workflow**. 
+## Reusable Actions
 
----
+### Setup Liquibase (`setup-liquibase/action.yml`)
+Composite action that sets up the Liquibase environment:
+- Installs Java 17 (Temurin distribution)
+- Sets up Liquibase Pro Secure edition v5.0.0
+- Used by all main workflows
 
-## Syncing Environments
-Perform the below steps to detect drift between environments. These steps will create a Drift Detection Report and create a changelog that can be used to sync the environments.
- - The environment is the Target environment.
- - The snapshot environment is the Source environment.
-The diff changelog represents the changes that need to be run on the Target environment to have it match the Source environment.
+### Install MSSQL Client Tools (`install-mssql-client-tools/action.yml`)
+Composite action that installs SQL Server command-line tools:
+- Installs `sqlcmd` and ODBC drivers
+- Required for workflows that need to interact directly with SQL Server
+- Used by the premerge workflow for database cloning operations
 
-### Step 1: Run Drift Detection
-1. Open the repository on GitHub.
-1. Navigate to **Actions** > **Compare an Environment to a Snapshot**.
-1. Run the utility by selecting **Run Workflow**.
-1. Select **environment** (as the Target environment) and **snapshot-environment** (as the Source environment).
-1. Click **Run Workflow**. 
-1. Download the report and changelog by logging in to [Azure Portal](https://portal.azure.com).
-1. Navigate to **Storage accounts** and select the proper storage account.
-1. Select **Data storage** > **Containers** > **diff-changelogs**
-1. Find the desired report and diff-changelog, use the three **...**, and select **Download**.
+## Environment Configuration
 
-### Step 2: Add newly generated changelog to your Liquibase project
-1. Find the diff-changelog in your **Downloads** folder.
-1. Place the diff-changelog in the changelog path for your project.
-1. Run the deployment for the Target environment.
+### Required Secrets
+All workflows expect the following secrets to be configured:
 
-### Step 3: Run ChangeLogSync or archive changelog
-Decide next steps: 
- - If the changesets are not duplicated in the existing changelog, you’ll probably want to keep the diff changelog in the changelog path but run changelog-sync for any environments that already have the changes.
-   1. Open the new repository on GitHub.
-   1. Navigate to **Actions** > **Utility - ChangelogSync**.
-   1. Run the utility by selecting **Run Workflow**.
-   1. Select **Environment to run changelog-sync** and click **Run Workflow**. 
-   1. Repeat for each Environment where changes were not deployed.
- - If the changesets are unique to a particular environment or duplicated in the existing changelog, move the diff changelog to an archive folder outside the changelog path.
+**Azure Storage**:
+- `AZURE_TENANT_ID`
+- `AZURE_CLIENT_ID`
+- `AZURE_CLIENT_SECRET`
 
----
+**Liquibase License**:
+- `LIQUIBASE_PRO_LICENSE_KEY`
 
-## Upgrading Liquibase
-1. As per [Upgrade Documentation](https://docs.liquibase.com/workflows/liquibase-community/upgrading-liquibase.html) read the Release Notes. 
-1. Check your PATH environment variable or use `where liquibase` or `which liquibase` to find the current installation directory for Liquibase. 
-1. Install the new version in a new directory adjacent to the existing install.
-1. Depending on where the old installation is intalled, perform the following:
-  -  If the PATH contains a versioned folder, update the PATH to the new version.
-  -  If the PATH contains a non-versioned folder, eg. C:\Apps\liquibase, rename the old folder to a versioned folder and rename the new version to the non-versioned folder.
-5. Source the shell to pick up any environment variable changes.
-6. Run `liquibase -v` to ensure the new version is in place.
+**Database Connection**:
+- `LIQUIBASE_URL`
+- `LIQUIBASE_USERNAME`
+- `LIQUIBASE_PASSWORD`
 
----
+**SQL Server Specific** (for premerge):
+- `LIQUIBASE_HOSTNAME`
+- `LIQUIBASE_PORT`
+- `LIQUIBASE_DATABASE_NAME`
 
-## Conclusion
-This runbook provides a step-by-step guide for setting up and managing Liquibase Pro.
+### Standard Configuration
+- **Runner**: Self-hosted runners
+- **Logging**: JSON format with INFO level
+- **Schema Management**: Liquibase tracking tables stored in `LB` schema
+- **Search Path**: `flows, checks, changelogs`
+- **Changelog**: `changelog.yaml`
+- **Schemas**: DBO and Sales schemas are managed
 
+## Flow Files
+
+Each workflow references specific Liquibase flow files that orchestrate the database operations:
+
+- `liquibase-build.flowfile.yaml` - Build operations
+- `liquibase-checks.flowfile.yaml` - Policy and compliance checks
+- `liquibase-deploy.flowfile.yaml` - Deployment operations
+- `liquibase-drift.flowfile.yaml` - Drift detection and comparison
+- `liquibase-premerge.flowfile.yaml` - Pre-merge validation
+- `liquibase-rollback.flowfile.yaml` - Rollback operations
+- `liquibase-snapshot.flowfile.yaml` - Snapshot creation
+
+## Usage
+
+1. **Development Workflow**:
+   - Use `lbp_build_action.yml` for initial development builds
+   - Use `lbp_checks_action.yml` for policy validation
+   - Use `lbp_premerge_action.yml` before merging changes
+
+2. **Deployment Workflow**:
+   - Use `lbp_deploy_action.yml` for environment promotions
+   - Policy failures trigger manual approval requirements
+
+3. **Maintenance Operations**:
+   - Use `lbp_diff_action.yml` to detect environment drift
+   - Use `lbp_snapshot_action.yml` for regular backups
+   - Use `lbp_rollback_action.yml` for emergency rollbacks
+
+All workflows generate comprehensive reports stored in Azure Storage at `az://reports/gh_sqlserver_reports` for audit and troubleshooting purposes.

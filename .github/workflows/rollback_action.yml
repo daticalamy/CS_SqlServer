@@ -1,0 +1,99 @@
+####################################################################
+#  GitHub Action to perform an environment-targeted rollback of
+#  database changes using Liquibase Secure, Flows, and Azure Storage.
+#####################################################################
+name: 'Liquibase Rollback'
+run-name: ${{ inputs.environment}} rollback by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+      # The type 'environment' will automatically pull in the environments created in GitHub
+      environment:
+        description: 'Environment for rollback'
+        type: environment
+        required: true
+
+      rollback_type:
+        description: 'Select an option'
+        type: choice
+        required: true
+        options:
+          - rollback_to_tag
+          - rollback_by_label
+
+      lb_tag_or_label:
+        description: 'Tag or Label for Rollback'
+        type: string
+        required: true     
+
+####################################################################
+#  Set up the environment
+#####################################################################
+env:
+  # Azure Storage account and container to hold reports
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  
+  # Pro License key
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  
+  # Default schema: Specify schema for all changes
+  # LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: Sales
+  # LIQUIBASE_COMMAND_REFERENCE_DEFAULT_SCHEMA_NAME: Sales
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: flows, checks, changelogs
+  
+  # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
+  
+  ENVIRONMENT: ${{ inputs.environment }}
+  
+  ROLLBACK_TYPE: ${{ github.event.inputs.rollback_type }}
+  LB_TAG_OR_LABEL: ${{ github.event.inputs.lb_tag_or_label }}
+  LB_SCHEMAS: "DBO,Sales"
+  
+  # Reports
+  LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+
+  # History Table
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+
+jobs:
+  #########################################################################
+  #  Rollback
+  #########################################################################
+
+  database-rollback:
+    runs-on: [self-hosted]
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+ 
+    - name: Liquibase Rollback Flow
+      run: liquibase flow --flow-file=liquibase-rollback.flowfile.yaml

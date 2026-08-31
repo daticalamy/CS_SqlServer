@@ -1,0 +1,76 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+## Note: Any command which fails in any stage below result in the command stopping, and endStage being run.
+## A flow file can have one or more stages, each with multiple "actions", 
+## or your flow file can have multiple stages with fewer actions in each stage.
+globalVariables:
+  TAG: ${LB_TAG}
+  BRANCH: ${BRANCH}
+  
+stages:
+  Validation:
+    actions: 
+      - type: liquibase
+        command: validate
+
+  Status:
+    actions:
+      - type: liquibase
+        command: status
+        cmdArgs: {verbose: true}
+        
+      - type: control
+        if: "status.changesetCount == 0"
+        command: exit
+        cmdArgs: {exitCode: 0, exitMessage: "Exiting with an error status of 0 because the database is up-to-date"}
+
+  Checks-Changelog:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
+        globalArgs: { reports-name: "checks-report-build-changelog.html"}
+
+  Set-Labels:
+    actions:
+      - type: shell
+        command: |
+          ./flows/set_labels.sh
+          git add changelogs/*
+          git commit -m'Added Liquibase labels to pending changesets' || echo "Nothing to commit"
+          git push origin HEAD:${BRANCH}
+
+  Update-SQL:
+    actions:
+      - type: liquibase
+        command: update-sql
+        globalArgs: { reports-name: "sql-build-report.html"}
+
+  Tag:
+    actions:
+      - type: liquibase
+        command: tag
+        cmdArgs: {tag: "${TAG}"}
+
+  Update:
+    actions:
+      - type: liquibase
+        command: update-testing-rollback
+        globalArgs: { reports-name: "build-report.html"}
+
+  Checks-Database:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: database}
+        globalArgs: { reports-name: "checks-report-build-database.html"}
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: history

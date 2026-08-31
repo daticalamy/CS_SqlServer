@@ -1,0 +1,148 @@
+####################################################################
+#  GitHub Action to perform an environment-targeted deployment of
+#  database changes using Liquibase Secure, Flows, Azure Storage,
+#  and Custom Policy checks.
+#####################################################################
+name: 'Liquibase Deployment Job'
+run-name: ${{ inputs.environment}} deployment of current repo by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+      # The type 'environment' will automatically pull in the environments created in GitHub
+      environment:
+        description: 'Environment for deployment'
+        type: environment
+        required: true
+
+      lb_tag:
+        description: 'Optional tag for the build'
+        type: string
+        required: false
+        
+      check_drift:
+        description: 'Check for Drift Detection'
+        type: boolean
+        required: true
+        default: true
+
+####################################################################
+#  Set up the environment
+#####################################################################
+env:
+  # Azure Storage account and container to hold reports
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  AZURE_CONTAINER: snapshots
+  
+  # Pro License key
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  
+  # Default schema: Specify schema for all changes
+  # LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: Sales
+  # LIQUIBASE_COMMAND_REFERENCE_DEFAULT_SCHEMA_NAME: Sales
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: flows, checks, changelogs
+  
+  # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
+  LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
+  
+  ENVIRONMENT: ${{ inputs.environment }}
+  LB_TAG: ${{ github.event.inputs.lb_tag || github.ref_name }}
+  LB_CHECK_DRIFT: ${{ github.event.inputs.check_drift }}
+  LB_SCHEMAS: "DBO,Sales"
+
+  # Reports
+  LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+  
+  # History Table
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+  
+  # Checks Settings
+  LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off
+
+jobs:
+  #########################################################################
+  #  Deploy
+  #########################################################################
+
+  run-policy-checks:
+    runs-on: [self-hosted]
+    environment: ${{ inputs.environment }}
+    outputs:
+      needs_approval: ${{ steps.lbp-policy-checks.outputs.needs_approval }}
+      exit_message: ${{ steps.lbp-policy-checks.outputs.exit_message }}
+    steps:
+    - uses: actions/checkout@v4
+   
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+
+    - name: Liquibase Checks Flow
+      id: lbp-policy-checks
+      run: |       
+        set +e
+        CHECKS_STATUS=$(liquibase flow --flow-file=liquibase-checks.flowfile.yaml 2>&1)
+        EXIT_CODE=$?
+        set -e
+        
+        if [ $EXIT_CODE -eq 1 ]; then          
+          echo "needs_approval=true" >> $GITHUB_OUTPUT
+          echo "exit_message=❌ Liquibase checks failed - manual review required" >> $GITHUB_OUTPUT
+          echo "✋ Manual approval will be required"
+        else
+          echo "needs_approval=false" >> $GITHUB_OUTPUT
+          echo "exit_message=✅ Liquibase checks passed" >> $GITHUB_OUTPUT
+          echo "✅ Proceeding automatically"
+        fi
+      
+  manual-approval:
+    runs-on: [self-hosted]
+    needs: run-policy-checks
+    environment: manual-approval
+    if: needs.run-policy-checks.outputs.needs_approval == 'true'
+    steps:
+    - name: Request manual approval
+      run: |
+        echo "🚨 Manual approval required!"
+        echo "Exit message: ${{ needs.run-policy-checks.outputs.exit_message }}"
+        echo "Click 'Review deployments' to approve or reject this deployment."
+        echo ""
+        echo "To approve: Click 'Review deployments' button above"
+        echo "Environment: ${{ inputs.environment }}"
+      
+  deploy:
+    runs-on: [self-hosted]
+    needs: [run-policy-checks, manual-approval]
+    environment: ${{ inputs.environment }}
+    if: always() && (needs.run-policy-checks.outputs.needs_approval == 'false' || needs.manual-approval.result == 'success')
+    steps:
+    - uses: actions/checkout@v4    
+
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+
+    - name: Liquibase Deploy Flow
+      run: liquibase flow --flow-file=liquibase-deploy.flowfile.yaml

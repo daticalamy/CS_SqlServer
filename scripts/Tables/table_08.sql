@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset amy_smith:01 labels:POCEnv
+--changeset amy_smith:01 labels:pocenv
 create table dbo.table_08 (
   id int, 
   name varchar(50),
@@ -8,7 +8,7 @@ create table dbo.table_08 (
 );
 --rollback drop table dbo.table_08
 
---changeset amy_smith:02 labels:POCEnv
+--changeset amy_smith:02 labels:pocenv
 CREATE UNIQUE INDEX table_08_sku
 ON dbo.table_08 (sku);
 --rollback DROP INDEX table_08_sku ON dbo.table_08;

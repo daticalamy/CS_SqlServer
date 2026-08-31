@@ -1,0 +1,79 @@
+####################################################################
+#  GitHub Action to perform an environment-targeted snapshot of
+#  a database using Liquibase Secure, Flows, and Azure Storage.
+#####################################################################
+name: 'Liquibase Snapshot'
+run-name: ${{ inputs.environment}} snapshot by ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    # Following are the inputs received via the GitHubActions Run workflow dialog
+    inputs:
+      # The type 'environment' will automatically pull in the environments created in GitHub
+      environment:
+        description: 'Environment for snapshot'
+        type: environment
+        required: true     
+
+####################################################################
+#  Set up the environment
+#####################################################################
+env:
+
+  # Azure Storage account and container to hold snapshots
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  AZURE_CONTAINER: snapshots
+  
+  # Pro License key
+  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
+  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+  
+  # JDBC URL of the database per environment
+  # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
+
+  # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+
+  # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
+  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  
+  # Default schema: Specify schema for all changes
+  # LIQUIBASE_COMMAND_DEFAULT_SCHEMA_NAME: DBO    
+  # LIQUIBASE_COMMAND_REFERENCE_DEFAULT_SCHEMA_NAME: DBO
+
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: flows, checks, changelogs
+  
+  ENVIRONMENT: ${{ inputs.environment }}
+  LB_SCHEMAS: "DBO,Sales"
+  
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
+  LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+  
+  # History Table  
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+
+jobs:
+  #########################################################################
+  #  Snapshot
+  #########################################################################
+
+  database-snapshot:
+    runs-on: [self-hosted]
+    environment: ${{ inputs.environment }}
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Liquibase Environment
+      uses: ./.github/workflows/setup-liquibase
+ 
+    - name: Liquibase Snapshot Flow
+      run: liquibase flow --flow-file=liquibase-snapshot.flowfile.yaml

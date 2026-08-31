@@ -1,0 +1,19 @@
+# .github/workflows/install-mssql-client-tools/action.yml
+name: 'Install MSSQL Client Tools'
+description: 'Sets up sqlcmd'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install MSSQL Client Tools (sqlcmd)
+      shell: bash
+      run: |
+        curl https://packages.microsoft.com/config/rhel/8/prod.repo | sudo tee /etc/yum.repos.d/msprod.repo
+        sudo ACCEPT_EULA=Y yum install -y mssql-tools18 unixODBC-devel
+        echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+
+    - name: Check MSSQL client tools (sqlcmd) installation
+      shell: bash
+      run: |
+        echo "sqlcmd version:"
+        sqlcmd -?

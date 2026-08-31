@@ -1,9 +1,16 @@
 databaseChangeLog:
+
+  - modifyChangeSets:
+      failOnError: false
+      includeAll:
+        - path: scripts/Tables
+        - relativeToChangelogFile: true
+        - errorIfMissingOrEmpty: false
       
-  - includeAll:
-      path: scripts/Tables
-      relativeToChangelogFile: true
-      errorIfMissingOrEmpty: false
+#  - includeAll:
+#      path: scripts/Tables
+#      relativeToChangelogFile: true
+#      errorIfMissingOrEmpty: false
 
   - includeAll:
       path: scripts/Procedures
@@ -18,10 +25,12 @@ databaseChangeLog:
   - include:
       file: scripts/Data/changelog.yaml      
       relativeToChangelogFile: true  
+      ignore: false
 
   - include:
       file: scripts/Data/populate_table4.yaml      
       relativeToChangelogFile: true
+      ignore: false
 
   - includeAll:
       path: scripts/CBAE
@@ -34,3 +43,11 @@ databaseChangeLog:
       context: LBAE
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
+
+  - modifyChangeSets:
+      runWith: sqlcmd
+      includeAll:
+        - path: scripts/Vendor_Scripts
+        - labels: VENDOR
+        - relativeToChangelogFile: true
+        - errorIfMissingOrEmpty: false

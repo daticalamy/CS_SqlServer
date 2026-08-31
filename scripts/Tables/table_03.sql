@@ -1,5 +1,5 @@
 --liquibase formatted sql
---changeset amy_smith:01 labels:POCEnv
+--changeset amy_smith:01 labels:pocenv
 
 create table dbo.table_03 (
   id int, 

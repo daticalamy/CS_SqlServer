@@ -1,0 +1,64 @@
+##########           LIQUIBASE FLOWFILE                ##########
+##########  learn more http://docs.liquibase.com/flow  ##########
+
+globalVariables:
+  ROLLBACK_TYPE: ${ROLLBACK_TYPE}
+  TAG_OR_LABEL: ${LB_TAG_OR_LABEL}
+  ENV: ${ENVIRONMENT}
+  SCHEMAS: ${LB_SCHEMAS}
+  CONTAINER: ${AZURE_CONTAINER} 
+
+stages:
+  Rollback-Logging:
+    actions:
+      - type: shell
+        command: echo 'Attempting to rollback using Rollback Type ${ROLLBACK_TYPE} and tag or label ${LB_TAG_OR_LABEL}' 
+
+  Rollback-To-Tag-SQL:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_to_tag"
+        command: rollback-sql
+        cmdArgs: {tag: "${LB_TAG_OR_LABEL}"}
+        globalArgs: { reports-name: "sql-rollback-report-${ENV}.html" }
+
+  Rollback-To-Tag:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_to_tag"
+        command: rollback
+        cmdArgs: {tag: "${LB_TAG_OR_LABEL}"}
+        globalArgs: { reports-name: "rollback-report-${ENV}.html" }
+
+  Rollback-By-Label-SQL:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_by_label"
+        command: rollback-sql
+        cmdArgs: {tag: "initial_tag_v0", label-filter: "${LB_TAG_OR_LABEL}"}
+        globalArgs: { reports-name: "sql-rollback-report-${ENV}.html" }
+
+  Rollback-By-Label:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_by_label"
+        command: rollback
+        cmdArgs: {tag: "initial_tag_v0", label-filter: "${LB_TAG_OR_LABEL}"}
+        globalArgs: { reports-name: "rollback-report-${ENV}.html" }
+
+## The endStage ALWAYS RUNS. 
+## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
+## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
+
+endStage:
+  actions:
+    - type: liquibase
+      command: snapshot
+      cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}", snapshot-filters: "column,foreignkey,index,primarykey,table,uniqueconstraint,view,checkconstraint,trigger"}
+      globalArgs: { output-file: 'az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json' }
+        
+    - type: shell
+      command: echo 'Updated snapshot saved to az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json'   
+
+    - type: liquibase
+      command: history
