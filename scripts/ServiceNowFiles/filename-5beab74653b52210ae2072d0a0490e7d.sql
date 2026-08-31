@@ -1,0 +1,1 @@
+--liquibase formatted sql\n--changeset jlewis:01\n\nCREATE TABLE pro.products_23 (\n\tid int4 NULL,\n\tname varchar(50) NULL,\n\tsku varchar(10) NULL\n);\n
