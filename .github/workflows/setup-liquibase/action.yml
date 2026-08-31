@@ -14,15 +14,15 @@ runs:
     - name: Setup Liquibase Secure
       uses: liquibase/setup-liquibase@v3
       with:
-        version: '6.0.0-RC8'
+        version: '5.2.2'
         edition: 'secure'
-        download-url-base: 'https://repo.liquibase.com/non-releases/secure/{version}/liquibase-secure-{version}.tar.gz'
 
 #    - name: Setup Liquibase Secure
-#      uses: liquibase/setup-liquibase@v2
+#      uses: liquibase/setup-liquibase@v3
 #      with:
-#        version: '5.1.0'
+#        version: '6.0.0-RC8'
 #        edition: 'secure'
+#        download-url-base: 'https://repo.liquibase.com/non-releases/secure/{version}/liquibase-secure-{version}.tar.gz'
 
 #    - name: Install Liquibase from local zip
 #      shell: powershell
