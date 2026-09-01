@@ -8,18 +8,26 @@ runs:
     - name: Install MSSQL Client Tools (sqlcmd)
       shell: pwsh
       run: |
-        choco install sqlserver-cmdlineutils -y
+        $ErrorActionPreference = "Stop"
 
-        # Locate sqlcmd and add its folder to GITHUB_PATH so later steps can call it directly
-        $sqlcmdPath = (Get-Command sqlcmd -ErrorAction SilentlyContinue).Source
-        if (-not $sqlcmdPath) {
-          $sqlcmdPath = Get-ChildItem -Path "C:\Program Files\Microsoft SQL Server" -Recurse -Filter "sqlcmd.exe" -ErrorAction SilentlyContinue |
-            Select-Object -First 1 -ExpandProperty FullName
+        # Look up the latest go-sqlcmd release and find the Windows amd64 zip asset
+        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/microsoft/go-sqlcmd/releases/latest" -Headers @{ "User-Agent" = "github-actions" }
+        $asset = $release.assets | Where-Object { $_.name -like "*windows-amd64.zip" } | Select-Object -First 1
+        if (-not $asset) {
+          throw "Could not find a windows-amd64.zip asset in the latest go-sqlcmd release"
         }
-        if (-not $sqlcmdPath) {
-          throw "sqlcmd.exe not found after installation"
+
+        $zipPath = Join-Path $env:RUNNER_TEMP "sqlcmd.zip"
+        $installDir = Join-Path $env:RUNNER_TEMP "sqlcmd"
+
+        Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
+
+        # Add the folder containing sqlcmd.exe to PATH for later steps
+        $sqlcmdDir = (Get-ChildItem -Path $installDir -Recurse -Filter "sqlcmd.exe" | Select-Object -First 1).DirectoryName
+        if (-not $sqlcmdDir) {
+          throw "sqlcmd.exe not found in extracted archive"
         }
-        $sqlcmdDir = Split-Path $sqlcmdPath -Parent
         Add-Content -Path $env:GITHUB_PATH -Value $sqlcmdDir
 
     - name: Check MSSQL client tools (sqlcmd) installation
