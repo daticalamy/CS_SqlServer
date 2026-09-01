@@ -43,15 +43,15 @@ env:
   LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
 
   # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
-  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_USERNAME }}
-  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_PASSWORD }}
+  LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_COMMAND_USERNAME }}
+  LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}
 
   # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
   # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
-  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  # LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
-  LIQUIBASE_SEARCH_PATH: flows, checks, changelogs
+  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks
   
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
@@ -60,7 +60,8 @@ env:
   LB_TAG: ${{ github.ref_name }}
 
   # Reports
-  LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
+  #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
+  LIQUIBASE_REPORT_PATH: reports
   
   # Values: OFF, SEVERE, WARNING, INFO, FINE
   LIQUIBASE_LOG_LEVEL: INFO
@@ -78,6 +79,7 @@ env:
   
   # Checks Settings
   LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off
+  LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true
 
 jobs:
   #########################################################################
