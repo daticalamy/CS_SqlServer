@@ -36,8 +36,8 @@ env:
   
   # JDBC URL of the database per environment
   # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
-  #LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
   #LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL_INTEGRATED_SECURITY }}
+  LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
 
   # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
   LIQUIBASE_COMMAND_USERNAME: ${{ secrets.LIQUIBASE_COMMAND_USERNAME }}
