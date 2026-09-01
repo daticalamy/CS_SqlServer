@@ -6,14 +6,24 @@ runs:
   using: 'composite'
   steps:
     - name: Install MSSQL Client Tools (sqlcmd)
-      shell: bash
+      shell: pwsh
       run: |
-        curl https://packages.microsoft.com/config/rhel/8/prod.repo | sudo tee /etc/yum.repos.d/msprod.repo
-        sudo ACCEPT_EULA=Y yum install -y mssql-tools18 unixODBC-devel
-        echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
+        choco install sqlserver-cmdlineutils -y
+
+        # Locate sqlcmd and add its folder to GITHUB_PATH so later steps can call it directly
+        $sqlcmdPath = (Get-Command sqlcmd -ErrorAction SilentlyContinue).Source
+        if (-not $sqlcmdPath) {
+          $sqlcmdPath = Get-ChildItem -Path "C:\Program Files\Microsoft SQL Server" -Recurse -Filter "sqlcmd.exe" -ErrorAction SilentlyContinue |
+            Select-Object -First 1 -ExpandProperty FullName
+        }
+        if (-not $sqlcmdPath) {
+          throw "sqlcmd.exe not found after installation"
+        }
+        $sqlcmdDir = Split-Path $sqlcmdPath -Parent
+        Add-Content -Path $env:GITHUB_PATH -Value $sqlcmdDir
 
     - name: Check MSSQL client tools (sqlcmd) installation
-      shell: bash
+      shell: pwsh
       run: |
-        echo "sqlcmd version:"
+        Write-Host "sqlcmd version:"
         sqlcmd -?
