@@ -42,7 +42,7 @@ env:
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  AZURE_CONTAINER: snapshots
+  AZURE_CONTAINER: ${{ vars.AZURE_CONTAINER }}
   
   # Pro License key
   # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
@@ -61,7 +61,7 @@ env:
   # LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
-  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks
+  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,az://${{ vars.AZURE_CONTAINER }}/gh_sqlserver_snapshots/
   
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml

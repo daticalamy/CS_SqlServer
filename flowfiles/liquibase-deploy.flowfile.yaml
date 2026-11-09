@@ -11,19 +11,20 @@ globalVariables:
 
 stages:
 
+  #Drift-Detection:
+    # Check if manual updates were made to the environment since last deployment
+    #actions:
+    #  - type: shell
+    #    if: "${CHECK_DRIFT} == true"
+    #    command: liquibase --search-path=az://${CONTAINER}/gh_sqlserver_snapshots/ diff --reference-url=offline:mssql?snapshot=${ENV}-snapshot.json --report-name="drift-report-${ENV}.html" --drift-severity=1 --schemas=${SCHEMAS}
+
   Drift-Detection:
     # Check if manual updates were made to the environment since last deployment
     actions:
-      - type: shell
+      - type: liquibase
         if: "${CHECK_DRIFT} == true"
-        command: liquibase --search-path=az://${CONTAINER}/gh_sqlserver_snapshots/ diff --reference-url=offline:mssql?snapshot=${ENV}-snapshot.json --report-name="drift-report-${ENV}.html" --reports-enabled=true --drift-severity=1 --schemas=${SCHEMAS} --diff-types=columns,foreignkeys,indexes,primarykeys,tables,uniqueconstraints,views,checkconstraints,triggers
-
-    # actions:
-      # - type: liquibase
-        # if: "${CHECK_DRIFT} == true"
-        # command: diff
-        # cmdArgs: { schemas: "${SCHEMAS}", drift-severity: "1", reference-url: "offline:mssql?snapshot=${ENV}-snapshot.json" }
-        # globalArgs: { reports-name: "drift-report-${ENV}.html", search-path: "s3://${BUCKET}/gh_sqlserver_snapshots/" }
+        command: diff
+        cmdArgs: { schemas: "${SCHEMAS}", drift-severity: "1", reference-url: "offline:mssql?snapshot=${ENV}-snapshot.json", report-name: "drift-report-${ENV}.html" }
           
   Validation:
     actions: 
@@ -71,7 +72,7 @@ endStage:
     - type: liquibase
       command: snapshot
       if: "${DRY_RUN} == false"
-      cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}", snapshot-filters: "column,foreignkey,index,primarykey,table,uniqueconstraint,view,checkconstraint,trigger"}
+      cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}"}
       globalArgs: { output-file: 'az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json' }
         
     - type: shell
