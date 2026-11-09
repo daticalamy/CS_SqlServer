@@ -7,10 +7,10 @@ databaseChangeLog:
         - relativeToChangelogFile: true
         - errorIfMissingOrEmpty: false
       
-#  - includeAll:
-#      path: scripts/Tables
-#      relativeToChangelogFile: true
-#      errorIfMissingOrEmpty: false
+#   - includeAll:
+#       path: scripts/Tables
+#       relativeToChangelogFile: true
+#       errorIfMissingOrEmpty: false
 
   - includeAll:
       path: scripts/Procedures
