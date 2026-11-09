@@ -37,7 +37,7 @@ on:
 #  Set up the environment
 #####################################################################
 env:
-  # Azure Storage account and container to hold reports
+  # Azure Storage account and container to hold snapshots
   LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}

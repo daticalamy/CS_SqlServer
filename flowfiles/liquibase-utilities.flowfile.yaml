@@ -3,6 +3,7 @@
 
 globalVariables:
   ENV: ${ENVIRONMENT}
+  CONTAINER: ${AZURE_CONTAINER} 
   SCHEMAS: ${LB_SCHEMAS}
   UTILITY: ${LB_UTILITY}
 
@@ -22,12 +23,12 @@ stages:
         command: connect
         
       - type: liquibase
-        if: "${UTILITY} == generate-changelog-zip"
+        if: "${UTILITY} == generate-changelog"
         command: generate-changelog
         cmdArgs: { changelog-file: 'generatechangelogs/${ENV}/${ENV}-changelog.oracle.xml', overwrite-output-file: "true", schemas: "${SCHEMAS}" }
         
       - type: shell
-        if: "${UTILITY} == generate-changelog-zip"
+        if: "${UTILITY} == generate-changelog"
         command: echo 'Generate Changelog saved to generatechangelogs/${ENV}/${ENV}-changelog.oracle.xml'
 
       - type: liquibase
@@ -39,14 +40,14 @@ stages:
         command: release-locks
 
       - type: liquibase
-        if: "${UTILITY} == snapshot-zip"
+        if: "${UTILITY} == snapshot"
         command: snapshot
         cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}"}
-        globalArgs: { output-file: 'snapshots/${ENV}-snapshot.json' }
+        globalArgs: { output-file: 'az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json' }
         
       - type: shell
-        if: "${UTILITY} == snapshot-zip"
-        command: echo 'Snapshot saved to snapshots/${ENV}-snapshot.json'
+        if: "${UTILITY} == snapshot"
+        command: echo 'Snapshot saved to az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json'
 
       - type: liquibase
         if: "${UTILITY} == status"
