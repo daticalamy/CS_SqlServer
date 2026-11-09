@@ -5,3 +5,4 @@ generatechangelogs/
 snapshots/
 diffchangelogs/
 .liquibase/
+.claude/

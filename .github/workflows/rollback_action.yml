@@ -70,6 +70,7 @@ env:
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  AZURE_CONTAINER: ${{ vars.AZURE_CONTAINER }}
   
   # Pro License key
   # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
@@ -97,14 +98,19 @@ env:
   
   LB_DRY_RUN: ${{ github.event.inputs.dry_run }}
   ROLLBACK_TYPE: ${{ github.event.inputs.rollback_type }}
-  LB_TAG: ${{ github.event.inputs.lb_tag }}
-  LB_COUNT: ${{ github.event.inputs.lb_count }}
-  LB_CHANGESET_ID: ${{ github.event.inputs.lb_changeset_id }}
-  LB_CHANGESET_AUTHOR: ${{ github.event.inputs.lb_changeset_author }}
-  LB_CHANGESET_PATH: ${{ github.event.inputs.lb_changeset_path }}
-  LB_DEPLOYMENT_ID: ${{ github.event.inputs.lb_deployment_id }}
+
+  # Each of these is only populated when its matching rollback_type is selected.
+  # Otherwise it is forced to an empty string so Liquibase Flow's upfront
+  # validation of every stage's command args (regardless of 'if' gating)
+  # doesn't fail trying to resolve a variable that doesn't apply to this run.
+  LB_TAG: ${{ (github.event.inputs.rollback_type == 'rollback_to_tag' && github.event.inputs.lb_tag) || '' }}
+  LB_COUNT: ${{ (github.event.inputs.rollback_type == 'rollback_count' && github.event.inputs.lb_count) || '' }}
+  LB_CHANGESET_ID: ${{ (github.event.inputs.rollback_type == 'rollback_one_changeset' && github.event.inputs.lb_changeset_id) || '' }}
+  LB_CHANGESET_AUTHOR: ${{ (github.event.inputs.rollback_type == 'rollback_one_changeset' && github.event.inputs.lb_changeset_author) || '' }}
+  LB_CHANGESET_PATH: ${{ (github.event.inputs.rollback_type == 'rollback_one_changeset' && github.event.inputs.lb_changeset_path) || '' }}
+  LB_DEPLOYMENT_ID: ${{ (github.event.inputs.rollback_type == 'rollback_one_update' && github.event.inputs.lb_deployment_id) || '' }}
   LB_SCHEMAS: "DBO,Sales"
-  
+
   # Reports
   #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
   LIQUIBASE_REPORT_PATH: reports

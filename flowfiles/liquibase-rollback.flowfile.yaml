@@ -74,14 +74,14 @@ stages:
     actions:
       - type: liquibase
         if: "${ROLLBACK_TYPE} == rollback_count && ${DRY_RUN} == true"
-        command: rollback-sql
+        command: rollback-count-sql
         cmdArgs: {count: "${COUNT}", report-name: "sql-rollback-report-${ENV}.html"}
 
   Rollback-Count:
     actions:
       - type: liquibase
         if: "${ROLLBACK_TYPE} == rollback_count && ${DRY_RUN} == false"
-        command: rollback
+        command: rollback-count
         cmdArgs: {count: "${COUNT}", report-name: "rollback-report-${ENV}.html"}
 
   Rollback-One-Changeset-SQL:
