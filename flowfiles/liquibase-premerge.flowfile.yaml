@@ -25,18 +25,17 @@ stages:
    actions:
      - type: liquibase
        command: checks run
-       cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
-       globalArgs: { reports-name: "checks-report-premerge-changelog.html"}
+       cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-premerge-changelog.html"}
 
   # Create Clone Database
   Create-EphemeralDB:
     actions:
       - type: shell
         command: |
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "DBCC clonedatabase([${LB_DATABASENAME}], [${LB_DATABASENAME}_eph]) with verify_clonedb"
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "alter database [${LB_DATABASENAME}_eph] set read_write"
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "INSERT INTO [${LB_DATABASENAME}_eph].${LIQUIBASE_LIQUIBASE_SCHEMA_NAME}.DATABASECHANGELOG SELECT * FROM ${LB_DATABASENAME}.${LIQUIBASE_LIQUIBASE_SCHEMA_NAME}.DATABASECHANGELOG"
-
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "DBCC CLONEDATABASE([%LB_DATABASENAME%], [%LB_DATABASENAME%_eph]) WITH VERIFY_CLONEDB" || exit /b 1
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "ALTER DATABASE [%LB_DATABASENAME%_eph] SET READ_WRITE" || exit /b 1
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "INSERT INTO [%LB_DATABASENAME%_eph].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG SELECT * FROM [%LB_DATABASENAME%].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG" || exit /b 1
+          
   # Deploy to ephemeral database
   Tag-and-Deploy-to-EphemeralDB:
     actions:
@@ -47,22 +46,28 @@ stages:
       # Run the update (with testing rollback)
       - type: liquibase
         command: update-testing-rollback
-        cmdArgs: { URL: "${CLONED_URL}", reports-name: "clone-report.html" }
+        cmdArgs: { URL: "${CLONED_URL}", report-name: "clone-report.html" }
 
       - type: liquibase
         command: history
         cmdArgs: { URL: "${CLONED_URL}" }
         
+# endStage:
+#   actions:
+#    # Drop Ephemeral Database if it exists   
+#     - type: shell
+#       command: |
+#         DB_EXISTS=$(sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -h -1 -Q "SELECT CASE WHEN DB_ID('${LB_DATABASENAME}_eph') IS NOT NULL THEN 'EXISTS' ELSE 'NOT_EXISTS' END")
+#         echo "Database status: $DB_EXISTS"
+#         if [[ "$DB_EXISTS" == *"NOT_EXISTS"* ]]; then
+#           echo "Database does not exist - no drop necessary"
+#         else
+#           echo "Database exists - dropping"
+#           sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "drop database [${LB_DATABASENAME}_eph]"
+#         fi
+
 endStage:
   actions:
-   # Drop Ephemeral Database if it exists   
+    # Drop Ephemeral Database if it exists
     - type: shell
-      command: |
-        DB_EXISTS=$(sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -h -1 -Q "SELECT CASE WHEN DB_ID('${LB_DATABASENAME}_eph') IS NOT NULL THEN 'EXISTS' ELSE 'NOT_EXISTS' END")
-        echo "Database status: $DB_EXISTS"
-        if [[ "$DB_EXISTS" == *"NOT_EXISTS"* ]]; then
-          echo "Database does not exist - no drop necessary"
-        else
-          echo "Database exists - dropping"
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "drop database [${LB_DATABASENAME}_eph]"
-        fi
+      command: sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "IF DB_ID('%LB_DATABASENAME%_eph') IS NOT NULL BEGIN ALTER DATABASE [%LB_DATABASENAME%_eph] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [%LB_DATABASENAME%_eph]; END"
