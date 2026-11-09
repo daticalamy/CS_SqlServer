@@ -6,7 +6,6 @@
 ## or your flow file can have multiple stages with fewer actions in each stage.
 globalVariables:
   TAG: ${LB_TAG}
-  BRANCH: ${BRANCH}
   
 stages:
   Validation:
@@ -32,15 +31,6 @@ stages:
         cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
         globalArgs: { reports-name: "checks-report-build-changelog.html"}
 
-  Set-Labels:
-    actions:
-      - type: shell
-        command: |
-          ./flows/set_labels.sh
-          git add changelogs/*
-          git commit -m'Added Liquibase labels to pending changesets' || echo "Nothing to commit"
-          git push origin HEAD:${BRANCH}
-
   Update-SQL:
     actions:
       - type: liquibase
@@ -58,13 +48,6 @@ stages:
       - type: liquibase
         command: update-testing-rollback
         globalArgs: { reports-name: "build-report.html"}
-
-  Checks-Database:
-    actions:
-      - type: liquibase
-        command: checks run
-        cmdArgs: {checks-scope: database}
-        globalArgs: { reports-name: "checks-report-build-database.html"}
 
 ## The endStage ALWAYS RUNS. 
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.

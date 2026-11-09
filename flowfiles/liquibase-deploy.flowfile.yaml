@@ -40,13 +40,6 @@ stages:
         command: exit
         cmdArgs: {exitCode: 0, exitMessage: "Exiting with an error status of 0 because the database is up-to-date"}
 
-  # Checks-Changelog:
-    # actions:
-      # - type: liquibase
-        # command: checks run
-        # cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
-        # globalArgs: { reports-name: "checks-report-deploy-${ENV}-changelog.html" }
-
   Update-SQL:
     actions:
       - type: liquibase
@@ -64,13 +57,6 @@ stages:
       - type: liquibase
         command: update
         globalArgs: { reports-name: "deploy-report-${ENV}.html" }
-
-  Checks-Database:
-    actions:
-      - type: liquibase
-        command: checks run
-        cmdArgs: {checks-scope: database}
-        globalArgs: { reports-name: "checks-report-deploy-${ENV}-database.html" }
 
 ## The endStage ALWAYS RUNS. 
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
