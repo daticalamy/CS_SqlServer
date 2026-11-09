@@ -1,6 +1,6 @@
 ####################################################################
 #  GitHub Action to perform an environment-targeted rollback of
-#  database changes using Liquibase Secure, Flows, and Azure Storage.
+#  database changes using Liquibase Secure and Flows.
 #####################################################################
 name: 'Liquibase Rollback'
 run-name: ${{ inputs.environment}} rollback by ${{ github.actor }}
@@ -21,12 +21,45 @@ on:
         required: true
         options:
           - rollback_to_tag
-          - rollback_by_label
+          - rollback_count
+          - rollback_one_changeset
+          - rollback_one_update
 
-      lb_tag_or_label:
-        description: 'Tag or Label for Rollback'
+      dry_run:
+        description: 'Dry Run (no changes applied to the database)'
+        type: boolean
+        required: true
+        default: false
+
+      lb_tag:
+        description: 'Tag for Rollback (required for rollback_to_tag)'
         type: string
-        required: true     
+        required: false     
+
+      lb_count:
+        description: 'Count for Rollback (required for rollback_count)'
+        type: string
+        required: false
+
+      lb_changeset_id:
+        description: 'Changeset ID (required for rollback_one_changeset)'
+        type: string
+        required: false
+
+      lb_changeset_author:
+        description: 'Changeset Author (required for rollback_one_changeset)'
+        type: string
+        required: false
+
+      lb_changeset_path:
+        description: 'Changeset File Path (required for rollback_one_changeset)'
+        type: string
+        required: false
+
+      lb_deployment_id:
+        description: 'Deployment ID (required for rollback_one_update)'
+        type: string
+        required: false
 
 ####################################################################
 #  Set up the environment
@@ -62,8 +95,15 @@ env:
   
   ENVIRONMENT: ${{ inputs.environment }}
   
+  LB_DRY_RUN: ${{ github.event.inputs.dry_run }}
   ROLLBACK_TYPE: ${{ github.event.inputs.rollback_type }}
-  LB_TAG_OR_LABEL: ${{ github.event.inputs.lb_tag_or_label }}
+  LB_TAG: ${{ github.event.inputs.lb_tag }}
+  LB_COUNT: ${{ github.event.inputs.lb_count }}
+  LB_CHANGESET_ID: ${{ github.event.inputs.changeset_id }}
+  LB_CHANGESET_AUTHOR: ${{ github.event.inputs.changeset_author }}
+  LB_CHANGESET_PATH: ${{ github.event.inputs.changeset_path }}
+  LB_DEPLOYMENT_ID: ${{ github.event.inputs.deployment_id }}
+  LB_FORCE: ${{ github.event.inputs.force }}
   LB_SCHEMAS: "DBO,Sales"
   
   # Reports

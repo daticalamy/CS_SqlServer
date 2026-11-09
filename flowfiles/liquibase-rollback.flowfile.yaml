@@ -3,50 +3,81 @@
 
 globalVariables:
   ROLLBACK_TYPE: ${ROLLBACK_TYPE}
-  TAG_OR_LABEL: ${LB_TAG_OR_LABEL}
+  TAG: ${LB_TAG}
+  COUNT: ${LB_COUNT}
+  CHANGESET_ID: ${LB_CHANGESET_ID}
+  CHANGESET_AUTHOR: ${LB_CHANGESET_AUTHOR}
+  CHANGESET_PATH: ${LB_CHANGESET_PATH}
+  DEPLOYMENT_ID: ${LB_DEPLOYMENT_ID}
+  FORCE: true
   ENV: ${ENVIRONMENT}
   SCHEMAS: ${LB_SCHEMAS}
-  CONTAINER: ${AZURE_CONTAINER} 
+  CONTAINER: ${AZURE_CONTAINER}
+  DRY_RUN: ${LB_DRY_RUN}
 
 stages:
   Rollback-Logging:
     actions:
       - type: shell
-        command: echo 'Attempting to rollback using Rollback Type ${ROLLBACK_TYPE} and tag or label ${LB_TAG_OR_LABEL}' 
+        command: echo 'Attempting to rollback using Rollback Type ${ROLLBACK_TYPE} and Dry Run ${DRY_RUN}' 
 
   Rollback-To-Tag-SQL:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_to_tag"
+        if: "${ROLLBACK_TYPE} == rollback_to_tag && ${DRY_RUN} == true"
         command: rollback-sql
-        cmdArgs: {tag: "${LB_TAG_OR_LABEL}"}
-        globalArgs: { reports-name: "sql-rollback-report-${ENV}.html" }
+        cmdArgs: {tag: "${TAG}", report-name: "sql-rollback-report-${ENV}.html"}
 
   Rollback-To-Tag:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_to_tag"
+        if: "${ROLLBACK_TYPE} == rollback_to_tag && ${DRY_RUN} == false"
         command: rollback
-        cmdArgs: {tag: "${LB_TAG_OR_LABEL}"}
-        globalArgs: { reports-name: "rollback-report-${ENV}.html" }
+        cmdArgs: {tag: "${TAG}", report-name: "rollback-report-${ENV}.html"}
 
-  Rollback-By-Label-SQL:
+  Rollback-Count-SQL:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_by_label"
+        if: "${ROLLBACK_TYPE} == rollback_count && ${DRY_RUN} == true"
         command: rollback-sql
-        cmdArgs: {tag: "initial_tag_v0", label-filter: "${LB_TAG_OR_LABEL}"}
-        globalArgs: { reports-name: "sql-rollback-report-${ENV}.html" }
+        cmdArgs: {count: "${COUNT}", report-name: "sql-rollback-report-${ENV}.html"}
 
-  Rollback-By-Label:
+  Rollback-Count:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_by_label"
+        if: "${ROLLBACK_TYPE} == rollback_count && ${DRY_RUN} == false"
         command: rollback
-        cmdArgs: {tag: "initial_tag_v0", label-filter: "${LB_TAG_OR_LABEL}"}
-        globalArgs: { reports-name: "rollback-report-${ENV}.html" }
+        cmdArgs: {count: "${COUNT}", report-name: "rollback-report-${ENV}.html"}
 
-## The endStage ALWAYS RUNS. 
+  Rollback-One-Changeset-SQL:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_one_changeset && ${DRY_RUN} == true"
+        command: rollback-one-changeset-sql
+        cmdArgs: {changeset-id: "${CHANGESET_ID}", changeset-author: "${CHANGESET_AUTHOR}", changeset-path: "${CHANGESET_PATH}", force: "${FORCE}", report-name: "sql-rollback-report-${ENV}.html"}
+
+  Rollback-One-Changeset:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_one_changeset && ${DRY_RUN} == false"
+        command: rollback-one-changeset
+        cmdArgs: {changeset-id: "${CHANGESET_ID}", changeset-author: "${CHANGESET_AUTHOR}", changeset-path: "${CHANGESET_PATH}", force: "${FORCE}", report-name: "rollback-report-${ENV}.html"}
+
+  Rollback-One-Update-SQL:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_one_update && ${DRY_RUN} == true"
+        command: rollback-one-update-sql
+        cmdArgs: {deployment-id: "${DEPLOYMENT_ID}", force: "${FORCE}", report-name: "sql-rollback-report-${ENV}.html"}
+
+  Rollback-One-Update:
+    actions:
+      - type: liquibase
+        if: "${ROLLBACK_TYPE} == rollback_one_update && ${DRY_RUN} == false"
+        command: rollback-one-update
+        cmdArgs: {deployment-id: "${DEPLOYMENT_ID}", force: "${FORCE}", report-name: "rollback-report-${ENV}.html"}
+
+## The endStage ALWAYS RUNS.
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
 ## If you do not want any actions to ALWAYS RUN, simply delete the endStage from your flow file.
 
