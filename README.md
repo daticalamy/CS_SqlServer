@@ -1,4 +1,4 @@
-# Liquibase Pro GitHub Actions
+# Liquibase Secure GitHub Actions
 
 This repository contains a set of GitHub Actions workflows for managing database changes using Liquibase Secure. These workflows support a complete DevOps pipeline for database deployments with policy enforcement, drift detection, and rollback capabilities.
 
@@ -8,7 +8,7 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
 
 ## Workflows
 
-### 1. Build Action (`lbp_build_action.yml`)
+### 1. Build Action (`build_action.yml`)
 **Purpose**: Performs a build on the first database environment (typically DEV) with policy checks and deployment.
 
 - **Trigger**: Manual workflow dispatch
@@ -20,8 +20,8 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
   - Generates JSON-formatted logs and reports stored in Azure Storage
 - **Use Case**: Initial development database builds and testing changes
 
-### 2. Checks Action (`lbp_checks_action.yml`)
-**Purpose**: Runs Liquibase Python policy checks without performing deployments.
+### 2. Checks Action (`checks_action.yml`)
+**Purpose**: Runs Liquibase policy checks without performing deployments.
 
 - **Trigger**: Manual workflow dispatch
 - **Environment**: User-selectable (defaults to DEV)
@@ -29,7 +29,7 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
   - Executes policy checks using `liquibase-checks.flowfile.yaml`
 - **Use Case**: Standalone policy validation and compliance checking
 
-### 3. Deploy Action (`lbp_deploy_action.yml`)
+### 3. Deploy Action (`deploy_action.yml`)
 **Purpose**: Environment-targeted deployment with conditional manual approval based on policy check results.
 
 - **Trigger**: Manual workflow dispatch
@@ -42,7 +42,7 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
   - Uses `liquibase-deploy.flowfile.yaml` for deployment execution
 - **Use Case**: Production deployments with governance and approval workflows
 
-### 4. Diff Action (`lbp_diff_action.yml`)
+### 4. Diff Action (`diff_action.yml`)
 **Purpose**: Compares database schemas between two environments to detect differences and drift.
 
 - **Trigger**: Manual workflow dispatch
@@ -53,7 +53,7 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
   - Generates difference reports stored in Azure Storage
 - **Use Case**: Environment synchronization validation and drift detection
 
-### 5. Premerge Action (`lbp_premerge_action.yml`)
+### 5. Premerge Action (`premerge_action.yml`)
 **Purpose**: Validates changes in an ephemeral database environment before allowing code merges.
 
 - **Trigger**: Manual workflow dispatch (commented PR trigger available)
@@ -66,7 +66,7 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
   - Destroys ephemeral environment after testing
 - **Use Case**: Pre-merge validation and CI/CD integration
 
-### 6. Rollback Action (`lbp_rollback_action.yml`)
+### 6. Rollback Action (`rollback_action.yml`)
 **Purpose**: Rolls back database changes to a specific tag or label.
 
 - **Trigger**: Manual workflow dispatch
@@ -78,7 +78,7 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
   - Supports multiple schemas (DBO, Sales)
 - **Use Case**: Emergency rollbacks and change reversions
 
-### 7. Snapshot Action (`lbp_snapshot_action.yml`)
+### 7. Snapshot Action (`snapshot_action.yml`)
 **Purpose**: Creates database snapshots for reference purposes and Drift Detection.
 
 - **Trigger**: Manual workflow dispatch
@@ -94,7 +94,7 @@ All workflows use Liquibase Secure with secure connections, Azure Storage for re
 ### Setup Liquibase (`setup-liquibase/action.yml`)
 Composite action that sets up the Liquibase environment:
 - Installs Java 17 (Temurin distribution)
-- Sets up Liquibase Pro Secure edition v5.0.0
+- Sets up Liquibase Secure
 - Used by all main workflows
 
 ### Install MSSQL Client Tools (`install-mssql-client-tools/action.yml`)
@@ -114,7 +114,7 @@ All workflows expect the following secrets to be configured:
 - `AZURE_CLIENT_SECRET`
 
 **Liquibase License**:
-- `LIQUIBASE_PRO_LICENSE_KEY`
+- `LIQUIBASE_LICENSE_KEY`
 
 **Database Connection**:
 - `LIQUIBASE_URL`
@@ -149,17 +149,17 @@ Each workflow references specific Liquibase flow files that orchestrate the data
 ## Usage
 
 1. **Development Workflow**:
-   - Use `lbp_build_action.yml` for initial development builds
-   - Use `lbp_checks_action.yml` for policy validation
-   - Use `lbp_premerge_action.yml` before merging changes
+   - Use `build_action.yml` for initial development builds
+   - Use `checks_action.yml` for policy validation
+   - Use `premerge_action.yml` before merging changes
 
 2. **Deployment Workflow**:
-   - Use `lbp_deploy_action.yml` for environment promotions
+   - Use `deploy_action.yml` for environment promotions
    - Policy failures trigger manual approval requirements
 
 3. **Maintenance Operations**:
-   - Use `lbp_diff_action.yml` to detect environment drift
-   - Use `lbp_snapshot_action.yml` for regular backups
-   - Use `lbp_rollback_action.yml` for emergency rollbacks
+   - Use `diff_action.yml` to detect environment drift
+   - Use `snapshot_action.yml` for regular backups
+   - Use `rollback_action.yml` for emergency rollbacks
 
 All workflows generate comprehensive reports stored in Azure Storage at `az://reports/gh_sqlserver_reports` for audit and troubleshooting purposes.
