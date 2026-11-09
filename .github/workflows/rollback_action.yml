@@ -57,7 +57,7 @@ on:
         required: false
 
       lb_deployment_id:
-        description: 'Deployment ID (required for rollback_one_update)'
+        description: 'Deployment ID for rollback_one_update (optional - if left blank, the most recent update is rolled back)'
         type: string
         required: false
 
@@ -99,11 +99,10 @@ env:
   ROLLBACK_TYPE: ${{ github.event.inputs.rollback_type }}
   LB_TAG: ${{ github.event.inputs.lb_tag }}
   LB_COUNT: ${{ github.event.inputs.lb_count }}
-  LB_CHANGESET_ID: ${{ github.event.inputs.changeset_id }}
-  LB_CHANGESET_AUTHOR: ${{ github.event.inputs.changeset_author }}
-  LB_CHANGESET_PATH: ${{ github.event.inputs.changeset_path }}
-  LB_DEPLOYMENT_ID: ${{ github.event.inputs.deployment_id }}
-  LB_FORCE: ${{ github.event.inputs.force }}
+  LB_CHANGESET_ID: ${{ github.event.inputs.lb_changeset_id }}
+  LB_CHANGESET_AUTHOR: ${{ github.event.inputs.lb_changeset_author }}
+  LB_CHANGESET_PATH: ${{ github.event.inputs.lb_changeset_path }}
+  LB_DEPLOYMENT_ID: ${{ github.event.inputs.lb_deployment_id }}
   LB_SCHEMAS: "DBO,Sales"
   
   # Reports

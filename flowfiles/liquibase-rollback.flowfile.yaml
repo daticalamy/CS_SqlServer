@@ -16,10 +16,45 @@ globalVariables:
   DRY_RUN: ${LB_DRY_RUN}
 
 stages:
+  Validate-Inputs:
+    actions:
+      - type: shell
+        command: |
+          case "${ROLLBACK_TYPE}" in
+            rollback_to_tag)
+              if [ -z "${TAG}" ]; then
+                echo "ERROR: 'lb_tag' is required when rollback_type is 'rollback_to_tag'." >&2
+                exit 1
+              fi
+              ;;
+            rollback_count)
+              if [ -z "${COUNT}" ]; then
+                echo "ERROR: 'lb_count' is required when rollback_type is 'rollback_count'." >&2
+                exit 1
+              fi
+              ;;
+            rollback_one_changeset)
+              if [ -z "${CHANGESET_ID}" ] || [ -z "${CHANGESET_AUTHOR}" ] || [ -z "${CHANGESET_PATH}" ]; then
+                echo "ERROR: 'changeset_id', 'changeset_author', and 'changeset_path' are all required when rollback_type is 'rollback_one_changeset'." >&2
+                exit 1
+              fi
+              ;;
+            rollback_one_update)
+              if [ -z "${DEPLOYMENT_ID}" ]; then
+                echo "NOTE: 'deployment_id' was not supplied - the most recent update will be rolled back."
+              fi
+              ;;
+            *)
+              echo "ERROR: Unrecognized rollback_type '${ROLLBACK_TYPE}'." >&2
+              exit 1
+              ;;
+          esac
+          echo "Input validation passed for rollback_type=${ROLLBACK_TYPE}"
+
   Rollback-Logging:
     actions:
       - type: shell
-        command: echo 'Attempting to rollback using Rollback Type ${ROLLBACK_TYPE} and Dry Run ${DRY_RUN}' 
+        command: echo 'Attempting to rollback using Rollback Type ${ROLLBACK_TYPE} and Dry Run ${DRY_RUN}'
 
   Rollback-To-Tag-SQL:
     actions:
