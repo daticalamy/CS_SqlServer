@@ -21,19 +21,12 @@ stages:
         command: exit
         cmdArgs: {exitCode: 0, exitMessage: "Exiting with an error status of 0 because the database is up-to-date"}
 
-  # Moved to separate flow
-  # Checks-Changelog:
-  #  actions:
-  #    - type: liquibase
-  #      command: checks run
-  #      cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
-  #      globalArgs: { reports-name: "checks-report-premerge-changelog.html"}
-
-  Update-SQL:
-    actions:
-      - type: liquibase
-        command: update-sql
-        globalArgs: { reports-name: "sql-premerge-report.html"}
+  Checks-Changelog:
+   actions:
+     - type: liquibase
+       command: checks run
+       cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
+       globalArgs: { reports-name: "checks-report-premerge-changelog.html"}
 
   # Create Clone Database
   Create-EphemeralDB:

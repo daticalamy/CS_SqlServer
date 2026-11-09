@@ -28,13 +28,7 @@ on:
 #  Set up the premerge environment (will be clone of first db, eg. DEV)
 ###########################################################################
 env:
-  # Azure Storage account and container to hold reports
-  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
-  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-  
-  # Pro License key
+  # Secure License key
   # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
   LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
   
@@ -98,20 +92,6 @@ jobs:
     # Required to run commands for Cloning DB
     - name: Install MSSQL Client tools
       uses: ./.github/workflows/install-mssql-client-tools
-
-    - name: Liquibase Checks Flow
-      id: lbp-policy-checks
-      continue-on-error: true
-      run: | 
-        set +e
-        CHECKS_STATUS=$(liquibase flow --flow-file=liquibase-checks.flowfile.yaml 2>&1)
-        EXIT_CODE=$?
-        set -e
-        if [ $EXIT_CODE -eq 1 ]; then
-          echo "::error::Policy checks did not pass, but allowing merge."
-          echo "::error::In non-build environments, this deployment will require Manual Approval."
-          exit $EXIT_CODE
-        fi
         
     - name: Liquibase Premerge Flow
       run: liquibase flow --flow-file=liquibase-premerge.flowfile.yaml

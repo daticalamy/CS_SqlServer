@@ -11,13 +11,6 @@ globalVariables:
 
 stages:
 
-  #Drift-Detection:
-    # Check if manual updates were made to the environment since last deployment
-    #actions:
-    #  - type: shell
-    #    if: "${CHECK_DRIFT} == true"
-    #    command: liquibase --search-path=az://${CONTAINER}/gh_sqlserver_snapshots/ diff --reference-url=offline:mssql?snapshot=${ENV}-snapshot.json --report-name="drift-report-${ENV}.html" --drift-severity=1 --schemas=${SCHEMAS}
-
   Drift-Detection:
     # Check if manual updates were made to the environment since last deployment
     actions:
