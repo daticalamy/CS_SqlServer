@@ -1,5 +1,0 @@
-databaseChangeLog:
-  - include: 
-      file: ./changelog.yaml 
-  - include:
-      file: ./populate_table4.yaml
