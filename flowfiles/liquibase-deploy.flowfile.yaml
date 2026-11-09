@@ -6,6 +6,7 @@ globalVariables:
   CONTAINER: ${AZURE_CONTAINER} 
   TAG: ${LB_TAG}
   CHECK_DRIFT: ${LB_CHECK_DRIFT}
+  DRY_RUN: ${LB_DRY_RUN}
   SCHEMAS: ${LB_SCHEMAS}
 
 stages:
@@ -43,18 +44,21 @@ stages:
   Update-SQL:
     actions:
       - type: liquibase
+        if: "${DRY_RUN} == true"
         command: update-sql
-        globalArgs: { reports-name: "sql-deploy-report-${ENV}.html" }
+        globalArgs: { reports-name: "dryrun-deploy-report-${ENV}.html" }
 
   Tag:
     actions:
       - type: liquibase
+        if: "${DRY_RUN} == false"
         command: tag
         cmdArgs: {tag: "${TAG}"}
 
   Update:
     actions:
       - type: liquibase
+        if: "${DRY_RUN} == false"
         command: update
         globalArgs: { reports-name: "deploy-report-${ENV}.html" }
 
@@ -66,11 +70,13 @@ endStage:
   actions:
     - type: liquibase
       command: snapshot
+      if: "${DRY_RUN} == false"
       cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}", snapshot-filters: "column,foreignkey,index,primarykey,table,uniqueconstraint,view,checkconstraint,trigger"}
       globalArgs: { output-file: 'az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json' }
         
     - type: shell
-      command: echo 'Updated snapshot saved to az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json'  
+      if: "${DRY_RUN} == false"
+      command: echo 'Updated snapshot saved to az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json' 
   
     - type: liquibase
       command: history

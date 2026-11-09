@@ -20,7 +20,13 @@ on:
         description: 'Optional tag for the build'
         type: string
         required: false
-        
+
+      dry_run:
+        description: 'Dry Run (no changes applied to the database)'
+        type: boolean
+        required: true
+        default: false
+
       check_drift:
         description: 'Check for Drift Detection'
         type: boolean
@@ -63,6 +69,7 @@ env:
   ENVIRONMENT: ${{ inputs.environment }}
   LB_TAG: ${{ github.event.inputs.lb_tag || github.ref_name }}
   LB_CHECK_DRIFT: ${{ github.event.inputs.check_drift }}
+  LB_DRY_RUN: ${{ github.event.inputs.dry_run }}
   LB_SCHEMAS: "DBO,Sales"
 
   # Reports
@@ -86,7 +93,7 @@ jobs:
   #  Deploy
   #########################################################################
       
-  database-build:
+  database-deploy:
     runs-on: [self-hosted]
     environment: ${{ inputs.environment }}
     steps:
