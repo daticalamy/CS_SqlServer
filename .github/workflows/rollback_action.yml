@@ -136,6 +136,7 @@ jobs:
     if: ${{ inputs.rollback_type == 'rollback_to_tag' }}
     steps:
       - name: Validate required inputs
+        shell: bash
         run: |
           if [ -z "${{ inputs.lb_tag }}" ]; then
             echo "ERROR: tag is required for rollback_to_tag"
@@ -150,6 +151,7 @@ jobs:
     if: ${{ inputs.rollback_type == 'rollback_count' }}
     steps:
       - name: Validate required inputs
+        shell: bash
         run: |
           if [ -z "${{ inputs.lb_count }}" ]; then
             echo "ERROR: count is required for rollback_count"
@@ -164,6 +166,7 @@ jobs:
     if: ${{ inputs.rollback_type == 'rollback_one_changeset' }}
     steps:
       - name: Validate required inputs
+        shell: bash
         run: |
           if [ -z "${{ inputs.changeset_id }}" ] || [ -z "${{ inputs.changeset_author }}" ] || [ -z "${{ inputs.changeset_path }}" ]; then
             echo "ERROR: changeset_id, changeset_author, and changeset_path are required for rollback_one_changeset"
