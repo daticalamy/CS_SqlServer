@@ -94,7 +94,14 @@ jobs:
  
     - name: Liquibase Utilities Flow
       run: liquibase flow --flow-file=liquibase-utilities.flowfile.yaml
-        
+
+    - name: Upload Reports Artifact
+      if: always()
+      uses: ./.github/workflows/upload-reports
+      with:
+        job-type: utilities
+        upload-other: false
+
     - name: Upload Generate Changelog Artifact
       if: github.event.inputs.utility == 'generate-changelog'
       uses: actions/upload-artifact@v4

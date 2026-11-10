@@ -104,3 +104,10 @@ jobs:
 
     - name: Liquibase Deploy Flow
       run: liquibase flow --flow-file=liquibase-deploy.flowfile.yaml
+
+    - name: Upload Reports Artifact
+      if: always()
+      uses: ./.github/workflows/upload-reports
+      with:
+        job-type: deploy
+        upload-other: false

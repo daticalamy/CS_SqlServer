@@ -207,3 +207,10 @@ jobs:
  
     - name: Liquibase Rollback Flow
       run: liquibase flow --flow-file=liquibase-rollback.flowfile.yaml
+
+    - name: Upload Reports Artifact
+      if: always()
+      uses: ./.github/workflows/upload-reports
+      with:
+        job-type: rollback
+        upload-other: false

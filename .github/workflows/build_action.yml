@@ -97,5 +97,5 @@ jobs:
       if: always()
       uses: ./.github/workflows/upload-reports
       with:
-        job-type: deploy
+        job-type: build
         upload-other: false
