@@ -177,7 +177,7 @@ jobs:
 
   rollback-one-update:
     runs-on: [self-hosted]
-    if: ${{ inputs.rollback_type == 'rollback_one_update ' }}
+    if: ${{ inputs.rollback_type == 'rollback_one_update' }}
     steps:
       - name: Run one update rollback
         run: |
