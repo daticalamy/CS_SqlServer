@@ -17,6 +17,7 @@ stages:
       - type: liquibase
         if: "${UTILITY} == changelog-sync"
         command: changelog-sync
+        cmdArgs: { context-filter: "${ENV}" }
 
       - type: liquibase
         if: "${UTILITY} == connect"
@@ -52,3 +53,4 @@ stages:
       - type: liquibase
         if: "${UTILITY} == status"
         command: status
+        cmdArgs: {verbose: true, context-filter: "${ENV}"}

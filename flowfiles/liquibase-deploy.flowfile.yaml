@@ -8,6 +8,7 @@ globalVariables:
   CHECK_DRIFT: ${LB_CHECK_DRIFT}
   DRY_RUN: ${LB_DRY_RUN}
   SCHEMAS: ${LB_SCHEMAS}
+  HISTORY_COUNT: ${LB_HISTORY_COUNT}
 
 stages:
 
@@ -28,7 +29,7 @@ stages:
     actions:
       - type: liquibase
         command: status
-        cmdArgs: {verbose: true}
+        cmdArgs: {verbose: true, context-filter: "${ENV}"}
         
       - type: control
         if: "status.changesetCount == 0"
@@ -46,7 +47,7 @@ stages:
       - type: liquibase
         if: "${DRY_RUN} == true"
         command: update-sql
-        globalArgs: { reports-name: "dryrun-deploy-report-${ENV}.html" }
+        globalArgs: { reports-name: "dryrun-deploy-report-${ENV}.html", context-filter: "${ENV}"}
 
   Tag:
     actions:
@@ -60,7 +61,7 @@ stages:
       - type: liquibase
         if: "${DRY_RUN} == false"
         command: update
-        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
+        globalArgs: { reports-name: "deploy-report-${ENV}.html", context-filter: "${ENV}"}
 
 ## The endStage ALWAYS RUNS. 
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
@@ -80,3 +81,4 @@ endStage:
   
     - type: liquibase
       command: history
+      cmdArgs: {count: "${HISTORY_COUNT}"}

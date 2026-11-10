@@ -1,6 +1,7 @@
 globalVariables:
   TAG: ${LB_TAG}
   CLONED_URL: ${LB_CLONED_URL}
+  HISTORY_COUNT: ${LB_HISTORY_COUNT}
   
 stages:
 
@@ -14,7 +15,7 @@ stages:
     actions:
       - type: liquibase
         command: status
-        cmdArgs: {verbose: true}
+        cmdArgs: {verbose: true, context-filter: "${ENV}"}
 
       - type: control
         if: "status.changesetCount == 0"
@@ -25,7 +26,7 @@ stages:
    actions:
      - type: liquibase
        command: checks run
-       cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-premerge.html"}
+       cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-premerge.html", context-filter: "${ENV}"}
 
   # Create Clone Database
   Create-EphemeralDB:
@@ -46,11 +47,11 @@ stages:
       # Run the update (with testing rollback)
       - type: liquibase
         command: update-testing-rollback
-        cmdArgs: { URL: "${CLONED_URL}", report-name: "clone-report.html" }
+        cmdArgs: { URL: "${CLONED_URL}", report-name: "clone-report.html", context-filter: "${ENV}" }
 
       - type: liquibase
         command: history
-        cmdArgs: { URL: "${CLONED_URL}" }
+        cmdArgs: { URL: "${CLONED_URL}", count: "${HISTORY_COUNT}" }
         
 # endStage:
 #   actions:

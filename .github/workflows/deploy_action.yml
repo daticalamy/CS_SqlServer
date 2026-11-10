@@ -71,6 +71,7 @@ env:
   LB_CHECK_DRIFT: ${{ github.event.inputs.check_drift }}
   LB_DRY_RUN: ${{ github.event.inputs.dry_run }}
   LB_SCHEMAS: "DBO,Sales"
+  LB_HISTORY_COUNT: 50
 
   # Reports
   #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports

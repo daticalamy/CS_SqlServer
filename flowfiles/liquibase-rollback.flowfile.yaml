@@ -14,6 +14,7 @@ globalVariables:
   SCHEMAS: ${LB_SCHEMAS}
   CONTAINER: ${AZURE_CONTAINER}
   DRY_RUN: ${LB_DRY_RUN:-false}
+  HISTORY_COUNT: ${LB_HISTORY_COUNT}
 
 stages:
   Rollback-Logging:
@@ -107,3 +108,4 @@ endStage:
 
     - type: liquibase
       command: history
+      cmdArgs: {count: "${HISTORY_COUNT}"}

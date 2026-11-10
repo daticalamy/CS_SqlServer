@@ -125,6 +125,7 @@ env:
 
   # History Table
   LIQUIBASE_DBCLHISTORY_ENABLED: true
+  LB_HISTORY_COUNT: 50
 
 jobs:
   #########################################################################

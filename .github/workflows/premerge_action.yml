@@ -52,6 +52,7 @@ env:
   
   ENVIRONMENT: DEV
   LB_TAG: ${{ github.ref_name }}
+  LB_HISTORY_COUNT: 50
 
   # Reports
   #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
