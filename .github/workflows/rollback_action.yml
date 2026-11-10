@@ -31,16 +31,19 @@ on:
         required: true
         default: false
 
+      # Tag (only used if rollback_type == rollback_to_tag)
       lb_tag:
         description: 'Tag for Rollback (required for rollback_to_tag)'
         type: string
         required: false     
 
+      # Count (only used if rollback_type == rollback_count)
       lb_count:
         description: 'Count for Rollback (required for rollback_count)'
         type: string
         required: false
 
+      # Changeset Fields (only used if rollback_type == rollback_one_changeset)
       lb_changeset_id:
         description: 'Changeset ID (required for rollback_one_changeset)'
         type: string
@@ -56,6 +59,7 @@ on:
         type: string
         required: false
 
+      # Deployment ID (only used if rollback_type == rollback_one_update)
       lb_deployment_id:
         description: 'Deployment ID for rollback_one_update (optional - if left blank, the most recent update is rolled back)'
         type: string
@@ -97,18 +101,17 @@ env:
   ENVIRONMENT: ${{ inputs.environment }}
   
   LB_DRY_RUN: ${{ github.event.inputs.dry_run }}
-  ROLLBACK_TYPE: ${{ github.event.inputs.rollback_type }}
 
-  # Each of these is only populated when its matching rollback_type is selected.
-  # Otherwise it is forced to an empty string so Liquibase Flow's upfront
-  # validation of every stage's command args (regardless of 'if' gating)
-  # doesn't fail trying to resolve a variable that doesn't apply to this run.
-  LB_TAG: ${{ (github.event.inputs.rollback_type == 'rollback_to_tag' && github.event.inputs.lb_tag) || '' }}
-  LB_COUNT: ${{ (github.event.inputs.rollback_type == 'rollback_count' && github.event.inputs.lb_count) || '' }}
-  LB_CHANGESET_ID: ${{ (github.event.inputs.rollback_type == 'rollback_one_changeset' && github.event.inputs.lb_changeset_id) || '' }}
-  LB_CHANGESET_AUTHOR: ${{ (github.event.inputs.rollback_type == 'rollback_one_changeset' && github.event.inputs.lb_changeset_author) || '' }}
-  LB_CHANGESET_PATH: ${{ (github.event.inputs.rollback_type == 'rollback_one_changeset' && github.event.inputs.lb_changeset_path) || '' }}
-  LB_DEPLOYMENT_ID: ${{ (github.event.inputs.rollback_type == 'rollback_one_update' && github.event.inputs.lb_deployment_id) || '' }}
+  # Rollback
+  ROLLBACK_TYPE: ${{ github.event.inputs.rollback_type }}
+  LB_TAG: ${{ github.event.inputs.lb_tag }}
+  LB_COUNT: ${{ github.event.inputs.lb_count }}
+  LB_CHANGESET_ID: ${{ github.event.inputs.lb_changeset_id }}
+  LB_CHANGESET_AUTHOR: ${{ github.event.inputs.lb_changeset_author }}
+  LB_CHANGESET_PATH: ${{ github.event.inputs.lb_changeset_path }}
+  LB_DEPLOYMENT_ID: ${{ github.event.inputs.lb_deployment_id }}
+  
+  # For Snapshot/Drift Detection
   LB_SCHEMAS: "DBO,Sales"
 
   # Reports
@@ -128,8 +131,67 @@ jobs:
   #  Rollback
   #########################################################################
 
+  rollback-to-tag:
+    runs-on: [self-hosted]
+    if: ${{ inputs.rollback_type == 'rollback_to_tag' }}
+    steps:
+      - name: Validate required inputs
+        run: |
+          if [ -z "${{ inputs.lb_tag }}" ]; then
+            echo "ERROR: tag is required for rollback_to_tag"
+            exit 1
+          fi
+      - name: Run tag rollback
+        run: |
+          echo "Rolling back to tag ${{ inputs.lb_tag }}"
+
+  rollback-count:
+    runs-on: [self-hosted]
+    if: ${{ inputs.rollback_type == 'rollback_count' }}
+    steps:
+      - name: Validate required inputs
+        run: |
+          if [ -z "${{ inputs.lb_count }}" ]; then
+            echo "ERROR: count is required for rollback_count"
+            exit 1
+          fi
+      - name: Run count rollback
+        run: |
+          echo "Rolling back ${{ inputs.lb_count }} changesets"
+
+  rollback-one-changeset:
+    runs-on: [self-hosted]
+    if: ${{ inputs.rollback_type == 'rollback_one_changeset' }}
+    steps:
+      - name: Validate required inputs
+        run: |
+          if [ -z "${{ inputs.changeset_id }}" ] || [ -z "${{ inputs.changeset_author }}" ] || [ -z "${{ inputs.changeset_path }}" ]; then
+            echo "ERROR: changeset_id, changeset_author, and changeset_path are required for rollback_one_changeset"
+            exit 1
+          fi
+      - name: Run changeset rollback
+        run: |
+          echo "Rolling back changeset ${{ inputs.changeset_id }} by ${{ inputs.changeset_author }} at ${{ inputs.changeset_path }}"
+
+  rollback-one-update:
+    runs-on: [self-hosted]
+    if: ${{ inputs.rollback_type == 'rollback_one_update ' }}
+    steps:
+      - name: Run one update rollback
+        run: |
+          echo "Rolling back deployment ${{ inputs.lb_deployment_id }}"
+
   database-rollback:
     runs-on: [self-hosted]
+    needs: [rollback-to-tag, rollback-count, rollback-one-changeset, rollback-one-update]
+    if: |
+      always() &&
+      (needs.rollback-to-tag.result == 'success' || needs.rollback-to-tag.result == 'skipped') &&
+      (needs.rollback-count.result == 'success' || needs.rollback-count.result == 'skipped') &&
+      (needs.rollback-one-changeset.result == 'success' || needs.rollback-one-changeset.result == 'skipped') &&
+      (needs.rollback-one-update.result == 'success' || needs.rollback-one-update.result == 'skipped') &&
+      (needs.rollback-to-tag.result == 'success' || needs.rollback-count.result == 'success' || needs.rollback-one-changeset.result == 'success' || needs.rollback-one-update.result == 'success')
+
     environment: ${{ inputs.environment }}
     steps:
     - uses: actions/checkout@v4
