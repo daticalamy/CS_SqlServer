@@ -143,7 +143,7 @@ jobs:
           }
       - name: Run tag rollback
         run: |
-          echo "Rolling back to tag ${{ inputs.lb_tag }}"
+          echo "Rolling back to tag ${{ inputs.lb_tag }} (Dry Run: ${{ inputs.dry_run }})"
 
   rollback-count:
     runs-on: [self-hosted]
@@ -157,7 +157,7 @@ jobs:
           }
       - name: Run count rollback
         run: |
-          echo "Rolling back ${{ inputs.lb_count }} changesets"
+          echo "Rolling back ${{ inputs.lb_count }} changesets (Dry Run: ${{ inputs.dry_run }})"
 
   rollback-one-changeset:
     runs-on: [self-hosted]
@@ -173,7 +173,7 @@ jobs:
           }
       - name: Run changeset rollback
         run: |
-          echo "Rolling back changeset ${{ inputs.changeset_id }} by ${{ inputs.changeset_author }} at ${{ inputs.changeset_path }}"
+          echo "Rolling back changeset ${{ inputs.changeset_id }} by ${{ inputs.changeset_author }} at ${{ inputs.changeset_path }} (Dry Run: ${{ inputs.dry_run }})"
 
   rollback-one-update:
     runs-on: [self-hosted]
@@ -184,7 +184,7 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($env:LB_DEPLOYMENT_ID)) {
             Write-Host "No deployment ID given; rolling back the most recent update"
           } else {
-            Write-Host "Rolling back deployment $env:LB_DEPLOYMENT_ID"
+            Write-Host "Rolling back deployment $env:LB_DEPLOYMENT_ID (Dry Run: ${{ inputs.dry_run }})"
           }
 
   database-rollback:
