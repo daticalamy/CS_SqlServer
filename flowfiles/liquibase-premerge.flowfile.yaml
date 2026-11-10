@@ -25,7 +25,7 @@ stages:
    actions:
      - type: liquibase
        command: checks run
-       cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-premerge-changelog.html"}
+       cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-premerge.html"}
 
   # Create Clone Database
   Create-EphemeralDB:

@@ -28,8 +28,7 @@ stages:
     actions:
       - type: liquibase
         command: checks run
-        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
-        globalArgs: { reports-name: "checks-report-build-changelog.html"}
+        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-build.html"}
 
   Tag:
     actions:

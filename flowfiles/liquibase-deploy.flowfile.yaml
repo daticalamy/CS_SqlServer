@@ -35,6 +35,12 @@ stages:
         command: exit
         cmdArgs: {exitCode: 0, exitMessage: "Exiting with an error status of 0 because the database is up-to-date"}
 
+  Checks-Changelog:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-${ENV}.html"}
+  
   Update-SQL:
     actions:
       - type: liquibase
