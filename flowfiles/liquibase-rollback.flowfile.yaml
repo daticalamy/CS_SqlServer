@@ -8,7 +8,7 @@ globalVariables:
   CHANGESET_ID: ${LB_CHANGESET_ID:-""}
   CHANGESET_AUTHOR: ${LB_CHANGESET_AUTHOR:-""}
   CHANGESET_PATH: ${LB_CHANGESET_PATH:-""}
-  DEPLOYMENT_ID: ${LB_DEPLOYMENT_ID:-""}
+  DEPLOYMENT_ID: ${LB_DEPLOYMENT_ID:-none}
   FORCE: true
   ENV: ${ENVIRONMENT}
   SCHEMAS: ${LB_SCHEMAS}
@@ -66,16 +66,30 @@ stages:
   Rollback-One-Update-SQL:
     actions:
       - type: liquibase
-        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'true'"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'true' && '${DEPLOYMENT_ID}' != '' && '${DEPLOYMENT_ID}' != 'none'"
         command: rollback-one-update-sql
         cmdArgs: {deployment-id: "${DEPLOYMENT_ID}", force: "${FORCE}", report-name: "sql-rollback-report-${ENV}.html"}
+
+  Rollback-One-Update-SQL-Latest:
+    actions:
+      - type: liquibase
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'true' && ('${DEPLOYMENT_ID}' == '' || '${DEPLOYMENT_ID}' == 'none')"
+        command: rollback-one-update-sql
+        cmdArgs: {force: "${FORCE}", report-name: "sql-rollback-report-${ENV}.html"}
 
   Rollback-One-Update:
     actions:
       - type: liquibase
-        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'false'"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'false' && '${DEPLOYMENT_ID}' != '' && '${DEPLOYMENT_ID}' != 'none'"
         command: rollback-one-update
         cmdArgs: {deployment-id: "${DEPLOYMENT_ID}", force: "${FORCE}", report-name: "rollback-report-${ENV}.html"}
+
+  Rollback-One-Update-Latest:
+    actions:
+      - type: liquibase
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'false' && ('${DEPLOYMENT_ID}' == '' || '${DEPLOYMENT_ID}' == 'none')"
+        command: rollback-one-update
+        cmdArgs: {force: "${FORCE}", report-name: "rollback-report-${ENV}.html"}
 
 ## The endStage ALWAYS RUNS.
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
