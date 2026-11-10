@@ -24,56 +24,56 @@ stages:
   Rollback-To-Tag-SQL:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_to_tag && ${DRY_RUN} == true"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_to_tag' && '${DRY_RUN}' == 'true'"
         command: rollback-sql
         cmdArgs: {tag: "${TAG}", report-name: "sql-rollback-report-${ENV}.html"}
 
   Rollback-To-Tag:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_to_tag && ${DRY_RUN} == false"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_to_tag' && '${DRY_RUN}' == 'false'"
         command: rollback
         cmdArgs: {tag: "${TAG}", report-name: "rollback-report-${ENV}.html"}
 
   Rollback-Count-SQL:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_count && ${DRY_RUN} == true"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_count' && '${DRY_RUN}' == 'true'"
         command: rollback-count-sql
         cmdArgs: {count: "${COUNT}", report-name: "sql-rollback-report-${ENV}.html"}
 
   Rollback-Count:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_count && ${DRY_RUN} == false"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_count' && '${DRY_RUN}' == 'false'"
         command: rollback-count
         cmdArgs: {count: "${COUNT}", report-name: "rollback-report-${ENV}.html"}
 
   Rollback-One-Changeset-SQL:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_one_changeset && ${DRY_RUN} == true"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_changeset' && '${DRY_RUN}' == 'true'"
         command: rollback-one-changeset-sql
         cmdArgs: {changeset-id: "${CHANGESET_ID}", changeset-author: "${CHANGESET_AUTHOR}", changeset-path: "${CHANGESET_PATH}", force: "${FORCE}", report-name: "sql-rollback-report-${ENV}.html"}
 
   Rollback-One-Changeset:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_one_changeset && ${DRY_RUN} == false"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_changeset' && '${DRY_RUN}' == 'false'"
         command: rollback-one-changeset
         cmdArgs: {changeset-id: "${CHANGESET_ID}", changeset-author: "${CHANGESET_AUTHOR}", changeset-path: "${CHANGESET_PATH}", force: "${FORCE}", report-name: "rollback-report-${ENV}.html"}
 
   Rollback-One-Update-SQL:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_one_update && ${DRY_RUN} == true"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'true'"
         command: rollback-one-update-sql
         cmdArgs: {deployment-id: "${DEPLOYMENT_ID}", force: "${FORCE}", report-name: "sql-rollback-report-${ENV}.html"}
 
   Rollback-One-Update:
     actions:
       - type: liquibase
-        if: "${ROLLBACK_TYPE} == rollback_one_update && ${DRY_RUN} == false"
+        if: "'${ROLLBACK_TYPE}' == 'rollback_one_update' && '${DRY_RUN}' == 'false'"
         command: rollback-one-update
         cmdArgs: {deployment-id: "${DEPLOYMENT_ID}", force: "${FORCE}", report-name: "rollback-report-${ENV}.html"}
 
