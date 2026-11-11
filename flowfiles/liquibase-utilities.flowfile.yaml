@@ -6,6 +6,7 @@ globalVariables:
   CONTAINER: ${AZURE_CONTAINER} 
   SCHEMAS: ${LB_SCHEMAS}
   UTILITY: ${LB_UTILITY}
+  REF_ENV: ${LB_REFERENCE_ENV}
 
 stages:
   Utility:
@@ -22,15 +23,21 @@ stages:
       - type: liquibase
         if: "${UTILITY} == connect"
         command: connect
+  
+      - type: liquibase
+        if: "${UTILITY} == diff"
+        command: diff
+        cmdArgs: { schemas: "${SCHEMAS}", drift-severity: "1", reference-url: "offline:mssql?snapshot=${REF_ENV}-snapshot.json", report-name: "drift-report-${ENV}-to-${REF_ENV}.html" }
         
       - type: liquibase
         if: "${UTILITY} == generate-changelog"
         command: generate-changelog
-        cmdArgs: { changelog-file: 'generatechangelogs/${ENV}/${ENV}-changelog.oracle.xml', overwrite-output-file: "true", schemas: "${SCHEMAS}" }
-        
+        cmdArgs: { changelog-file: 'generatechangelogs/${ENV}/${ENV}-changelog.mssql.xml', overwrite-output-file: "true", schemas: "${SCHEMAS}", object-changelogs: "by-table" }
+        globalArgs: { changelog-pretty-print-sql: "true" }
+
       - type: shell
         if: "${UTILITY} == generate-changelog"
-        command: echo 'Generate Changelog saved to generatechangelogs/${ENV}/${ENV}-changelog.oracle.xml'
+        command: echo 'Generate Changelog saved to generatechangelogs/${ENV}/${ENV}-changelog.mssql.xml'
 
       - type: liquibase
         if: "${UTILITY} == history"

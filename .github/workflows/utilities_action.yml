@@ -21,11 +21,21 @@ on:
         options:
         - changelog-sync
         - connect
+        - diff
         - generate-changelog
         - history
         - release-locks
         - snapshot
         - status
+
+      reference_snapshot:
+        description: 'Reference snapshot (required for diff)'
+        type: choice
+        required: false
+        options:
+        - DEV
+        - QA
+        - PROD
        
 ####################################################################
 #  Set up the environment
@@ -62,6 +72,7 @@ env:
   
   ENVIRONMENT: ${{ inputs.environment }}
   LB_UTILITY: ${{ inputs.utility }}
+  LB_REFERENCE_ENV: ${{ inputs.reference_snapshot }}
   
   # Drift Detection
   LB_SCHEMAS: "DBO,Sales"
@@ -106,5 +117,5 @@ jobs:
       if: github.event.inputs.utility == 'generate-changelog'
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.environment }}-changelog.oracle.zip
+        name: ${{ inputs.environment }}-changelog.mssql.zip
         path: generatechangelogs
