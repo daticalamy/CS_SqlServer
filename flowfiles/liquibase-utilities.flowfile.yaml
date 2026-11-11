@@ -32,12 +32,12 @@ stages:
       - type: liquibase
         if: "${UTILITY} == generate-changelog"
         command: generate-changelog
-        cmdArgs: { changelog-file: 'generatechangelogs/${ENV}/${ENV}-changelog.mssql.yml', overwrite-output-file: "true", schemas: "${SCHEMAS}", object-changelogs: "by-table" }
+        cmdArgs: { changelog-file: 'generatechangelogs/${ENV}/${ENV}-changelog.mssql.sql', overwrite-output-file: "true", schemas: "${SCHEMAS}", object-changelogs: "by-table" }
         globalArgs: { changelog-pretty-print-sql: "true" }
 
       - type: shell
         if: "${UTILITY} == generate-changelog"
-        command: echo 'Generate Changelog saved to generatechangelogs/${ENV}/${ENV}-changelog.mssql.yml'
+        command: echo 'Generate Changelog saved to generatechangelogs/${ENV}/${ENV}-changelog.mssql.sql'
 
       - type: liquibase
         if: "${UTILITY} == history"
