@@ -22,6 +22,7 @@ on:
         - changelog-sync
         - connect
         - diff
+        - diff-changelog
         - generate-changelog
         - history
         - release-locks
@@ -29,7 +30,7 @@ on:
         - status
 
       reference_snapshot:
-        description: 'Reference snapshot (required for diff)'
+        description: 'Reference snapshot (required for diff and diff-changelog)'
         type: choice
         required: false
         options:
@@ -113,8 +114,8 @@ jobs:
         job-type: utilities
         upload-other: false
 
-    - name: Upload Generate Changelog Artifact
-      if: github.event.inputs.utility == 'generate-changelog'
+    - name: Upload Generate Changelog and Diff Changelog Artifacts
+      if: github.event.inputs.utility == 'generate-changelog' || github.event.inputs.utility == 'diff-changelog'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.environment }}-changelog.mssql.zip

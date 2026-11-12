@@ -28,7 +28,17 @@ stages:
         if: "${UTILITY} == diff"
         command: diff
         cmdArgs: { schemas: "${SCHEMAS}", drift-severity: "1", reference-url: "offline:mssql?snapshot=${REF_ENV}-snapshot.json", report-name: "drift-report-${ENV}-to-${REF_ENV}.html" }
-        
+
+      - type: liquibase
+        if: "${UTILITY} == diff-changelog"
+        command: diff-changelog
+        cmdArgs: { reference-url: "offline:mssql?snapshot=${REF_ENV}-snapshot.json", changelog-file: 'generatechangelogs/${ENV}/${ENV}-changelog.mssql.sql', schemas: "${SCHEMAS}", drift-severity: "1", object-changelogs: "by-table", report-name: "drift-report-${ENV}-to-${REF_ENV}.html" }
+        globalArgs: { changelog-pretty-print-sql: "true" }
+
+      - type: shell
+        if: "${UTILITY} == diff-changelog"
+        command: echo 'Diff Changelog saved to generatechangelogs/${ENV}/${ENV}-changelog.mssql.sql'
+
       - type: liquibase
         if: "${UTILITY} == generate-changelog"
         command: generate-changelog
