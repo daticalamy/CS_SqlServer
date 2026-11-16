@@ -1,6 +1,18 @@
 # .github/workflows/setup-liquibase/action.yml
 name: 'Setup Liquibase Environment'
-description: 'Sets up Java and Liquibase Secure'
+description: 'Sets up Java and Liquibase Secure, and optionally trusts a CA certificate for the Liquibase PLatform'
+
+inputs:
+  ca-cert-path:
+    description: >
+      Path (relative to the repo root) to a CA certificate the JDK should trust,
+      e.g. when your Change Intelligence endpoint uses a private CA. Leave empty to skip.
+    required: false
+    default: ''
+  ca-cert-alias:
+    description: 'Alias for the certificate in the JDK truststore'
+    required: false
+    default: 'liquibase-ci-ca'
 
 runs:
   using: 'composite'
@@ -16,6 +28,26 @@ runs:
       with:
         version: '6.0.1'
         edition: 'secure'
+
+    # Liquibase runs on the JDK installed by setup-java, which has its own truststore.
+    # Certificates trusted by the operating system are NOT trusted by this JDK
+    # unless they are imported here.
+    - name: Trust CA certificate
+      if: inputs.ca-cert-path != ''
+      shell: pwsh
+      env:
+        CERT_PATH: ${{ inputs.ca-cert-path }}
+        CERT_ALIAS: ${{ inputs.ca-cert-alias }}
+      run: |
+        $keytool = Join-Path $env:JAVA_HOME 'bin' ($IsWindows ? 'keytool.exe' : 'keytool')
+        $cert = Join-Path $env:GITHUB_WORKSPACE $env:CERT_PATH
+        if (-not (Test-Path $cert)) { throw "Certificate not found: $cert" }
+
+        & $keytool -list -cacerts -storepass changeit -alias $env:CERT_ALIAS *> $null
+        if ($LASTEXITCODE -ne 0) {
+          & $keytool -importcert -noprompt -alias $env:CERT_ALIAS -file $cert -cacerts -storepass changeit
+          if ($LASTEXITCODE -ne 0) { throw "keytool failed to import $cert" }
+        }
 
 #    - name: Setup Liquibase Secure
 #      uses: liquibase/setup-liquibase@v3
