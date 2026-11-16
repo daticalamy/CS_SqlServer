@@ -1,6 +1,6 @@
 ﻿--liquibase formatted sql
 
---changeset asmith:vendor_script_01
+--changeset asmith:vendor_script_01 context:!DEV
 CREATE TABLE dbo.Stores (
     StoreID INT IDENTITY(1,1) PRIMARY KEY,      -- Auto-increments starting at 1
     StoreCode VARCHAR(10) NOT NULL UNIQUE,      -- Unique short identifier (e.g., 'AUS-01')
