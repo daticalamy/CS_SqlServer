@@ -15,7 +15,7 @@ CREATE TABLE dbo.Stores (
 GO
 --rollback drop table dbo.Stores
 
---changeset asmith:vendor_script_data_01
+--changeset asmith:vendor_script_data_01 context:!DEV
 INSERT INTO dbo.Stores (StoreCode, StoreName, City, StateCode, ZipCode, MonthlyRent, IsActive, OpenedDate)
 VALUES ('AUS-01', N'Downtown Flagship', N'Austin', 'TX', '78701', 12500.00, 1, '2024-05-15');
 --rollback delete from dbo.Stores where StoreCode='AUS-01';

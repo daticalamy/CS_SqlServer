@@ -65,8 +65,8 @@ env:
   
   # Values: OFF, SEVERE, WARNING, INFO, FINE
   LIQUIBASE_LOG_LEVEL: INFO
-  # LIQUIBASE_LOG_FORMAT: JSON_PRETTY
-  # LIQUIBASE_LOG_FILE: logs/log.json
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
   
   # History Table
   LIQUIBASE_DBCLHISTORY_ENABLED: true
@@ -74,8 +74,6 @@ env:
   # Checks Settings
   LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off
   LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true
-
-  JAVA_OPTS: -Djavax.net.debug=ssl:trustmanager
 
   # Liquibase Platform Settings
   LIQUIBASE_PLATFORM_ENABLED: true
