@@ -1,7 +1,7 @@
 ####################################################################
 #  GitHub Action to perform various Liquibase utilities.
 #####################################################################
-name: 'Liquibase Secure Utilities'
+name: 'Liquibase Utilities'
 run-name: ${{ inputs.environment}} utilities by ${{ github.actor }}
 
 on:
