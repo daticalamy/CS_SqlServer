@@ -75,6 +75,8 @@ env:
   LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off
   LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true
 
+  JAVA_OPTS: -Djavax.net.debug=ssl:trustmanager
+
   # Liquibase Platform Settings
   LIQUIBASE_PLATFORM_ENABLED: true
   LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
