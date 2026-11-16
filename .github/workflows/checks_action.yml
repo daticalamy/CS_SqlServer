@@ -42,7 +42,7 @@ env:
   #LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
-  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks
+  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,changelogs
   
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml

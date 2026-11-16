@@ -1,24 +1,24 @@
 databaseChangeLog:
       
   - includeAll:
-      path: scripts/Tables
+      path: Tables
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
 
   - includeAll:
-      path: scripts/Procedures
+      path: Procedures
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
 
   - includeAll:
-      path: scripts/Views
+      path: Views
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
 
   - modifyChangeSets:
       runWith: sqlcmd
       includeAll:
-        - path: scripts/Data_Dml
+        - path: Data_Dml
         - labels: DATA_DML
         - relativeToChangelogFile: true
         - errorIfMissingOrEmpty: false
@@ -26,7 +26,7 @@ databaseChangeLog:
   - modifyChangeSets:
       runWith: sqlcmd
       includeAll:
-        - path: scripts/Vendor_Scripts
+        - path: Vendor_Scripts
         - labels: VENDOR
         - relativeToChangelogFile: true
         - errorIfMissingOrEmpty: false
