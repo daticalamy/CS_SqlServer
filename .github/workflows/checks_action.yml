@@ -75,10 +75,12 @@ jobs:
     runs-on: [self-hosted]
     environment: ${{ inputs.environment }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Setup Liquibase Environment
       uses: ./.github/workflows/setup-liquibase
+      with:
+        ca-cert-path: certs/cs-ci-ca.cer
       
     - name: Liquibase Checks Flow
       id: lbp-policy-checks

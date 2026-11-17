@@ -201,10 +201,12 @@ jobs:
 
     environment: ${{ inputs.environment }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Setup Liquibase Environment
       uses: ./.github/workflows/setup-liquibase
+      with:
+        ca-cert-path: certs/cs-ci-ca.cer
  
     - name: Liquibase Rollback Flow
       run: liquibase flow --flow-file=liquibase-rollback.flowfile.yaml
