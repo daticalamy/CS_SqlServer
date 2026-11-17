@@ -1,7 +1,7 @@
 ####################################################################
 #  GitHub Action to perform various Liquibase utilities.
 #####################################################################
-name: 'Liquibase Secure Utilities'
+name: 'Liquibase Utilities'
 run-name: ${{ inputs.environment}} utilities by ${{ github.actor }}
 
 on:
@@ -21,16 +21,34 @@ on:
         options:
         - changelog-sync
         - connect
-        - generate-changelog-zip
+        - diff
+        - diff-changelog
+        - generate-changelog
         - history
         - release-locks
-        - snapshot-zip
+        - snapshot
         - status
+
+      reference_snapshot:
+        description: 'Reference snapshot (required for diff and diff-changelog)'
+        type: choice
+        required: false
+        options:
+        - DEV
+        - QA
+        - PROD
        
 ####################################################################
 #  Set up the environment
 #####################################################################
-env:  
+env:
+  # Azure Storage account and container to hold snapshots
+  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  AZURE_CONTAINER: ${{ vars.AZURE_CONTAINER }}
+
   # License key
   LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
   
@@ -48,13 +66,14 @@ env:
   #LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
-  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks
+  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,changelogs,az://${{ vars.AZURE_CONTAINER }}/gh_sqlserver_snapshots/
 
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
   
   ENVIRONMENT: ${{ inputs.environment }}
   LB_UTILITY: ${{ inputs.utility }}
+  LB_REFERENCE_ENV: ${{ inputs.reference_snapshot }}
   
   # Drift Detection
   LB_SCHEMAS: "DBO,Sales"
@@ -71,6 +90,17 @@ env:
   # History Table
   LIQUIBASE_DBCLHISTORY_ENABLED: true
 
+  # Liquibase Platform Settings
+  LIQUIBASE_PLATFORM_ENABLED: true
+  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
+  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
+  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
+  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
+
+  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
+  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
+  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
+
 jobs:
   #########################################################################
   #  Run Utilities
@@ -80,24 +110,26 @@ jobs:
     runs-on: [self-hosted, Windows]
     environment: ${{ inputs.environment }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Setup Liquibase Environment
       uses: ./.github/workflows/setup-liquibase
+      with:
+        ca-cert-path: certs/cs-ci-ca.cer
  
     - name: Liquibase Utilities Flow
       run: liquibase flow --flow-file=liquibase-utilities.flowfile.yaml
-        
-    - name: Upload Generate Changelog Artifact
-      if: github.event.inputs.utility == 'generate-changelog-zip'
+
+    - name: Upload Reports Artifact
+      if: always()
+      uses: ./.github/workflows/upload-reports
+      with:
+        job-type: utilities
+        upload-other: false
+
+    - name: Upload Generate Changelog and Diff Changelog Artifacts
+      if: github.event.inputs.utility == 'generate-changelog' || github.event.inputs.utility == 'diff-changelog'
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.environment }}-changelog.oracle.zip
+        name: ${{ inputs.environment }}-changelog.mssql.zip
         path: generatechangelogs
-        
-    - name: Upload Snapshot Artifact
-      if: github.event.inputs.utility == 'snapshot-zip'
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ inputs.environment }}-snapshot.zip
-        path: snapshots

@@ -1,1 +1,0 @@
---liquibase formatted sql\n--changeset jlewis:01\n\n--CHG0030194\n\tDROP table products_23;\n

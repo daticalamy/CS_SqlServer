@@ -4,7 +4,7 @@ description: 'Creates artifact for reports and optionally zips for upload to ano
 
 inputs:
   job-type:
-    description: 'Type of job (checks or deploy)'
+    description: 'Type of job (checks, build, deploy, rollback, utilities)'
     required: true
   upload-other:
     description: 'Whether to upload to another service'
@@ -22,8 +22,9 @@ runs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: REPORTS-${{ inputs.job-type }}-${{ env.TIMESTAMP }}-${{ github.run_id }}.${{ github.run_number }}.zip
+        name: REPORTS-${{ inputs.job-type }}-${{ env.TIMESTAMP }}-${{ github.run_id }}.${{ github.run_number }}
         path: reports
+        if-no-files-found: ignore
 
     - name: Create zip file for another service
       if: inputs.upload-other == 'true'

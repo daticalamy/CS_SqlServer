@@ -1,0 +1,32 @@
+databaseChangeLog:
+      
+  - includeAll:
+      path: Tables
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: Procedures
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - includeAll:
+      path: Views
+      relativeToChangelogFile: true
+      errorIfMissingOrEmpty: false
+
+  - modifyChangeSets:
+      runWith: sqlcmd
+      includeAll:
+        - path: Data_Dml
+        - labels: DATA_DML
+        - relativeToChangelogFile: true
+        - errorIfMissingOrEmpty: false
+
+  - modifyChangeSets:
+      runWith: sqlcmd
+      includeAll:
+        - path: Vendor_Scripts
+        - labels: VENDOR
+        - relativeToChangelogFile: true
+        - errorIfMissingOrEmpty: false

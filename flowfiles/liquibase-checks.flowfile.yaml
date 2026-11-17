@@ -9,8 +9,7 @@ stages:
     actions:    
       - type: liquibase
         command: checks run
-        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING"}
-        globalArgs: { reports-name: "checks-report-deploy-${ENV}-changelog.html"}
+        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-deploy-${ENV}-changelog.html", context-filter: "${ENV}"}
         continueOnError: true
         
       - type: control

@@ -6,23 +6,19 @@ globalVariables:
   CONTAINER: ${AZURE_CONTAINER} 
   TAG: ${LB_TAG}
   CHECK_DRIFT: ${LB_CHECK_DRIFT}
+  DRY_RUN: ${LB_DRY_RUN}
   SCHEMAS: ${LB_SCHEMAS}
+  HISTORY_COUNT: ${LB_HISTORY_COUNT}
 
 stages:
 
   Drift-Detection:
     # Check if manual updates were made to the environment since last deployment
     actions:
-      - type: shell
+      - type: liquibase
         if: "${CHECK_DRIFT} == true"
-        command: liquibase --search-path=az://${CONTAINER}/gh_sqlserver_snapshots/ diff --reference-url=offline:mssql?snapshot=${ENV}-snapshot.json --report-name="drift-report-${ENV}.html" --reports-enabled=true --drift-severity=1 --schemas=${SCHEMAS} --diff-types=columns,foreignkeys,indexes,primarykeys,tables,uniqueconstraints,views,checkconstraints,triggers
-
-    # actions:
-      # - type: liquibase
-        # if: "${CHECK_DRIFT} == true"
-        # command: diff
-        # cmdArgs: { schemas: "${SCHEMAS}", drift-severity: "1", reference-url: "offline:mssql?snapshot=${ENV}-snapshot.json" }
-        # globalArgs: { reports-name: "drift-report-${ENV}.html", search-path: "s3://${BUCKET}/gh_sqlserver_snapshots/" }
+        command: diff
+        cmdArgs: { schemas: "${SCHEMAS}", drift-severity: "1", reference-url: "offline:mssql?snapshot=${ENV}-snapshot.json", report-name: "drift-report-${ENV}.html" }
           
   Validation:
     actions: 
@@ -33,30 +29,39 @@ stages:
     actions:
       - type: liquibase
         command: status
-        cmdArgs: {verbose: true}
+        cmdArgs: {verbose: true, context-filter: "${ENV}"}
         
       - type: control
         if: "status.changesetCount == 0"
         command: exit
         cmdArgs: {exitCode: 0, exitMessage: "Exiting with an error status of 0 because the database is up-to-date"}
 
+  Checks-Changelog:
+    actions:
+      - type: liquibase
+        command: checks run
+        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-${ENV}.html"}
+  
   Update-SQL:
     actions:
       - type: liquibase
+        if: "${DRY_RUN} == true"
         command: update-sql
-        globalArgs: { reports-name: "sql-deploy-report-${ENV}.html" }
+        cmdArgs: { report-name: "dryrun-deploy-report-${ENV}.html", context-filter: "${ENV}"}
 
   Tag:
     actions:
       - type: liquibase
+        if: "${DRY_RUN} == false"
         command: tag
         cmdArgs: {tag: "${TAG}"}
 
   Update:
     actions:
       - type: liquibase
+        if: "${DRY_RUN} == false"
         command: update
-        globalArgs: { reports-name: "deploy-report-${ENV}.html" }
+        cmdArgs: { report-name: "deploy-report-${ENV}.html", context-filter: "${ENV}"}
 
 ## The endStage ALWAYS RUNS. 
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
@@ -66,11 +71,14 @@ endStage:
   actions:
     - type: liquibase
       command: snapshot
-      cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}", snapshot-filters: "column,foreignkey,index,primarykey,table,uniqueconstraint,view,checkconstraint,trigger"}
+      if: "${DRY_RUN} == false"
+      cmdArgs: {  snapshot-format: json, schemas: "${SCHEMAS}"}
       globalArgs: { output-file: 'az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json' }
         
     - type: shell
-      command: echo 'Updated snapshot saved to az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json'  
+      if: "${DRY_RUN} == false"
+      command: echo 'Updated snapshot saved to az://${CONTAINER}/gh_sqlserver_snapshots/${ENV}-snapshot.json' 
   
     - type: liquibase
       command: history
+      cmdArgs: {count: "${HISTORY_COUNT}"}

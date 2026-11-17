@@ -42,7 +42,7 @@ env:
   #LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
-  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks
+  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,changelogs
   
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
@@ -64,7 +64,18 @@ env:
   LIQUIBASE_LOG_FILE: logs/log.json
   
   # History Table
-  LIQUIBASE_DBCLHISTORY_ENABLED: true
+  LIQUIBASE_DBCLHISTORY_ENABLED: 
+
+  # Liquibase Platform Settings
+  LIQUIBASE_PLATFORM_ENABLED: true
+  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
+  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
+  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
+  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
+
+  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
+  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
+  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
  
 jobs:
   #########################################################################
@@ -75,13 +86,22 @@ jobs:
     runs-on: [self-hosted]
     environment: ${{ inputs.environment }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Setup Liquibase Environment
       uses: ./.github/workflows/setup-liquibase
+      with:
+        ca-cert-path: certs/cs-ci-ca.cer
       
     - name: Liquibase Checks Flow
       id: lbp-policy-checks
       continue-on-error: true
-      run: | 
+      run: |
         liquibase flow --flow-file=liquibase-checks.flowfile.yaml
+
+    - name: Upload Reports Artifact
+      if: always()
+      uses: ./.github/workflows/upload-reports
+      with:
+        job-type: checks
+        upload-other: false
