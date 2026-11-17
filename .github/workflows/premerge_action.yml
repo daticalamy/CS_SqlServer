@@ -42,7 +42,7 @@ env:
 
   # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
   # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
-  # LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
   LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,changelogs
@@ -50,7 +50,7 @@ env:
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
   
-  ENVIRONMENT: DEV
+  ENVIRONMENT: ${{ inputs.environment }}
   LB_TAG: ${{ github.ref_name }}
   LB_HISTORY_COUNT: 50
 

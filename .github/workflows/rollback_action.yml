@@ -185,7 +185,7 @@ jobs:
           }
       - name: Run changeset rollback
         run: |
-          echo "Rolling back changeset ${{ inputs.changeset_id }} by ${{ inputs.changeset_author }} at ${{ inputs.changeset_path }} (Dry Run: ${{ inputs.dry_run }})"
+          echo "Rolling back changeset ${{ inputs.lb_changeset_id }} by ${{ inputs.lb_changeset_author }} at ${{ inputs.lb_changeset_path }} (Dry Run: ${{ inputs.dry_run }})"
 
   rollback-one-update:
     runs-on: [self-hosted]

@@ -1,165 +1,238 @@
-# Liquibase Secure GitHub Actions
+# Liquibase Secure GitHub Actions for SQL Server
 
-This repository contains a set of GitHub Actions workflows for managing database changes using Liquibase Secure. These workflows support a complete DevOps pipeline for database deployments with policy enforcement, drift detection, and rollback capabilities.
+This repository contains GitHub Actions workflows for managing SQL Server database changes with Liquibase Secure. The workflows cover a full database DevOps pipeline: building, policy checks, pre-merge validation in an ephemeral database, environment-targeted deployments with drift detection, rollbacks, and day-to-day utilities.
 
 ## Overview
 
-All workflows use Liquibase Secure with secure connections, Azure Storage for reporting, and custom flow files for orchestrating database operations. The workflows are designed to work with SQL Server databases and support multiple environments (DEV, TEST, PROD).
+Every workflow follows the same pattern:
+
+1. Check out the repo.
+2. Set up Java and Liquibase Secure (and optionally trust a private CA certificate for Liquibase Platform) with the `setup-liquibase` composite action.
+3. Run a Liquibase [flow file](https://docs.liquibase.com/flow) that orchestrates the actual database operations.
+4. Upload the generated reports as a GitHub Actions artifact with the `upload-reports` composite action.
+
+All workflows are started manually (`workflow_dispatch`) and target a GitHub **environment** (for example DEV, QA, PROD). Environment-specific connection details come from that environment's variables and secrets, and the environment name is also used as the Liquibase **context filter**, so changesets only deploy to the environments their `context` allows.
+
+Operation data is sent to Liquibase Platform (Change Intelligence), and database snapshots used for drift detection are stored in Azure Blob Storage.
+
+## Repository Layout
+
+```
+.github/workflows/
+  build_action.yml              # Build on the first environment (e.g. DEV)
+  checks_action.yml             # Policy checks only
+  deploy_action.yml             # Environment-targeted deployment
+  premerge_action.yml           # Validation in an ephemeral database clone
+  rollback_action.yml           # Rollback by tag, count, changeset, or update
+  utilities_action.yml          # Ad hoc Liquibase utilities
+  setup-liquibase/action.yml    # Composite: Java + Liquibase Secure + CA cert
+  install-mssql-client-tools/action.yml  # Composite: go-sqlcmd
+  upload-reports/action.yml     # Composite: upload reports artifact
+certs/
+  cs-ci-ca.cer                  # CA certificate trusted by the JDK
+changelogs/
+  changelog.yaml                # Root changelog
+  Tables/  Procedures/  Views/  Vendor_Scripts/   # Formatted SQL changesets
+flowfiles/
+  liquibase-*.flowfile.yaml     # One flow file per workflow
+policychecks/
+  liquibase.checks-settings.conf  # Policy checks configuration
+```
 
 ## Workflows
 
-### 1. Build Action (`build_action.yml`)
-**Purpose**: Performs a build on the first database environment (typically DEV) with policy checks and deployment.
+### 1. Build (`build_action.yml`)
 
-- **Trigger**: Manual workflow dispatch
-- **Environment**: User-selectable (defaults to DEV)
-- **Key Features**:
-  - Runs Liquibase policy checks (allows build to continue even if checks fail)
-  - Executes build flow using `liquibase-build.flowfile.yaml`
-  - Supports optional tagging
-  - Generates JSON-formatted logs and reports stored in Azure Storage
-- **Use Case**: Initial development database builds and testing changes
+Builds pending changes on the first database environment, typically DEV.
 
-### 2. Checks Action (`checks_action.yml`)
-**Purpose**: Runs Liquibase policy checks without performing deployments.
+| Input | Type | Description |
+|---|---|---|
+| `environment` | environment | Target environment (default `DEV`) |
+| `lb_tag` | string | Optional tag; defaults to the branch name |
 
-- **Trigger**: Manual workflow dispatch
-- **Environment**: User-selectable (defaults to DEV)
-- **Key Features**:
-  - Executes policy checks using `liquibase-checks.flowfile.yaml`
-- **Use Case**: Standalone policy validation and compliance checking
+Flow (`liquibase-build.flowfile.yaml`): validate → status (exits successfully if nothing is pending) → policy checks on pending changesets → tag → `update-testing-rollback` (deploys, rolls back, and redeploys to prove every changeset is rollback-safe) → history. A failing policy check stops the build.
 
-### 3. Deploy Action (`deploy_action.yml`)
-**Purpose**: Environment-targeted deployment with conditional manual approval based on policy check results.
+### 2. Checks (`checks_action.yml`)
 
-- **Trigger**: Manual workflow dispatch
-- **Environment**: User-selectable
-- **Key Features**:
-  - Three-stage process: Policy Checks → Manual Approval (if needed) → Deployment
-  - Automatic deployment if policy checks pass
-  - Manual approval gate if policy checks fail
-  - Optional drift detection
-  - Uses `liquibase-deploy.flowfile.yaml` for deployment execution
-- **Use Case**: Production deployments with governance and approval workflows
+Runs policy checks against pending changesets without changing the database.
 
-### 4. Diff Action (`diff_action.yml`)
-**Purpose**: Compares database schemas between two environments to detect differences and drift.
+| Input | Type | Description |
+|---|---|---|
+| `environment` | environment | Environment whose pending changesets are checked (default `DEV`) |
 
-- **Trigger**: Manual workflow dispatch
-- **Environments**: Source (any environment) and Target (DEV/TEST/PROD)
-- **Key Features**:
-  - Uses `liquibase-drift.flowfile.yaml` for drift detection
-  - Compares multiple schemas (DBO, Sales)
-  - Generates difference reports stored in Azure Storage
-- **Use Case**: Environment synchronization validation and drift detection
+Flow (`liquibase-checks.flowfile.yaml`): runs `checks run` with `changeset-filter: PENDING` and the environment's context filter. If any check returns exit code 2 or higher, the flow exits with a "requires manual approval" message. The workflow step uses `continue-on-error`, so the job itself still completes and the checks report is uploaded.
 
-### 5. Premerge Action (`premerge_action.yml`)
-**Purpose**: Validates changes in an ephemeral database environment before allowing code merges.
+**Using Checks as a pull request requirement:** This workflow has been made a required status check so that pull requests cannot be merged until the pending changesets pass policy checks. To set this up, in the repository's branch protection rules (or rulesets) for the target branch, enable **Require status checks to pass before merging** and select the `database-checks` job.
 
-- **Trigger**: Manual workflow dispatch (commented PR trigger available)
-- **Environment**: DEV (creates ephemeral clone)
-- **Key Features**:
-  - Creates temporary database clone for testing
-  - Runs policy checks and validation
-  - Uses `liquibase-premerge.flowfile.yaml`
-  - Includes MSSQL client tools installation
-  - Destroys ephemeral environment after testing
-- **Use Case**: Pre-merge validation and CI/CD integration
+### 3. Deploy (`deploy_action.yml`)
 
-### 6. Rollback Action (`rollback_action.yml`)
-**Purpose**: Rolls back database changes to a specific tag or label.
+Deploys pending changesets to the selected environment.
 
-- **Trigger**: Manual workflow dispatch
-- **Environment**: User-selectable
-- **Key Features**:
-  - Two rollback options: by tag or by label
-  - User-specified rollback target
-  - Uses `liquibase-rollback.flowfile.yaml`
-  - Supports multiple schemas (DBO, Sales)
-- **Use Case**: Emergency rollbacks and change reversions
+| Input | Type | Description |
+|---|---|---|
+| `environment` | environment | Target environment |
+| `lb_tag` | string | Optional tag; defaults to the branch name |
+| `dry_run` | boolean | Generate SQL only; make no database changes (default `false`) |
+| `check_drift` | boolean | Compare the database against its last snapshot first (default `true`) |
 
-### 7. Snapshot Action (`snapshot_action.yml`)
-**Purpose**: Creates database snapshots for reference purposes and Drift Detection.
+Flow (`liquibase-deploy.flowfile.yaml`):
 
-- **Trigger**: Manual workflow dispatch
-- **Environment**: User-selectable
-- **Key Features**:
-  - Uses `liquibase-snapshot.flowfile.yaml`
-  - Snapshots stored in Azure Storage
-  - Supports multiple schemas (DBO, Sales)
-- **Use Case**: Database state capture for backup, comparison, and audit purposes
+1. **Drift detection** (if `check_drift`): diffs the database against `<ENV>-snapshot.json` in Azure Storage and fails on drift.
+2. **Validate** the changelog.
+3. **Status**: exits successfully if the database is already up to date.
+4. **Policy checks** on pending changesets.
+5. **Dry run** (if `dry_run`): `update-sql` to produce the SQL that would run.
+6. **Tag and update** (if not `dry_run`): tags the database, then runs `update` with the environment's context filter.
+7. **Always**: takes a fresh snapshot to Azure Storage (unless dry run) to serve as the baseline for the next drift check, then prints history.
 
-## Reusable Actions
+### 4. Premerge (`premerge_action.yml`)
 
-### Setup Liquibase (`setup-liquibase/action.yml`)
-Composite action that sets up the Liquibase environment:
-- Installs Java 17 (Temurin distribution)
-- Sets up Liquibase Secure
-- Used by all main workflows
+Validates changes against a throwaway copy of the DEV database before code is merged. A `pull_request` trigger is included but commented out.
 
-### Install MSSQL Client Tools (`install-mssql-client-tools/action.yml`)
-Composite action that installs SQL Server command-line tools:
-- Installs `sqlcmd` and ODBC drivers
-- Required for workflows that need to interact directly with SQL Server
-- Used by the premerge workflow for database cloning operations
+Flow (`liquibase-premerge.flowfile.yaml`):
 
-## Environment Configuration
+1. Validate, status, and policy checks.
+2. Create an ephemeral clone (`<database>_eph`) with `DBCC CLONEDATABASE`, make it writable, and copy in the `DATABASECHANGELOG` rows from the source database.
+3. Tag the clone and run `update-testing-rollback` against it, then print history.
+4. **Always**: drop the ephemeral database.
 
-### Required Secrets
-All workflows expect the following secrets to be configured:
+Requires the `install-mssql-client-tools` action (for `sqlcmd`) and the premerge-specific secrets listed below.
 
-**Azure Storage**:
-- `AZURE_TENANT_ID`
-- `AZURE_CLIENT_ID`
-- `AZURE_CLIENT_SECRET`
+### 5. Rollback (`rollback_action.yml`)
 
-**Liquibase License**:
-- `LIQUIBASE_LICENSE_KEY`
+Rolls back changes in the selected environment.
 
-**Database Connection**:
-- `LIQUIBASE_URL`
-- `LIQUIBASE_USERNAME`
-- `LIQUIBASE_PASSWORD`
+| Input | Type | Description |
+|---|---|---|
+| `environment` | environment | Target environment |
+| `rollback_type` | choice | `rollback_to_tag`, `rollback_count`, `rollback_one_changeset`, or `rollback_one_update` |
+| `dry_run` | boolean | Generate rollback SQL only (default `false`) |
+| `lb_tag` | string | Required for `rollback_to_tag` |
+| `lb_count` | string | Required for `rollback_count` |
+| `lb_changeset_id`, `lb_changeset_author`, `lb_changeset_path` | string | Required for `rollback_one_changeset` |
+| `lb_deployment_id` | string | Optional for `rollback_one_update`; if blank, the most recent update is rolled back |
 
-**SQL Server Specific** (for premerge):
-- `LIQUIBASE_HOSTNAME`
-- `LIQUIBASE_PORT`
-- `LIQUIBASE_DATABASE_NAME`
+A small validation job runs first for the selected rollback type and fails fast if a required input is missing. The flow (`liquibase-rollback.flowfile.yaml`) then runs the matching rollback command (or its `-sql` variant for a dry run), takes a fresh snapshot to Azure Storage, and prints history.
 
-### Standard Configuration
-- **Runner**: Self-hosted runners
-- **Logging**: JSON format with INFO level
-- **Schema Management**: Liquibase tracking tables stored in `LB` schema
-- **Search Path**: `flows, checks, changelogs`
-- **Changelog**: `changelog.yaml`
-- **Schemas**: DBO and Sales schemas are managed
+### 6. Utilities (`utilities_action.yml`)
 
-## Flow Files
+Runs a single Liquibase utility command against the selected environment.
 
-Each workflow references specific Liquibase flow files that orchestrate the database operations:
+| Input | Type | Description |
+|---|---|---|
+| `environment` | environment | Target environment |
+| `utility` | choice | `changelog-sync`, `connect`, `diff`, `diff-changelog`, `generate-changelog`, `history`, `release-locks`, `snapshot`, `status` |
+| `reference_snapshot` | choice | `DEV`, `QA`, or `PROD`; the snapshot to compare against for `diff` and `diff-changelog` |
 
-- `liquibase-build.flowfile.yaml` - Build operations
-- `liquibase-checks.flowfile.yaml` - Policy and compliance checks
-- `liquibase-deploy.flowfile.yaml` - Deployment operations
-- `liquibase-drift.flowfile.yaml` - Drift detection and comparison
-- `liquibase-premerge.flowfile.yaml` - Pre-merge validation
-- `liquibase-rollback.flowfile.yaml` - Rollback operations
-- `liquibase-snapshot.flowfile.yaml` - Snapshot creation
+Notes on specific utilities:
 
-## Usage
+- `snapshot` saves `<ENV>-snapshot.json` to Azure Storage. Run it once per environment to create the baseline used by drift detection.
+- `diff` compares the environment against the chosen reference snapshot and produces a drift report.
+- `diff-changelog` and `generate-changelog` write SQL changelogs (one file per table) to `generatechangelogs/<ENV>/`, which are uploaded as a separate artifact.
+- `changelog-sync` marks pending changesets (for the environment's context) as deployed without running them.
 
-1. **Development Workflow**:
-   - Use `build_action.yml` for initial development builds
-   - Use `checks_action.yml` for policy validation
-   - Use `premerge_action.yml` before merging changes
+## Composite Actions
 
-2. **Deployment Workflow**:
-   - Use `deploy_action.yml` for environment promotions
-   - Policy failures trigger manual approval requirements
+### Setup Liquibase (`setup-liquibase`)
 
-3. **Maintenance Operations**:
-   - Use `diff_action.yml` to detect environment drift
-   - Use `snapshot_action.yml` for regular backups
-   - Use `rollback_action.yml` for emergency rollbacks
+- Installs Java 17 (Temurin).
+- Installs Liquibase Secure 6.0.2 via `liquibase/setup-liquibase@v3`.
+- Optionally imports a CA certificate into the JDK truststore (input `ca-cert-path`, alias `ca-cert-alias`). This is needed when the Liquibase Platform endpoint uses a private CA, because the JDK does not trust certificates from the operating system's store. All workflows pass `certs/cs-ci-ca.cer`.
 
-All workflows generate comprehensive reports stored in Azure Storage at `az://reports/gh_sqlserver_reports` for audit and troubleshooting purposes.
+### Install MSSQL Client Tools (`install-mssql-client-tools`)
+
+Downloads the latest Windows amd64 release of [go-sqlcmd](https://github.com/microsoft/go-sqlcmd) and adds `sqlcmd` to the `PATH`. Used by the premerge workflow to clone and drop the ephemeral database.
+
+### Upload Reports (`upload-reports`)
+
+Uploads the `reports/` directory as an artifact named `REPORTS-<job-type>-<timestamp>-<run_id>.<run_number>`. With `upload-other: true` it also zips the reports for upload to another service.
+
+## Changelog Structure
+
+`changelogs/changelog.yaml` includes, in order:
+
+| Folder | Notes |
+|---|---|
+| `Tables/` | Table DDL |
+| `Procedures/` | Stored procedures |
+| `Views/` | Views |
+| `Data_Dml/` | Run with `sqlcmd`, labeled `DATA_DML` |
+| `Vendor_Scripts/` | Run with `sqlcmd`, labeled `VENDOR` |
+
+Changesets are Liquibase formatted SQL. Use `context:` on a changeset to control which environments it deploys to. Because every workflow passes the environment name as the context filter, a changeset marked `context:PROD` only deploys when the PROD environment is selected. Changesets with no context deploy everywhere.
+
+## Policy Checks
+
+Checks are configured in `policychecks/liquibase.checks-settings.conf` and include warnings for `GRANT`/`REVOKE`, `DROP TABLE`/`DROP COLUMN`, `TRUNCATE TABLE`, `SELECT *`, reserved keywords, object naming patterns, and more. `policychecks/python/check_column_count.py` is a custom Python check that warns when an `ALTER TABLE ... ADD` would push a table past a column-count limit. Custom scripts are enabled with `LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true`.
+
+## Configuration
+
+### Runners
+
+All jobs run on **self-hosted Windows runners**. The composite actions and several workflow steps use PowerShell, the premerge flow uses Windows command syntax, and the utilities job explicitly requests the `Windows` label. The `upload-reports` action uses a `bash` step, so Git Bash (or another `bash`) must be available on the runner.
+
+### GitHub Environments
+
+Create one GitHub environment per database (for example `DEV`, `QA`, `PROD`). Environment names should match the contexts used in your changesets and the snapshot names used for drift detection.
+
+### Variables (per environment)
+
+| Variable | Description |
+|---|---|
+| `LIQUIBASE_URL` | JDBC URL of the environment's database |
+| `AZURE_CONTAINER` | Azure Storage container that holds snapshots |
+| `LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER` | Liquibase Platform connection identifier |
+| `LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER` | Liquibase Platform changelog identifier |
+
+### Secrets
+
+| Secret | Used by | Description |
+|---|---|---|
+| `LIQUIBASE_LICENSE_KEY` | All | Liquibase Secure license key |
+| `LIQUIBASE_COMMAND_USERNAME` | All | Database username |
+| `LIQUIBASE_COMMAND_PASSWORD` | All | Database password |
+| `LIQUIBASE_PLATFORM_API_KEY` | All | Liquibase Platform API key (also used for license tracking) |
+| `AZURE_TENANT_ID` | All except premerge | Azure service principal tenant |
+| `AZURE_CLIENT_ID` | All except premerge | Azure service principal client ID |
+| `AZURE_CLIENT_SECRET` | All except premerge | Azure service principal secret |
+| `LIQUIBASE_HOSTNAME` | Premerge | SQL Server host, for cloning |
+| `LIQUIBASE_PORT` | Premerge | SQL Server port, for cloning |
+| `LIQUIBASE_DATABASE_NAME` | Premerge | Source database to clone |
+
+### Shared Settings
+
+| Setting | Value |
+|---|---|
+| Azure Storage account | `cssnapshots` |
+| Snapshot location | `az://<AZURE_CONTAINER>/gh_sqlserver_snapshots/<ENV>-snapshot.json` |
+| Search path | `.,flowfiles,policychecks,changelogs` (plus the Azure snapshot folder for deploy, rollback, and utilities) |
+| Changelog | `changelog.yaml` |
+| Managed schemas | `DBO`, `Sales` |
+| Tracking tables schema | Database default (the `LB` schema setting is present but commented out) |
+| Reports | Written to `reports/` and uploaded as a GitHub artifact |
+| Logging | `INFO` level, `JSON_PRETTY` format, written to `logs/log.json` |
+| DATABASECHANGELOGHISTORY | Enabled |
+| Liquibase Platform | Enabled; operations sent to `https://cs-ci.liquibase.net` |
+| License tracking | Enabled |
+
+## Typical Usage
+
+**Development**
+
+1. Add changesets under `changelogs/` on a feature branch.
+2. Run **Checks** for quick policy feedback.
+3. Run **Premerge** to prove the changes deploy and roll back cleanly on a copy of DEV.
+4. Merge, then run **Build** to deploy to DEV.
+
+**Promotion**
+
+1. Run **Utilities → snapshot** once per environment to create the drift baseline (deploy and rollback refresh it automatically afterward).
+2. Run **Deploy** with `dry_run: true` to review the SQL.
+3. Run **Deploy** with `dry_run: false` to apply it. Protect higher environments such as PROD with GitHub environment required reviewers if you need an approval gate.
+
+**Maintenance**
+
+- **Utilities → diff** or **diff-changelog** to compare environments.
+- **Utilities → status** or **history** to see what is pending or deployed.
+- **Utilities → release-locks** if a run was interrupted and left a lock.
+- **Rollback** to back out a tag, a number of changesets, a single changeset, or a single update.

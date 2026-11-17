@@ -2,6 +2,7 @@ globalVariables:
   TAG: ${LB_TAG}
   CLONED_URL: ${LB_CLONED_URL}
   HISTORY_COUNT: ${LB_HISTORY_COUNT}
+  ENV: ${ENVIRONMENT}
   
 stages:
 
@@ -52,20 +53,6 @@ stages:
       - type: liquibase
         command: history
         cmdArgs: { URL: "${CLONED_URL}", count: "${HISTORY_COUNT}" }
-        
-# endStage:
-#   actions:
-#    # Drop Ephemeral Database if it exists   
-#     - type: shell
-#       command: |
-#         DB_EXISTS=$(sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -h -1 -Q "SELECT CASE WHEN DB_ID('${LB_DATABASENAME}_eph') IS NOT NULL THEN 'EXISTS' ELSE 'NOT_EXISTS' END")
-#         echo "Database status: $DB_EXISTS"
-#         if [[ "$DB_EXISTS" == *"NOT_EXISTS"* ]]; then
-#           echo "Database does not exist - no drop necessary"
-#         else
-#           echo "Database exists - dropping"
-#           sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:${LB_HOSTNAME},${LB_PORT}" -C -d "master" -Q "drop database [${LB_DATABASENAME}_eph]"
-#         fi
 
 endStage:
   actions:

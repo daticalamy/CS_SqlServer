@@ -1,8 +1,10 @@
 #############################################################################
 #  GitHub Action to run Liquibase Python Policy Checks.
+#  Runs manually or on pull requests, and can be set as a required
+#  status check in branch protection to gate merges on policy checks.
 ##############################################################################
 name: 'Liquibase Checks'
-run-name: ${{ inputs.environment}} checks of current repo by ${{ github.actor }}
+run-name: ${{ inputs.environment || 'DEV' }} checks of current repo by ${{ github.actor }}
 
 on:
   workflow_dispatch:
@@ -14,6 +16,12 @@ on:
         type: environment
         required: true
         default: DEV
+
+  # Run on pull requests so this job can be a required status check.
+  # Pull request runs have no inputs, so they check against DEV (see ENVIRONMENT below).
+  pull_request:
+    branches:
+      - main
 
 ####################################################################
 #  Set up the environment
@@ -51,8 +59,8 @@ env:
   LIQUIBASE_COMMAND_CHECKS_RUN_AUTO_UPDATE: off
   LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true
 
-  ENVIRONMENT: ${{ inputs.environment }}  
-  BRANCH: ${{ github.ref_name }}
+  ENVIRONMENT: ${{ inputs.environment || 'DEV' }}
+  BRANCH: ${{ github.head_ref || github.ref_name }}
 
   # Reports
   #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
@@ -84,7 +92,7 @@ jobs:
 
   database-checks:
     runs-on: [self-hosted]
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment || 'DEV' }}
     steps:
     - uses: actions/checkout@v5
     
@@ -95,7 +103,9 @@ jobs:
       
     - name: Liquibase Checks Flow
       id: lbp-policy-checks
-      continue-on-error: true
+      # Manual runs continue past check failures so the report is reviewed.
+      # Pull request runs fail the job so the required status check blocks the merge.
+      continue-on-error: ${{ github.event_name != 'pull_request' }}
       run: |
         liquibase flow --flow-file=liquibase-checks.flowfile.yaml
 
