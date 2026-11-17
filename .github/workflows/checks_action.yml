@@ -64,7 +64,18 @@ env:
   LIQUIBASE_LOG_FILE: logs/log.json
   
   # History Table
-  LIQUIBASE_DBCLHISTORY_ENABLED: true
+  LIQUIBASE_DBCLHISTORY_ENABLED: 
+
+  # Liquibase Platform Settings
+  LIQUIBASE_PLATFORM_ENABLED: true
+  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
+  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
+  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
+  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
+
+  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
+  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
+  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
  
 jobs:
   #########################################################################
