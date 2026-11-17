@@ -1,6 +1,6 @@
 ﻿--liquibase formatted sql
 
---changeset asmith:vendor_script_01 context:!DEV
+--changeset asmith:vendor_script_01 context:PROD
 CREATE TABLE dbo.Stores (
     StoreID INT IDENTITY(1,1) PRIMARY KEY,      -- Auto-increments starting at 1
     StoreCode VARCHAR(10) NOT NULL UNIQUE,      -- Unique short identifier (e.g., 'AUS-01')
@@ -15,7 +15,7 @@ CREATE TABLE dbo.Stores (
 GO
 --rollback drop table dbo.Stores
 
---changeset asmith:vendor_script_data_01 context:!DEV
+--changeset asmith:vendor_script_data_01 context:PROD
 INSERT INTO dbo.Stores (StoreCode, StoreName, City, StateCode, ZipCode, MonthlyRent, IsActive, OpenedDate)
 VALUES ('AUS-01', N'Downtown Flagship', N'Austin', 'TX', '78701', 12500.00, 1, '2024-05-15');
 --rollback delete from dbo.Stores where StoreCode='AUS-01';

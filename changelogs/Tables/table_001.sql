@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---changeset amy_smith:dept_001 context:!DEV
+--changeset amy_smith:dept_001 context:PROD
 create table dbo.dept_001 (
   id int, 
   name varchar(30),
@@ -8,6 +8,6 @@ create table dbo.dept_001 (
 );
 --rollback drop table dbo.dept_001
 
---changeset amy_smith:dept_001_add_code_01 context:!DEV
+--changeset amy_smith:dept_001_add_code_01 context:PROD
 alter table dbo.dept_001 add code_01 varchar(10);
 --rollback alter table dbo.dept_001 drop column code_01;
