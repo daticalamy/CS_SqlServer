@@ -47,7 +47,7 @@ stages:
       - type: liquibase
         if: "${DRY_RUN} == true"
         command: update-sql
-        globalArgs: { reports-name: "dryrun-deploy-report-${ENV}.html", context-filter: "${ENV}"}
+        cmdArgs: { report-name: "dryrun-deploy-report-${ENV}.html", context-filter: "${ENV}"}
 
   Tag:
     actions:
@@ -61,7 +61,7 @@ stages:
       - type: liquibase
         if: "${DRY_RUN} == false"
         command: update
-        globalArgs: { reports-name: "deploy-report-${ENV}.html", context-filter: "${ENV}"}
+        cmdArgs: { report-name: "deploy-report-${ENV}.html", context-filter: "${ENV}"}
 
 ## The endStage ALWAYS RUNS. 
 ## So put actions here which you desire to perform whether previous stages' actions succeed or fail.
