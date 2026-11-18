@@ -69,16 +69,26 @@ on:
 #  Set up the environment
 #####################################################################
 env:
+
+  # Liquibase Platform Settings
+  LIQUIBASE_PLATFORM_ENABLED: true
+  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
+  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
+  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
+  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
+
+  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
+  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
+  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
+  # Optional fallback if the endpoint is unreachable:
+  # LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+
   # Azure Storage account and container to hold reports
   LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
   AZURE_CONTAINER: ${{ vars.AZURE_CONTAINER }}
-  
-  # Pro License key
-  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
-  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
   
   # JDBC URL of the database per environment
   # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
@@ -98,11 +108,11 @@ env:
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
   
+  # Environment and Dry Run information
   ENVIRONMENT: ${{ inputs.environment }}
-  
   LB_DRY_RUN: ${{ github.event.inputs.dry_run }}
 
-  # Rollback
+  # Rollback Settings
   ROLLBACK_TYPE: ${{ github.event.inputs.rollback_type }}
   LB_TAG: ${{ github.event.inputs.lb_tag }}
   LB_COUNT: ${{ github.event.inputs.lb_count }}
@@ -111,11 +121,10 @@ env:
   LB_CHANGESET_PATH: ${{ github.event.inputs.lb_changeset_path }}
   LB_DEPLOYMENT_ID: ${{ github.event.inputs.lb_deployment_id }}
   
-  # For Snapshot/Drift Detection
+    # Drift Settings (to house refreshed snapshot)
   LB_SCHEMAS: "DBO,Sales"
 
   # Reports
-  #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
   LIQUIBASE_REPORT_PATH: reports
   
   # Values: OFF, SEVERE, WARNING, INFO, FINE
@@ -123,20 +132,9 @@ env:
   LIQUIBASE_LOG_FORMAT: JSON_PRETTY
   LIQUIBASE_LOG_FILE: logs/log.json
 
-  # History Table
+  # DBCL / History Settings
   LIQUIBASE_DBCLHISTORY_ENABLED: true
   LB_HISTORY_COUNT: 50
-
-  # Liquibase Platform Settings
-  LIQUIBASE_PLATFORM_ENABLED: true
-  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
-  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
-  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
-  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
-
-  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
-  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
-  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
 
 jobs:
   #########################################################################
