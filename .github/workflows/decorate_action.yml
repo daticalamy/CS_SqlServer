@@ -52,7 +52,16 @@ env:
   RAW_SQL_DIR: raw_sql
   DECORATED_DIR: changelogs/Decorated
 
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,changelogs
+
+  # Values: OFF, SEVERE, WARNING, INFO, FINE
   LIQUIBASE_LOG_LEVEL: INFO
+  LIQUIBASE_LOG_FORMAT: JSON_PRETTY
+  LIQUIBASE_LOG_FILE: logs/log.json
+
+  # DBCL / History Settings
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
 
 jobs:
   decorate-raw-sql:
