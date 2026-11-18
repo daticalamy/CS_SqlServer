@@ -81,8 +81,6 @@ jobs:
 
     # Windows runners use the PowerShell flow, Linux runners the bash flow.
     - name: Liquibase Decorate Flow
-      env:
-        LIQUIBASE_COMMAND_FLOW_SHELL_INTERPRETER: powershell
       run: liquibase flow --flow-file=liquibase-decorate.flowfile.yaml
 
     # bash works on Linux runners and on Windows runners with Git Bash.
