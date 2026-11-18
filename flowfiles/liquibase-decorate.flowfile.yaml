@@ -1,0 +1,50 @@
+## Decorate raw SQL scripts into Liquibase changelogs (Windows / PowerShell).
+## Run with: liquibase flow --flow-file=liquibase-decorate.flowfile.yaml --flow-shell-interpreter=powershell
+##
+##   raw_sql/<name>.sql + raw_sql/<name>.rollback.sql  -> rollback from the .rollback.sql file
+##   raw_sql/<name>.sql on its own                     -> rollback from any --rollbackSQL markers
+## Both write changelogs/Decorated/<name>.sql
+
+globalVariables:
+  RAW_DIR: "raw_sql"
+  OUT_DIR: "changelogs/Decorated"
+  DB_TYPE: "mssql"
+  AUTHOR: "${LB_AUTHOR}"
+
+stages:
+
+  Decorate:
+    actions:
+      - type: shell
+        command: |
+          New-Item -ItemType Directory -Force -Path "${OUT_DIR}" | Out-Null
+
+          foreach ($file in Get-ChildItem "${RAW_DIR}/*.sql") {
+            $name = $file.BaseName
+
+            # Rollback files are used together with their main script
+            if ($name -like '*.rollback') { continue }
+
+            if (Test-Path "${RAW_DIR}/$name.rollback.sql") {
+              liquibase decorate-sql --sql-file="${RAW_DIR}/$name.sql" --rollback-file="${RAW_DIR}/$name.rollback.sql" `
+                --changelog-file="${OUT_DIR}/$name.sql" --db-type=${DB_TYPE} --author="${AUTHOR}"
+            }
+            else {
+              liquibase decorate-sql --sql-file="${RAW_DIR}/$name.sql" `
+                --changelog-file="${OUT_DIR}/$name.sql" --db-type=${DB_TYPE} --author="${AUTHOR}"
+            }
+
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+
+  # Move the raw scripts out of the way so they are never decorated twice.
+  Archive:
+    actions:
+      - type: shell
+        command: |
+          New-Item -ItemType Directory -Force -Path "${RAW_DIR}/processed" | Out-Null
+
+          foreach ($file in Get-ChildItem "${RAW_DIR}/*.sql") {
+            git mv "${RAW_DIR}/$($file.Name)" "${RAW_DIR}/processed/$($file.Name)"
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
