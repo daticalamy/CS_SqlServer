@@ -138,16 +138,23 @@ Notes on specific utilities:
 
 ### 7. Decorate Raw SQL (`decorate_action.yml`)
 
-Converts plain SQL Server scripts into Liquibase changelogs with [`decorate-sql`](https://docs.liquibase.com/secure/reference-guide-6-0-2/decorate-sql), so authors don't have to hand-write formatted SQL. See [`raw_sql/README.md`](raw_sql/README.md) for the authoring rules.
+Converts plain SQL Server scripts into Liquibase changelogs with [`decorate-sql`](https://docs.liquibase.com/secure/reference-guide-6-0-2/decorate-sql), so authors don't have to hand-write formatted SQL. See [`raw_sql/README.md`](raw_sql/README.md) for how to write the scripts.
 
-Runs automatically on a push to any branch except `main` that touches `raw_sql/*.sql`, or manually. For each script it:
+Runs automatically on a push to any branch except `main` that touches `raw_sql/*.sql`, or manually.
 
-1. Runs `decorate-sql --db-type=mssql` (offline, no database connection) and writes `changelogs/Decorated/<name>.sql`. The author on each changeset is the GitHub user who pushed.
-2. Fails if any generated changeset has no rollback (`REQUIRE_ROLLBACK_MARKERS`), since Build's `update-testing-rollback` would fail on it anyway.
-3. Moves the raw script to `raw_sql/processed/` so it is never decorated twice.
-4. Commits both changes back to the branch for review in the pull request.
+Each script's rollback comes from one of two places:
 
-Nothing is committed unless every script decorates. Existing output files are never overwritten. The Build flow refuses to run if undecorated scripts reach it.
+| Files | Rollback comes from |
+|---|---|
+| `raw_sql/<name>.sql` | `--rollbackSQL` markers inside the script |
+| `raw_sql/<name>.sql` + `raw_sql/<name>.rollback.sql` | The `.rollback.sql` file |
+
+Flow (`liquibase-decorate.flowfile.yaml`):
+
+1. **Decorate**: runs `decorate-sql --db-type=mssql` for each script (offline, no database connection) and writes `changelogs/Decorated/<name>.sql`. The author on each changeset is the GitHub user who pushed.
+2. **Archive**: moves the raw scripts to `raw_sql/processed/` so they are never decorated twice.
+
+The workflow then commits both changes back to the branch for review in the pull request. If the flow fails, nothing is committed. `decorate-sql` never overwrites an existing changelog, so a reused file name fails the run. Missing rollbacks are caught later, when Premerge or Build runs `update-testing-rollback`.
 
 **Note:** pushes made with the default `GITHUB_TOKEN` do not start other workflows, so the Checks workflow won't re-run on the decorate commit automatically. Push another commit, re-run Checks manually, or switch the checkout and push to a GitHub App token if you want it to trigger.
 
