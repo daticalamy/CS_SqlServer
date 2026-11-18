@@ -10,6 +10,15 @@ globalVariables:
   HISTORY_COUNT: ${LB_HISTORY_COUNT}
 
 stages:
+
+  # Guard: raw SQL must be decorated (and reviewed) on a feature branch
+  # by the Decorate workflow before it reaches Build. Fail fast if any
+  # undecorated script is still sitting in raw_sql/.
+  Raw-SQL-Guard:
+    actions:
+      - type: shell
+        command: if exist raw_sql\*.sql (echo ERROR - Undecorated scripts found in raw_sql. Push them on a feature branch so the Decorate workflow converts them, review the PR, then merge. & dir /b raw_sql\*.sql & exit /b 1) else (echo No undecorated raw SQL scripts found.)
+
   Validation:
     actions: 
       - type: liquibase
