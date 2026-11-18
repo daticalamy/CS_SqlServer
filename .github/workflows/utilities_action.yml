@@ -42,19 +42,29 @@ on:
 #  Set up the environment
 #####################################################################
 env:
+
+  # Liquibase Platform Settings
+  LIQUIBASE_PLATFORM_ENABLED: true
+  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
+  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
+  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
+  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
+
+  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
+  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
+  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
+  # Optional fallback if the endpoint is unreachable:
+  # LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+
   # Azure Storage account and container to hold snapshots
   LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
   AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
   AZURE_CONTAINER: ${{ vars.AZURE_CONTAINER }}
-
-  # License key
-  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
   
   # JDBC URL of the database per environment
   # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
-  #LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL_INTEGRATED_SECURITY }}
   LIQUIBASE_COMMAND_URL: ${{ vars.LIQUIBASE_URL }}
 
   # Credentials for the environment's database https://docs.liquibase.com/parameters/command-parameters.html
@@ -71,6 +81,7 @@ env:
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
   
+  # Environment and utility information
   ENVIRONMENT: ${{ inputs.environment }}
   LB_UTILITY: ${{ inputs.utility }}
   LB_REFERENCE_ENV: ${{ inputs.reference_snapshot }}
@@ -79,7 +90,6 @@ env:
   LB_SCHEMAS: "DBO,Sales"
 
   # Reports
-  #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
   LIQUIBASE_REPORT_PATH: reports
   
   # Values: OFF, SEVERE, WARNING, INFO, FINE
@@ -87,19 +97,8 @@ env:
   LIQUIBASE_LOG_FORMAT: JSON_PRETTY
   LIQUIBASE_LOG_FILE: logs/log.json
 
-  # History Table
+  # DBCL / History Settings
   LIQUIBASE_DBCLHISTORY_ENABLED: true
-
-  # Liquibase Platform Settings
-  LIQUIBASE_PLATFORM_ENABLED: true
-  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
-  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
-  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
-  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
-
-  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
-  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
-  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
 
 jobs:
   #########################################################################

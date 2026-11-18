@@ -28,9 +28,19 @@ on:
 #  Set up the premerge environment (will be clone of first db, eg. DEV)
 ###########################################################################
 env:
-  # Secure License key
-  # See https://docs.liquibase.com/workflows/liquibase-pro/how-to-apply-your-liquibase-pro-license-key.html
-  LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
+
+  # Liquibase Platform Settings
+  LIQUIBASE_PLATFORM_ENABLED: true
+  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
+  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
+  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
+  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
+
+  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
+  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
+  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
+  # Optional fallback if the endpoint is unreachable:
+  # LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
   
   # JDBC URL of the database per environment
   # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
@@ -41,7 +51,7 @@ env:
   LIQUIBASE_COMMAND_PASSWORD: ${{ secrets.LIQUIBASE_COMMAND_PASSWORD }}
 
   # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
-  # See https://docs.liquibase.com/parameters/liquibase-schema-name.html
+  # For Prevalidate, this setting is used to insert into the DBCL table and so needs to be set.
   LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
@@ -50,12 +60,11 @@ env:
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
   
+  # Environment and Tag information
   ENVIRONMENT: ${{ inputs.environment }}
   LB_TAG: ${{ github.ref_name }}
-  LB_HISTORY_COUNT: 50
 
   # Reports
-  #LIQUIBASE_REPORT_PATH: az://reports/gh_sqlserver_reports
   LIQUIBASE_REPORT_PATH: reports
   
   # Values: OFF, SEVERE, WARNING, INFO, FINE
@@ -63,8 +72,9 @@ env:
   LIQUIBASE_LOG_FORMAT: JSON_PRETTY
   LIQUIBASE_LOG_FILE: logs/log.json
 
-  # History Table
+  # DBCL / History Settings
   LIQUIBASE_DBCLHISTORY_ENABLED: true
+  LB_HISTORY_COUNT: 50
 
   # Prevalidate Settings
   LB_CLONED_URL: "jdbc:sqlserver://${{ secrets.LIQUIBASE_HOSTNAME }}:${{ secrets.LIQUIBASE_PORT }};databaseName=${{ secrets.LIQUIBASE_DATABASE_NAME }}_eph;trustServerCertificate=true"
@@ -77,17 +87,6 @@ env:
   LIQUIBASE_COMMAND_CHECKS_RUN_CHECKS_SCRIPTS_ENABLED: true
   LIQUIBASE_COMMAND_CHECKS_RUN_ASSIGNMENT_ID: ${{ vars.LIQUIBASE_COMMAND_CHECKS_ASSIGNMENT_ID }}
   LIQUIBASE_COMMAND_CHECKS_SHOW_ASSIGNMENT_ID: ${{ vars.LIQUIBASE_COMMAND_CHECKS_ASSIGNMENT_ID }}
-
-  # Liquibase Platform Settings
-  LIQUIBASE_PLATFORM_ENABLED: true
-  LIQUIBASE_PLATFORM_API_URL: https://cs-ci.liquibase.net/api/operations/ingest
-  LIQUIBASE_PLATFORM_API_KEY: ${{ secrets.LIQUIBASE_PLATFORM_API_KEY }}
-  LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CONNECTION_IDENTIFIER }}
-  LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER: ${{ vars.LIQUIBASE_PLATFORM_CHANGELOG_IDENTIFIER }}
-
-  # Liquibase License Tracking Settings (also needs PLATFORM_API_KEY from above)
-  LIQUIBASE_LICENSE_TRACKING_ENABLED: true
-  LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
 
 jobs:
   #########################################################################
