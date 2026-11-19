@@ -1,20 +1,15 @@
 #############################################################################
 #  GitHub Action to convert raw SQL scripts into Liquibase changelogs
-#  with the decorate-sql command (Liquibase Secure 6.0.2+).
+#  with decorate-sql (Liquibase Secure 6.0.2+).
 #
-#  Trigger: a push to any branch other than main that adds or changes
-#  a .sql file directly under raw_sql/ (or a manual run).
+#  All decorate logic lives in the flow files:
+#    flowfiles/liquibase-decorate.flowfile.yaml 
+#  This workflow runs decorate-sql, and commits the
+#  result back to the branch so it is reviewed in the pull request.
 #
-#  For each raw_sql/<name>.sql it:
-#    1. Runs decorate-sql (offline, no DB connection) and writes
-#       changelogs/Decorated/<name>.sql as a formatted SQL changelog.
-#    2. Optionally verifies every changeset has a rollback.
-#    3. Moves the raw script to raw_sql/processed/ so it is never
-#       decorated twice (re-decorating can renumber changeset IDs).
-#    4. Commits both changes back to the same branch, so the generated
-#       changelog is reviewed in the pull request before Build runs.
-#
-#  Nothing is committed unless EVERY script decorates successfully.
+#  Raw script naming (directly under raw_sql/):
+#    <name>.sql                        inline --rollbackSQL markers
+#    <name>.sql + <name>.rollback.sql   paired script and rollback script
 ##############################################################################
 name: 'Liquibase Decorate Raw SQL'
 run-name: decorate raw SQL on ${{ github.ref_name }} by ${{ github.actor }}
@@ -49,30 +44,30 @@ env:
   # Optional fallback if the endpoint is unreachable:
   # LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
 
-  # decorate-sql settings (see https://docs.liquibase.com/secure/reference-guide-6-0-2/decorate-sql)
-  LIQUIBASE_COMMAND_DECORATE_SQL_DB_TYPE: mssql
-  # Author stamped on every generated changeset (part of the changeset identity)
-  LB_AUTHOR: ${{ github.actor }}
+  # Read by the decorate flow files (AUTHOR variable)
+  LB_AUTHOR: ${{ github.actor }}          # author stamped on every generated changeset
 
-  # Folders
+  # Used by the commit step below; must match the flow files' globalVariables
   RAW_SQL_DIR: raw_sql
-  PROCESSED_DIR: raw_sql/processed
   DECORATED_DIR: changelogs/Decorated
 
-  # Fail the run if any generated changeset has no rollback.
-  # Build uses update-testing-rollback, which fails on such changesets anyway,
-  # so catching it here gives the author faster feedback on their branch.
-  REQUIRE_ROLLBACK_MARKERS: 'true'
+  # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
+  LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,changelogs
 
   # Values: OFF, SEVERE, WARNING, INFO, FINE
   LIQUIBASE_LOG_LEVEL: INFO
   LIQUIBASE_LOG_FORMAT: JSON_PRETTY
   LIQUIBASE_LOG_FILE: logs/log.json
 
+  # DBCL / History Settings
+  LIQUIBASE_DBCLHISTORY_ENABLED: true
+
 jobs:
   decorate-raw-sql:
     runs-on: [self-hosted]
-    environment: DEV # Nothing is deployed to the database in this job; it runs decorate-sql offline.
+    # The license key secret lives on the environments, so borrow DEV's.
+    # decorate-sql never connects to the database.
+    environment: DEV
     steps:
     - uses: actions/checkout@v5
       with:
@@ -83,116 +78,29 @@ jobs:
       with:
         ca-cert-path: certs/cs-ci-ca.cer
 
-    - name: Decorate raw SQL scripts
-      id: decorate
-      shell: pwsh
-      run: |
-        $ErrorActionPreference = 'Stop'
-
-        $raw = @(Get-ChildItem -Path $env:RAW_SQL_DIR -Filter *.sql -File -ErrorAction SilentlyContinue | Sort-Object Name)
-        if ($raw.Count -eq 0) {
-          Write-Host "No raw SQL scripts in $env:RAW_SQL_DIR. Nothing to decorate."
-          "decorated=" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          exit 0
-        }
-
-        New-Item -ItemType Directory -Force -Path $env:DECORATED_DIR, $env:PROCESSED_DIR | Out-Null
-
-        $failed = @()
-        $done   = @()
-
-        foreach ($f in $raw) {
-          $in        = "$env:RAW_SQL_DIR/$($f.Name)"
-          $out       = "$env:DECORATED_DIR/$($f.Name)"
-          $processed = "$env:PROCESSED_DIR/$($f.Name)"
-
-          # Never overwrite: a changelog that may already be deployed must keep its IDs.
-          if (Test-Path $out) {
-            Write-Host "::error file=$in::$out already exists. Give the new script a new, unique file name. Never re-decorate a script that has been deployed."
-            $failed += $f.Name; continue
-          }
-          if (Test-Path $processed) {
-            Write-Host "::error file=$in::$processed already exists. Give the new script a new, unique file name."
-            $failed += $f.Name; continue
-          }
-
-          Write-Host "::group::decorate-sql $in -> $out"
-          liquibase decorate-sql --sql-file="$in" --changelog-file="$out" --author="$env:LB_AUTHOR"
-          $code = $LASTEXITCODE
-          Write-Host "::endgroup::"
-
-          if ($code -ne 0) {
-            Write-Host "::error file=$in::decorate-sql failed (exit $code). See the log above for the LB-CMD error code."
-            $failed += $f.Name; continue
-          }
-
-          # Optional rollback check: every changeset block should hold a rollback line.
-          if ($env:REQUIRE_ROLLBACK_MARKERS -eq 'true') {
-            $current = $null; $hasRollback = $false; $missing = @()
-            foreach ($line in Get-Content $out) {
-              if ($line -match '^\s*--\s*changeset\s+(\S+)') {
-                if ($current -and -not $hasRollback) { $missing += $current }
-                $current = $Matches[1]; $hasRollback = $false
-              }
-              elseif ($line -match '^\s*--\s*rollback\b') { $hasRollback = $true }
-            }
-            if ($current -and -not $hasRollback) { $missing += $current }
-
-            if ($missing.Count -gt 0) {
-              Write-Host "::error file=$in::Changesets without rollback: $($missing -join ', '). Add a --rollbackSQL marker on the line after each statement."
-              $failed += $f.Name; continue
-            }
-          }
-
-          $done += $f.Name
-        }
-
-        if ($failed.Count -gt 0) {
-          Write-Host "::error::Decoration failed for: $($failed -join ', '). Nothing was committed. Fix the scripts and push again."
-          exit 1
-        }
-
-        # Every script succeeded: move the raw scripts out of the input folder.
-        foreach ($name in $done) {
-          git mv "$env:RAW_SQL_DIR/$name" "$env:PROCESSED_DIR/$name"
-          if ($LASTEXITCODE -ne 0) { throw "git mv failed for $name" }
-        }
-
-        "decorated=$($done -join ', ')" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-
-        # Job summary for reviewers
-        "## Decorated raw SQL scripts" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-        foreach ($name in $done) {
-          "- ``$env:RAW_SQL_DIR/$name`` → ``$env:DECORATED_DIR/$name``" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-        }
-        "Review the generated changesets (grouping, IDs, rollbacks, contexts) in the pull request before merging." | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+    - name: Liquibase Decorate Flow
+      run: liquibase flow --flow-file=liquibase-decorate.flowfile.yaml
 
     - name: Commit decorated changelogs to the branch
-      if: steps.decorate.outputs.decorated != ''
       shell: pwsh
       env:
-        DECORATED: ${{ steps.decorate.outputs.decorated }}
         BRANCH: ${{ github.ref_name }}
       run: |
-        $ErrorActionPreference = 'Stop'
+        git add -- $env:DECORATED_DIR $env:RAW_SQL_DIR
+        git diff --cached --quiet
+        if ($LASTEXITCODE -eq 0) { Write-Host "Nothing to commit."; exit 0 }
+
         git config user.name  "github-actions[bot]"
         git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-
-        git add -- "$env:DECORATED_DIR" "$env:RAW_SQL_DIR"
-        git commit -m "Decorate raw SQL: $env:DECORATED" -m "Generated by decorate-sql for $env:LB_AUTHOR."
-        if ($LASTEXITCODE -ne 0) { throw "git commit failed" }
-
-        # Pick up any commits pushed while this job ran, then push.
-        git pull --rebase origin "$env:BRANCH"
-        if ($LASTEXITCODE -ne 0) { throw "git pull --rebase failed; resolve on the branch and re-run" }
+        git commit -m "Decorate raw SQL for $env:LB_AUTHOR"
+        git pull --rebase origin $env:BRANCH
         git push origin "HEAD:$env:BRANCH"
-        if ($LASTEXITCODE -ne 0) { throw "git push failed" }
 
     - name: Upload partial decorate output for debugging
       if: failure()
       uses: actions/upload-artifact@v4
       with:
-        name: decorate-logs-${{ github.run_id }}
+        name: decorate-output-${{ github.run_id }}
         path: |
           changelogs/Decorated/
         if-no-files-found: ignore

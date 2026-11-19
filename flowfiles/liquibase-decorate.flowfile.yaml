@@ -1,0 +1,45 @@
+## Decorate raw SQL scripts into Liquibase changelogs (Windows runners).
+## Run with: liquibase flow --flow-file=liquibase-decorate.flowfile.yaml
+##
+##   raw_sql\<name>.sql + raw_sql\<name>.rollback.sql  -> rollback from the .rollback.sql file
+##   raw_sql\<name>.sql on its own                     -> rollback from any --rollbackSQL markers
+## Both write changelogs\Decorated\<name>.sql
+
+globalVariables:
+  RAW_DIR: raw_sql
+  OUT_DIR: changelogs\Decorated
+  ROLLBACK_DIR: changelogs/Rollbacks
+  DB_TYPE: mssql
+  AUTHOR: ${LB_AUTHOR}
+
+stages:
+
+  Decorate:
+    actions:
+      - type: shell
+        command: |
+          if not exist ${OUT_DIR} mkdir ${OUT_DIR}
+
+          rem %%~nF is the file name without .sql (x.rollback.sql gives x.rollback).
+          rem The inner loop reads the last part of that name, so .rollback files are skipped.
+          for %%F in (${RAW_DIR}\*.sql) do (
+            for %%R in ("%%~nF") do if /i not "%%~xR"==".rollback" (
+              if exist ${RAW_DIR}\%%~nF.rollback.sql (
+                rem The changelog references the rollback file by path, so move it to its permanent home first.
+                git mv ${RAW_DIR}\%%~nF.rollback.sql ${ROLLBACK_DIR}/%%~nF.rollback.sql || exit /b 1
+                call liquibase decorate-sql --sql-file=${RAW_DIR}\%%~nxF --rollback-file=${ROLLBACK_DIR}/%%~nF.rollback.sql --changelog-file=${OUT_DIR}\%%~nF.sql --db-type=${DB_TYPE} --author=${AUTHOR} || exit /b 1
+              ) else (
+                call liquibase decorate-sql --sql-file=${RAW_DIR}\%%~nxF --changelog-file=${OUT_DIR}\%%~nF.sql --db-type=${DB_TYPE} --author=${AUTHOR} || exit /b 1
+              )
+            )
+          )
+
+  # Move the raw scripts out of the way so they are never decorated twice.
+  # (Rollback files were already moved to changelogs/Rollbacks/ in the Decorate stage.)
+  Archive:
+    actions:
+      - type: shell
+        command: |
+          if not exist ${RAW_DIR}\processed mkdir ${RAW_DIR}\processed
+
+          for %%F in (${RAW_DIR}\*.sql) do git mv %%F ${RAW_DIR}\processed\%%~nxF || exit /b 1

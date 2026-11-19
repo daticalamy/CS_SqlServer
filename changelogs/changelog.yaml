@@ -22,6 +22,9 @@ databaseChangeLog:
       relativeToChangelogFile: true
       errorIfMissingOrEmpty: false
 
+  # NOTE: changelogs/Rollbacks/ holds rollback files that Decorated changelogs point to.
+  # Do not include the Rollbacks directory here, or its rollback SQL would run as forward changes.
+
   - modifyChangeSets:
       runWith: sqlcmd
       includeAll:
