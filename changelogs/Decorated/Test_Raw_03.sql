@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset daticalamy:1 splitStatements:false
+-- changeset daticalamy:1 splitStatements:false ignore: true
 CREATE TABLE dbo.TestWidgets3 (
     WidgetID   INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_TestWidgets3 PRIMARY KEY,
     WidgetCode VARCHAR(20)       NOT NULL,
