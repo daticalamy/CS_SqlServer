@@ -3,14 +3,13 @@
 #  with decorate-sql (Liquibase Secure 6.0.2+).
 #
 #  All decorate logic lives in the flow files:
-#    flowfiles/liquibase-decorate.windows.flowfile.yaml   (PowerShell)
-#    flowfiles/liquibase-decorate.linux.flowfile.yaml     (bash)
-#  This workflow picks the one for the runner's OS, runs it, and commits the
+#    flowfiles/liquibase-decorate.flowfile.yaml 
+#  This workflow runs decorate-sql, and commits the
 #  result back to the branch so it is reviewed in the pull request.
 #
 #  Raw script naming (directly under raw_sql/):
 #    <name>.sql                        inline --rollbackSQL markers
-#    <name>.up.sql + <name>.down.sql   paired Up/Down scripts
+#    <name>.sql + <name>.rollback.sql   paired script and rollback script
 ##############################################################################
 name: 'Liquibase Decorate Raw SQL'
 run-name: decorate raw SQL on ${{ github.ref_name }} by ${{ github.actor }}

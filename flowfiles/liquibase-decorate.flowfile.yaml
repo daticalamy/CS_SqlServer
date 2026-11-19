@@ -8,6 +8,7 @@
 globalVariables:
   RAW_DIR: raw_sql
   OUT_DIR: changelogs\Decorated
+  ROLLBACK_DIR: changelogs/Rollbacks
   DB_TYPE: mssql
   AUTHOR: ${LB_AUTHOR}
 
@@ -24,7 +25,9 @@ stages:
           for %%F in (${RAW_DIR}\*.sql) do (
             for %%R in ("%%~nF") do if /i not "%%~xR"==".rollback" (
               if exist ${RAW_DIR}\%%~nF.rollback.sql (
-                call liquibase decorate-sql --sql-file=${RAW_DIR}\%%~nxF --rollback-file=${RAW_DIR}\%%~nF.rollback.sql --changelog-file=${OUT_DIR}\%%~nF.sql --db-type=${DB_TYPE} --author=${AUTHOR} || exit /b 1
+                rem The changelog references the rollback file by path, so move it to its permanent home first.
+                git mv ${RAW_DIR}\%%~nF.rollback.sql ${ROLLBACK_DIR}/%%~nF.rollback.sql || exit /b 1
+                call liquibase decorate-sql --sql-file=${RAW_DIR}\%%~nxF --rollback-file=${ROLLBACK_DIR}/%%~nF.rollback.sql --changelog-file=${OUT_DIR}\%%~nF.sql --db-type=${DB_TYPE} --author=${AUTHOR} || exit /b 1
               ) else (
                 call liquibase decorate-sql --sql-file=${RAW_DIR}\%%~nxF --changelog-file=${OUT_DIR}\%%~nF.sql --db-type=${DB_TYPE} --author=${AUTHOR} || exit /b 1
               )
@@ -32,6 +35,7 @@ stages:
           )
 
   # Move the raw scripts out of the way so they are never decorated twice.
+  # (Rollback files were already moved to changelogs/Rollbacks/ in the Decorate stage.)
   Archive:
     actions:
       - type: shell

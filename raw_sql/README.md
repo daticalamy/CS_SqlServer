@@ -9,8 +9,9 @@ so you don't write any Liquibase syntax: no header and no `--changeset` lines.
 
 1. Add your script to `raw_sql/` on a feature branch (not `main`) and push.
 2. The Decorate workflow runs `flowfiles/liquibase-decorate.flowfile.yaml`:
-   - **Decorate** writes `changelogs/Decorated/<name>.sql` for each script.
-   - **Archive** moves the raw scripts to `raw_sql/processed/`.
+   - **Decorate** writes `changelogs/Decorated/<name>.sql` for each script, and
+     moves any `<name>.rollback.sql` file to `changelogs/Rollbacks/`.
+   - **Archive** moves the raw scripts to `raw_sql/processed/` (kept for reference).
 3. The workflow commits both changes back to your branch. Pull to get them.
 4. Review the generated changelog in your pull request, run **Checks** and
    **Premerge**, then merge and run **Build**.
@@ -79,6 +80,9 @@ GO
 - The rollback file must undo the **whole** script, in reverse order.
 - When a `.rollback.sql` file exists, `--rollbackSQL` markers in the main script
   are ignored.
+- The generated changelog doesn't copy the rollback file SQL. The flow moves the file to
+  `changelogs/Rollbacks/<name>.rollback.sql`, the changelog points to it there, and
+  Liquibase reads it whenever a rollback runs.
 
 ## Rules
 
@@ -113,10 +117,12 @@ Nothing has been recorded in a database yet, so you're free to:
   1. Delete the generated changelog: `changelogs/Decorated/<name>.sql`
   2. Delete the processed copy: `raw_sql/processed/<name>.sql`
      (and `raw_sql/processed/<name>.rollback.sql`, if there is one)
-  3. Put the fixed script (and rollback file) back in `raw_sql/` and push.
+  3. If there is one, move `changelogs/Rollbacks/<name>.rollback.sql` back to
+     `raw_sql/` (or delete it and add a new one).
+  4. Put the fixed script back in `raw_sql/` and push.
 
-  Both deletes are required. `decorate-sql` won't overwrite an existing changelog,
-  and the Archive stage can't move a script onto a processed file of the same name.
+  These steps are required. `decorate-sql` won't overwrite an existing changelog,
+  and the flow can't move a file onto an existing file of the same name.
 
 ### After it has been deployed: don't change it
 
@@ -130,6 +136,8 @@ and file path**, plus a checksum of its SQL. After deployment:
   or tries to run statements that already ran.
 - **Don't rename or move** the file in `changelogs/Decorated/`. Liquibase would see
   its changesets as new and try to run them again.
+- **Don't edit, move, or delete** its `changelogs/Rollbacks/<name>.rollback.sql`
+  file, if it has one. Rollbacks read it from there.
 
 To change something that's already deployed, **add a new script**.
 
@@ -153,7 +161,6 @@ Then run **Premerge** to prove the change deploys and rolls back on a copy of DE
 | Problem | Fix |
 |---|---|
 | Decorate fails because the output file already exists | Use a new file name, or, if the earlier version was never deployed, follow the redo steps above |
-| Archive fails on `git mv` | A script with that name was already processed. Use a new name, or delete the processed copy if it was never deployed |
+| Decorate or Archive fails on `git mv` | A file with that name already exists in `changelogs/Rollbacks/` or `raw_sql/processed/`. Use a new name, or remove the old file if it was never deployed |
 | Decorate fails with a dialect error | Make sure the script is SQL Server syntax |
-| Decorate fails with an encoding error | Re-save the script as UTF-8 |
 | Premerge fails during rollback | Add markers or a `.rollback.sql` file and redo the script, or fix the rollback in `changelogs/Decorated/` |
