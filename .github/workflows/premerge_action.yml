@@ -52,7 +52,7 @@ env:
 
   # Liquibase schema: Specified to allow flexibility in storage of Liquibase Change Tracking Tables
   # For Prevalidate, this setting is used to insert into the DBCL table and so needs to be set.
-  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: LB
+  LIQUIBASE_LIQUIBASE_SCHEMA_NAME: dbo
 
   # Search path (See https://docs.liquibase.com/concepts/changelogs/how-liquibase-finds-files.html)
   LIQUIBASE_SEARCH_PATH: .,flowfiles,policychecks,changelogs
