@@ -34,9 +34,10 @@ stages:
     actions:
       - type: shell
         command: |
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "DBCC CLONEDATABASE([%LB_DATABASENAME%], [%LB_DATABASENAME%_eph]) WITH VERIFY_CLONEDB" || exit /b 1
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "ALTER DATABASE [%LB_DATABASENAME%_eph] SET READ_WRITE" || exit /b 1
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "INSERT INTO [%LB_DATABASENAME%_eph].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG SELECT * FROM [%LB_DATABASENAME%].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG" || exit /b 1
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "SET NOCOUNT ON; IF DB_ID(N'%LB_DATABASENAME%_eph') IS NOT NULL THROW 50000, 'Ephemeral database %LB_DATABASENAME%_eph already exists, likely left over from a previous run. Drop it and re-run.', 1;" || (echo ERROR: Pre-check failed - ephemeral database already exists or server unreachable. & exit /b 1)
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "SET NOCOUNT ON; DBCC CLONEDATABASE([%LB_DATABASENAME%], [%LB_DATABASENAME%_eph]) WITH VERIFY_CLONEDB; IF DB_ID(N'%LB_DATABASENAME%_eph') IS NULL THROW 50001, 'DBCC CLONEDATABASE failed: ephemeral database %LB_DATABASENAME%_eph was not created. See DBCC output above.', 1; IF DATABASEPROPERTYEX(N'%LB_DATABASENAME%_eph', 'IsVerifiedClone') = 0 THROW 50002, 'DBCC CLONEDATABASE verification failed for %LB_DATABASENAME%_eph.', 1;" || (echo ERROR: Failed to create ephemeral database %LB_DATABASENAME%_eph. This is a clone failure, not a login issue. & exit /b 1)
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "ALTER DATABASE [%LB_DATABASENAME%_eph] SET READ_WRITE" || (echo ERROR: Failed to set %LB_DATABASENAME%_eph to READ_WRITE. & exit /b 1)
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "INSERT INTO [%LB_DATABASENAME%_eph].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG SELECT * FROM [%LB_DATABASENAME%].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG" || (echo ERROR: Failed to copy DATABASECHANGELOG into %LB_DATABASENAME%_eph. & exit /b 1)
           
   # Deploy to ephemeral database
   Tag-and-Deploy-to-EphemeralDB:
