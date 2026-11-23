@@ -29,15 +29,24 @@ stages:
        command: checks run
        cmdArgs: {checks-scope: changelog, changeset-filter: "PENDING", report-name: "checks-report-premerge.html", context-filter: "${ENV}"}
 
-  # Create Clone Database
+  # Create Ephemeral Database from a dacpac
+  #
+  # Least-privilege design: the pipeline login does NOT need sysadmin or ownership
+  # of the source database. Required permissions:
+  #   - Server:       CREATE ANY DATABASE (e.g. member of dbcreator)
+  #   - Source DB:    VIEW DEFINITION, and SELECT on DATABASECHANGELOG
+  #   - Ephemeral DB: none extra; the pipeline login owns the DB it creates
   Create-EphemeralDB:
     actions:
       - type: shell
         command: |
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "DBCC CLONEDATABASE([%LB_DATABASENAME%], [%LB_DATABASENAME%_eph]) WITH VERIFY_CLONEDB" || exit /b 1
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "ALTER DATABASE [%LB_DATABASENAME%_eph] SET READ_WRITE" || exit /b 1
-          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "INSERT INTO [%LB_DATABASENAME%_eph].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG SELECT * FROM [%LB_DATABASENAME%].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG" || exit /b 1
-          
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "SET NOCOUNT ON; IF DB_ID(N'%LB_DATABASENAME%_eph') IS NOT NULL THROW 50000, 'Ephemeral database %LB_DATABASENAME%_eph already exists, likely left over from a previous run. Drop it and re-run.', 1;" || (echo ERROR: Pre-check failed - ephemeral database already exists or server unreachable. & exit /b 1)
+          sqlpackage /Action:Extract /SourceServerName:"tcp:%LB_HOSTNAME%,%LB_PORT%" /SourceDatabaseName:"%LB_DATABASENAME%" /SourceUser:"${LIQUIBASE_COMMAND_USERNAME}" /SourcePassword:"${LIQUIBASE_COMMAND_PASSWORD}" /SourceTrustServerCertificate:True /TargetFile:"%TEMP%\%LB_DATABASENAME%_eph.dacpac" /OverwriteFiles:True || (echo ERROR: sqlpackage extract failed for %LB_DATABASENAME%. & exit /b 1)
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "CREATE DATABASE [%LB_DATABASENAME%_eph];" || (echo ERROR: Failed to create ephemeral database %LB_DATABASENAME%_eph. & exit /b 1)
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "%LB_DATABASENAME%_eph" -Q "SET NOCOUNT ON; DECLARE @sql nvarchar(max) = N''; SELECT @sql += N'CREATE USER ' + QUOTENAME(dp.name) + N' WITHOUT LOGIN; ' FROM [%LB_DATABASENAME%].sys.database_principals AS dp WHERE dp.type IN ('S','U','G') AND dp.principal_id > 4 AND dp.sid <> SUSER_SID() AND DATABASE_PRINCIPAL_ID(dp.name) IS NULL; EXEC sys.sp_executesql @sql;" || (echo ERROR: Failed to create database users in %LB_DATABASENAME%_eph. & exit /b 1)
+          sqlpackage /Action:Publish /SourceFile:"%TEMP%\%LB_DATABASENAME%_eph.dacpac" /TargetServerName:"tcp:%LB_HOSTNAME%,%LB_PORT%" /TargetDatabaseName:"%LB_DATABASENAME%_eph" /TargetUser:"${LIQUIBASE_COMMAND_USERNAME}" /TargetPassword:"${LIQUIBASE_COMMAND_PASSWORD}" /TargetTrustServerCertificate:True /p:CreateNewDatabase=False /p:ExcludeObjectTypes="Users;RoleMembership;Permissions;Logins" || (echo ERROR: sqlpackage publish failed - ephemeral database %LB_DATABASENAME%_eph is partially built and will be dropped in cleanup. & exit /b 1)
+          sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "INSERT INTO [%LB_DATABASENAME%_eph].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG SELECT * FROM [%LB_DATABASENAME%].%LIQUIBASE_LIQUIBASE_SCHEMA_NAME%.DATABASECHANGELOG" || (echo ERROR: Failed to copy DATABASECHANGELOG into %LB_DATABASENAME%_eph. & exit /b 1)
+
   # Deploy to ephemeral database
   Tag-and-Deploy-to-EphemeralDB:
     actions:
@@ -56,6 +65,11 @@ stages:
 
 endStage:
   actions:
+
     # Drop Ephemeral Database if it exists
     - type: shell
-      command: sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "IF DB_ID('%LB_DATABASENAME%_eph') IS NOT NULL BEGIN ALTER DATABASE [%LB_DATABASENAME%_eph] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [%LB_DATABASENAME%_eph]; END"
+      command: sqlcmd -b -U "${LIQUIBASE_COMMAND_USERNAME}" -P "${LIQUIBASE_COMMAND_PASSWORD}" -S "tcp:%LB_HOSTNAME%,%LB_PORT%" -C -d "master" -Q "IF DB_ID('%LB_DATABASENAME%_eph') IS NOT NULL BEGIN ALTER DATABASE [%LB_DATABASENAME%_eph] SET SINGLE_USER WITH ROLLBACK IMMEDIATE; DROP DATABASE [%LB_DATABASENAME%_eph]; PRINT 'Dropped ephemeral database %LB_DATABASENAME%_eph.'; END ELSE PRINT 'No ephemeral database %LB_DATABASENAME%_eph to drop.';"
+
+    # Remove the temporary dacpac
+    - type: shell
+      command: if exist "%TEMP%\%LB_DATABASENAME%_eph.dacpac" del /q "%TEMP%\%LB_DATABASENAME%_eph.dacpac" & exit /b 0

@@ -15,3 +15,7 @@ alter table dbo.dept_001 add code_01 varchar(10);
 --changeset amy_smith:dept_001_add_code_03 context:!DEV
 alter table dbo.dept_001 add code_03 varchar(10);
 --rollback alter table dbo.dept_001 drop column code_03;
+
+--changeset amy_smith:dept_001_add_code_04
+alter table dbo.dept_001 add code_04 varchar(10);
+--rollback alter table dbo.dept_001 drop column code_04;

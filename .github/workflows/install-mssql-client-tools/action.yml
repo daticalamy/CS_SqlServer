@@ -1,6 +1,6 @@
 # .github/workflows/install-mssql-client-tools/action.yml
 name: 'Install MSSQL Client Tools'
-description: 'Sets up sqlcmd'
+description: 'Sets up sqlcmd and sqlpackage'
 
 runs:
   using: 'composite'
@@ -30,8 +30,34 @@ runs:
         }
         Add-Content -Path $env:GITHUB_PATH -Value $sqlcmdDir
 
-    - name: Check MSSQL client tools (sqlcmd) installation
+    - name: Install MSSQL Client Tools (sqlpackage)
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $ProgressPreference = "SilentlyContinue"   # speeds up Invoke-WebRequest considerably
+
+        $zipPath = Join-Path $env:RUNNER_TEMP "sqlpackage.zip"
+        $installDir = Join-Path $env:RUNNER_TEMP "sqlpackage"
+
+        # Microsoft's evergreen link to the latest self-contained sqlpackage for Windows (no .NET install required)
+        Invoke-WebRequest -Uri "https://aka.ms/sqlpackage-windows" -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
+
+        # Add the folder containing sqlpackage.exe to PATH for later steps
+        $sqlpackageDir = (Get-ChildItem -Path $installDir -Recurse -Filter "sqlpackage.exe" | Select-Object -First 1).DirectoryName
+        if (-not $sqlpackageDir) {
+          throw "sqlpackage.exe not found in extracted archive"
+        }
+        Add-Content -Path $env:GITHUB_PATH -Value $sqlpackageDir
+
+    - name: Check MSSQL client tools installation
       shell: pwsh
       run: |
         Write-Host "sqlcmd version:"
         sqlcmd -?
+
+        Write-Host "sqlpackage version:"
+        sqlpackage /version
+        if ($LASTEXITCODE -ne 0) {
+          throw "sqlpackage is not available on PATH"
+        }

@@ -40,12 +40,6 @@ env:
   LIQUIBASE_LICENSE_ENDPOINT_URL: https://cs-ci.liquibase.net/api/licenses/access
   # Optional fallback if the endpoint is unreachable:
   # LIQUIBASE_LICENSE_KEY: ${{ secrets.LIQUIBASE_LICENSE_KEY }}
-
-  # Azure Storage account and container to hold reports
-  LIQUIBASE_AZURE_STORAGE_ACCOUNT: cssnapshots
-  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
   
   # JDBC URL of the database per environment
   # See https://docs.liquibase.com/workflows/liquibase-community/using-jdbc-url-in-liquibase.html
@@ -104,9 +98,6 @@ jobs:
       
     - name: Liquibase Checks Flow
       id: lbp-policy-checks
-      # Manual runs continue past check failures so the report is reviewed.
-      # Pull request runs fail the job so the required status check blocks the merge.
-      continue-on-error: ${{ github.event_name != 'pull_request' }}
       run: |
         liquibase flow --flow-file=liquibase-checks.flowfile.yaml
 
