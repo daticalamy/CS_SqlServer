@@ -1,6 +1,6 @@
 # .github/workflows/install-mssql-client-tools/action.yml
 name: 'Install MSSQL Client Tools'
-description: 'Sets up sqlcmd'
+description: 'Sets up sqlcmd and sqlpackage'
 
 runs:
   using: 'composite'
@@ -30,8 +30,39 @@ runs:
         }
         Add-Content -Path $env:GITHUB_PATH -Value $sqlcmdDir
 
-    - name: Check MSSQL client tools (sqlcmd) installation
+    - name: Install MSSQL Client Tools (sqlpackage)
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+
+        if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+          throw "The .NET SDK (dotnet) is required to install sqlpackage but was not found on this runner"
+        }
+
+        $installDir = Join-Path $env:RUNNER_TEMP "sqlpackage"
+
+        # Install sqlpackage as a .NET tool into a local folder
+        # To pin a version, add: --version <x.y.z>
+        dotnet tool install microsoft.sqlpackage --tool-path $installDir
+        if ($LASTEXITCODE -ne 0) {
+          throw "dotnet tool install microsoft.sqlpackage failed with exit code $LASTEXITCODE"
+        }
+
+        if (-not (Test-Path (Join-Path $installDir "sqlpackage.exe"))) {
+          throw "sqlpackage.exe not found in $installDir after install"
+        }
+
+        # Add the sqlpackage folder to PATH for later steps
+        Add-Content -Path $env:GITHUB_PATH -Value $installDir
+
+    - name: Check MSSQL client tools installation
       shell: pwsh
       run: |
         Write-Host "sqlcmd version:"
         sqlcmd -?
+
+        Write-Host "sqlpackage version:"
+        sqlpackage /version
+        if ($LASTEXITCODE -ne 0) {
+          throw "sqlpackage is not available on PATH"
+        }
