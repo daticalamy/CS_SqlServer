@@ -34,26 +34,21 @@ runs:
       shell: pwsh
       run: |
         $ErrorActionPreference = "Stop"
+        $ProgressPreference = "SilentlyContinue"   # speeds up Invoke-WebRequest considerably
 
-        if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-          throw "The .NET SDK (dotnet) is required to install sqlpackage but was not found on this runner"
-        }
-
+        $zipPath = Join-Path $env:RUNNER_TEMP "sqlpackage.zip"
         $installDir = Join-Path $env:RUNNER_TEMP "sqlpackage"
 
-        # Install sqlpackage as a .NET tool into a local folder
-        # To pin a version, add: --version <x.y.z>
-        dotnet tool install microsoft.sqlpackage --tool-path $installDir
-        if ($LASTEXITCODE -ne 0) {
-          throw "dotnet tool install microsoft.sqlpackage failed with exit code $LASTEXITCODE"
-        }
+        # Microsoft's evergreen link to the latest self-contained sqlpackage for Windows (no .NET install required)
+        Invoke-WebRequest -Uri "https://aka.ms/sqlpackage-windows" -OutFile $zipPath
+        Expand-Archive -Path $zipPath -DestinationPath $installDir -Force
 
-        if (-not (Test-Path (Join-Path $installDir "sqlpackage.exe"))) {
-          throw "sqlpackage.exe not found in $installDir after install"
+        # Add the folder containing sqlpackage.exe to PATH for later steps
+        $sqlpackageDir = (Get-ChildItem -Path $installDir -Recurse -Filter "sqlpackage.exe" | Select-Object -First 1).DirectoryName
+        if (-not $sqlpackageDir) {
+          throw "sqlpackage.exe not found in extracted archive"
         }
-
-        # Add the sqlpackage folder to PATH for later steps
-        Add-Content -Path $env:GITHUB_PATH -Value $installDir
+        Add-Content -Path $env:GITHUB_PATH -Value $sqlpackageDir
 
     - name: Check MSSQL client tools installation
       shell: pwsh
