@@ -176,7 +176,7 @@ The workflow then commits both changes back to the branch for review in the pull
 ### Setup Liquibase (`setup-liquibase`)
 
 - Installs Java 17 (Temurin).
-- Installs Liquibase Secure 6.0.2 via `liquibase/setup-liquibase@v3`.
+- Installs Liquibase Secure 6.0.3 via `liquibase/setup-liquibase@v3`.
 - Optionally imports a CA certificate into the JDK truststore (input `ca-cert-path`, alias `ca-cert-alias`). This is needed when the Liquibase Platform endpoint uses a private CA, because the JDK does not trust certificates from the operating system's store. All workflows pass `certs/cs-ci-ca.cer`.
 
 ### Install MSSQL Client Tools (`install-mssql-client-tools`)
