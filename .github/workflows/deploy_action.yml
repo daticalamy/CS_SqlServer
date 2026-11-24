@@ -33,6 +33,11 @@ on:
         required: true
         default: true
 
+      skip_changesets:
+        description: 'List of changesets to skip (format path::id::author, separated by commas for multiple changesets)'
+        type: string
+        required: false
+
 ####################################################################
 #  Set up the environment
 #####################################################################
@@ -76,10 +81,11 @@ env:
   # The database changelog. See https://docs.liquibase.com/concepts/changelogs/working-with-changelogs.html
   LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog.yaml
   
-  # Environment, Tag, and Dry Run information
+  # Environment, Tag, Dry Run, and Skip Changesets information
   ENVIRONMENT: ${{ inputs.environment }}
   LB_TAG: ${{ github.event.inputs.lb_tag || github.ref_name }}
   LB_DRY_RUN: ${{ github.event.inputs.dry_run }}
+  LIQUIBASE_COMMAND_IGNORE: ${{ github.event.inputs.skip_changesets }}
   
   # Drift Settings
   LB_CHECK_DRIFT: ${{ github.event.inputs.check_drift }}
