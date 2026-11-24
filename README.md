@@ -84,16 +84,24 @@ Deploys pending changesets to the selected environment.
 | `lb_tag` | string | Optional tag; defaults to the branch name |
 | `dry_run` | boolean | Generate SQL only; make no database changes (default `false`) |
 | `check_drift` | boolean | Compare the database against its last snapshot first (default `true`) |
+| `skip_changesets` | string | Optional changesets to skip for this run only, as a comma-separated list of `path::id::author` (see [Skipping changesets](#skipping-changesets)) |
 
 Flow (`liquibase-deploy.flowfile.yaml`):
 
 1. **Drift detection** (if `check_drift`): diffs the database against `<ENV>-snapshot.json` in Azure Storage and fails on drift.
 2. **Validate** the changelog.
-3. **Status**: exits successfully if the database is already up to date.
+3. **Status**: exits successfully if the database is already up to date. Skipped changesets don't count as pending.
 4. **Policy checks** on pending changesets.
 5. **Dry run** (if `dry_run`): `update-sql` to produce the SQL that would run.
-6. **Tag and update** (if not `dry_run`): tags the database, then runs `update` with the environment's context filter.
+6. **Tag and update** (if not `dry_run`): tags the database, then runs `update` with the environment's context filter, without the skipped changesets.
 7. **Always**: takes a fresh snapshot to Azure Storage (unless dry run) to serve as the baseline for the next drift check, then prints history.
+
+#### Skipping changesets
+
+Use `skip_changesets` when one changeset blocks a deployment and you need to deploy the rest without editing the changelog.
+
+- Write each changeset as `path::id::author`, exactly as Liquibase prints it in logs and reports, and separate several with commas.
+- Skipped changesets are not run, validated, or recorded in `DATABASECHANGELOG`. They stay pending and deploy on the next run that doesn't skip them.
 
 ### 4. Premerge (`premerge_action.yml`)
 
