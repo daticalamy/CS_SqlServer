@@ -34,7 +34,7 @@ on:
         default: true
 
       skip_changesets:
-        description: 'List of changesets to skip (comma-separated)'
+        description: 'List of changesets to skip (format path::id::author, separated by commas for multiple changesets)'
         type: string
         required: false
 
